@@ -1,0 +1,60 @@
+{
+  "common": {
+    "appName": "Anvil",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "confirm": "Confirmar",
+    "loading": "Cargando…",
+    "comingSoon": "Próximamente"
+  },
+  "tabs": {
+    "home": "Inicio",
+    "routines": "Rutinas",
+    "statistics": "Estadísticas"
+  },
+  "theme": {
+    "title": "Tema",
+    "system": "Sistema",
+    "light": "Claro",
+    "dark": "Oscuro"
+  },
+  "language": {
+    "title": "Idioma",
+    "english": "English",
+    "spanish": "Español"
+  },
+  "settings": {
+    "title": "Ajustes",
+    "appearance": "Apariencia",
+    "language": "Idioma",
+    "weeklyGoal": "Meta semanal de entrenamiento",
+    "weeklyGoalHint": "¿Cuántos días a la semana planeas entrenar?"
+  },
+  "home": {
+    "tagline": "Forja tu fuerza. Sigue tu progreso.",
+    "startWorkout": "Iniciar Entrenamiento",
+    "thisWeek": "Esta semana",
+    "workoutsOf": "{{done}} de {{goal}} entrenamientos",
+    "achievements": "Logros",
+    "achievementsHint": "Sigue entrenando para desbloquear más logros."
+  },
+  "achievements": {
+    "firstWorkout": {
+      "name": "Primer Entrenamiento",
+      "description": "Completa tu primera sesión de entrenamiento"
+    },
+    "thousandKgClub": {
+      "name": "Club de los 1000 kg",
+      "description": "Alcanza 1,000 kg de volumen total levantado"
+    },
+    "consistencyKing": {
+      "name": "Rey de la Constancia",
+      "description": "Entrena 30 días seguidos"
+    },
+    "progressiveOverload": {
+      "name": "Sobrecarga Progresiva",
+      "description": "Establece 5 récords personales en un mes"
+    }
+  }
+}

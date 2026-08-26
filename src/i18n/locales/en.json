@@ -1,0 +1,60 @@
+{
+  "common": {
+    "appName": "Anvil",
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "confirm": "Confirm",
+    "loading": "Loading…",
+    "comingSoon": "Coming soon"
+  },
+  "tabs": {
+    "home": "Home",
+    "routines": "Routines",
+    "statistics": "Statistics"
+  },
+  "theme": {
+    "title": "Theme",
+    "system": "System",
+    "light": "Light",
+    "dark": "Dark"
+  },
+  "language": {
+    "title": "Language",
+    "english": "English",
+    "spanish": "Español"
+  },
+  "settings": {
+    "title": "Settings",
+    "appearance": "Appearance",
+    "language": "Language",
+    "weeklyGoal": "Weekly workout goal",
+    "weeklyGoalHint": "How many days per week do you plan to train?"
+  },
+  "home": {
+    "tagline": "Forge your strength. Track your progress.",
+    "startWorkout": "Start Workout",
+    "thisWeek": "This week",
+    "workoutsOf": "{{done}} of {{goal}} workouts",
+    "achievements": "Achievements",
+    "achievementsHint": "Keep training to unlock more achievements."
+  },
+  "achievements": {
+    "firstWorkout": {
+      "name": "First Workout",
+      "description": "Complete your first workout session"
+    },
+    "thousandKgClub": {
+      "name": "1000kg Club",
+      "description": "Reach 1,000 kg of total lifting volume"
+    },
+    "consistencyKing": {
+      "name": "Consistency King",
+      "description": "Work out 30 days in a row"
+    },
+    "progressiveOverload": {
+      "name": "Progressive Overload",
+      "description": "Set 5 personal records in a month"
+    }
+  }
+}

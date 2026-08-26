@@ -1,18 +1,28 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+import { Stack } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { SQLiteProvider } from 'expo-sqlite';
+import { AndroidNavigationBar } from '@/components/android-navigation-bar';
+import { DATABASE_NAME, migrateDbIfNeeded } from '@/db/database';
+import { AppThemeProvider, useAppTheme } from '@/theme/app-theme-provider';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
+function RootNavigator() {
+  const { scheme } = useAppTheme();
 
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <>
+      <Stack screenOptions={{ headerShown: false }} />
+      <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
+    </>
+  );
+}
+
+export default function RootLayout() {
+  return (
+    <SQLiteProvider databaseName={DATABASE_NAME} onInit={migrateDbIfNeeded}>
+      <AppThemeProvider>
+        <AndroidNavigationBar />
+        <RootNavigator />
+      </AppThemeProvider>
+    </SQLiteProvider>
   );
 }
