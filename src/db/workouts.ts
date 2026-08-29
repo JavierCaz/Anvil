@@ -1,5 +1,13 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import dayjs from 'dayjs';
+import { getRoutineExerciseSets, saveRoutineExerciseSets } from './routines';
+import type {
+  ActiveWorkoutExercise,
+  RoutineExerciseSet,
+  WorkoutLog,
+  WorkoutSet,
+  WorkoutSummary,
+} from './types';
 
 export interface WorkoutStats {
   /** Total completed workout sessions. */
@@ -88,4 +96,278 @@ export async function getWorkoutDaysInRange(
     toISO
   );
   return new Set(rows.map((row) => row.d));
+}
+
+// ---------------------------------------------------------------------------
+// Active workout session
+// ---------------------------------------------------------------------------
+
+/** Create a workout log for a routine. Returns the new log id. */
+export async function startWorkout(db: SQLiteDatabase, routineId: number): Promise<number> {
+  const result = await db.runAsync(
+    'INSERT INTO workout_logs (routine_id, started_at) VALUES (?, ?)',
+    routineId,
+    new Date().toISOString()
+  );
+  return result.lastInsertRowId;
+}
+
+export async function getWorkoutLog(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<WorkoutLog | null> {
+  return (await db.getFirstAsync<WorkoutLog>('SELECT * FROM workout_logs WHERE id = ?', logId)) ?? null;
+}
+
+export async function getWorkoutRoutineName(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<string | null> {
+  const row = await db.getFirstAsync<{ name: string | null }>(
+    `SELECT r.name AS name
+     FROM workout_logs wl
+     LEFT JOIN routines r ON r.id = wl.routine_id
+     WHERE wl.id = ?`,
+    logId
+  );
+  return row?.name ?? null;
+}
+
+/**
+ * The routine's exercises for an active session, each with its target volume,
+ * its routine's per-set targets, and the number of sets already completed.
+ */
+export async function getActiveWorkoutExercises(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<ActiveWorkoutExercise[]> {
+  const rows = await db.getAllAsync<ActiveWorkoutExercise>(
+    `SELECT re.id AS routine_exercise_id,
+            e.id AS exercise_id,
+            e.name AS exercise_name,
+            e.slug AS exercise_slug,
+            e.source AS exercise_source,
+            e.primary_muscle AS exercise_primary_muscle,
+            e.equipment AS exercise_equipment,
+            MAX(re.sets, (SELECT COALESCE(MAX(s.set_number), 0) FROM sets s
+              WHERE s.workout_log_id = wl.id AND s.exercise_id = e.id)) AS target_sets,
+            re.reps AS target_reps,
+            re.rest_seconds AS target_rest_seconds,
+            re.order_index AS order_index,
+            (SELECT COUNT(*) FROM sets s
+              WHERE s.workout_log_id = ? AND s.exercise_id = e.id AND s.completed = 1)
+              AS completed_sets
+     FROM routine_exercises re
+     JOIN exercises e ON e.id = re.exercise_id
+     JOIN workout_logs wl ON wl.routine_id = re.routine_id
+     WHERE wl.id = ?
+     ORDER BY re.order_index ASC, re.id ASC`,
+    logId,
+    logId
+  );
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  // Attach the routine's per-set targets in one batch query.
+  const placeholders = rows.map(() => '?').join(', ');
+  const setTargets = await db.getAllAsync<RoutineExerciseSet>(
+    `SELECT * FROM routine_exercise_sets
+     WHERE routine_exercise_id IN (${placeholders})
+     ORDER BY routine_exercise_id ASC, set_number ASC`,
+    ...rows.map((row) => row.routine_exercise_id)
+  );
+
+  const byRoutineExercise = new Map<number, RoutineExerciseSet[]>();
+  for (const target of setTargets) {
+    const list = byRoutineExercise.get(target.routine_exercise_id) ?? [];
+    list.push(target);
+    byRoutineExercise.set(target.routine_exercise_id, list);
+  }
+
+  return rows.map((row) => ({
+    ...row,
+    set_targets: byRoutineExercise.get(row.routine_exercise_id) ?? [],
+  }));
+}
+
+/** One exercise (with target volume and per-set targets) inside an active session. */
+export async function getActiveWorkoutExercise(
+  db: SQLiteDatabase,
+  logId: number,
+  exerciseId: number
+): Promise<ActiveWorkoutExercise | null> {
+  const rows = await getActiveWorkoutExercises(db, logId);
+  return rows.find((row) => row.exercise_id === exerciseId) ?? null;
+}
+
+/** Logged sets for one exercise in a session, in ascending set order. */
+export async function getWorkoutSets(
+  db: SQLiteDatabase,
+  logId: number,
+  exerciseId: number
+): Promise<WorkoutSet[]> {
+  return db.getAllAsync<WorkoutSet>(
+    `SELECT * FROM sets
+     WHERE workout_log_id = ? AND exercise_id = ?
+     ORDER BY set_number ASC`,
+    logId,
+    exerciseId
+  );
+}
+
+export interface SetLogInput {
+  weight: number;
+  reps: number;
+  restSeconds: number;
+  completed: 0 | 1;
+}
+
+/**
+ * Insert or update the set row for (session, exercise, set number).
+ * Rest is recorded after the set completes.
+ */
+export async function upsertSet(
+  db: SQLiteDatabase,
+  logId: number,
+  exerciseId: number,
+  setNumber: number,
+  input: SetLogInput
+): Promise<void> {
+  await db.runAsync(
+    `INSERT INTO sets (workout_log_id, exercise_id, set_number, weight, reps, rest_seconds, completed)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(workout_log_id, exercise_id, set_number)
+     DO UPDATE SET weight = excluded.weight, reps = excluded.reps,
+                   rest_seconds = excluded.rest_seconds, completed = excluded.completed`,
+    logId,
+    exerciseId,
+    setNumber,
+    input.weight,
+    input.reps,
+    input.restSeconds,
+    input.completed
+  );
+}
+
+/** Mark the session as finished (`completed_at` = now). */
+export async function completeWorkout(db: SQLiteDatabase, logId: number): Promise<boolean> {
+  const result = await db.runAsync(
+    'UPDATE workout_logs SET completed_at = ? WHERE id = ? AND completed_at IS NULL',
+    new Date().toISOString(),
+    logId
+  );
+  return result.changes > 0;
+}
+
+/** Discard an unfinished session and its sets (FK CASCADE). */
+export async function cancelWorkout(db: SQLiteDatabase, logId: number): Promise<boolean> {
+  const result = await db.runAsync(
+    'DELETE FROM workout_logs WHERE id = ? AND completed_at IS NULL',
+    logId
+  );
+  return result.changes > 0;
+}
+
+export async function getWorkoutSummary(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<WorkoutSummary> {
+  const log = await getWorkoutLog(db, logId);
+  const started = log ? dayjs(log.started_at) : dayjs();
+  const finished = log?.completed_at ? dayjs(log.completed_at) : dayjs();
+
+  const row = await db.getFirstAsync<{ volume: number; sets: number }>(
+    `SELECT COALESCE(SUM(weight * reps), 0) AS volume, COUNT(*) AS sets
+     FROM sets WHERE workout_log_id = ? AND completed = 1`,
+    logId
+  );
+  return {
+    durationSeconds: Math.max(0, finished.diff(started, 'second')),
+    totalVolumeKg: row?.volume ?? 0,
+    setsCompleted: row?.sets ?? 0,
+  };
+}
+
+/**
+ * Mark that the user added or removed sets during the session (used by the
+ * finish flow to offer syncing the new set count back to the routine).
+ */
+export async function markWorkoutSetsEdited(db: SQLiteDatabase, logId: number): Promise<void> {
+  await db.runAsync('UPDATE workout_logs SET sets_edited = 1 WHERE id = ?', logId);
+}
+
+export async function wasWorkoutSetsEdited(db: SQLiteDatabase, logId: number): Promise<boolean> {
+  const row = await db.getFirstAsync<{ sets_edited: number }>(
+    'SELECT sets_edited FROM workout_logs WHERE id = ?',
+    logId
+  );
+  return row?.sets_edited === 1;
+}
+
+/**
+ * Delete a set row and renumber the ones after it (transactional), keeping
+ * `set_number` contiguous after a mid-exercise removal.
+ */
+export async function deleteSetAndShift(
+  db: SQLiteDatabase,
+  logId: number,
+  exerciseId: number,
+  setNumber: number
+): Promise<void> {
+  await db.withTransactionAsync(async () => {
+    await db.runAsync(
+      'DELETE FROM sets WHERE workout_log_id = ? AND exercise_id = ? AND set_number = ?',
+      logId,
+      exerciseId,
+      setNumber
+    );
+    await db.runAsync(
+      `UPDATE sets SET set_number = set_number - 1
+       WHERE workout_log_id = ? AND exercise_id = ? AND set_number > ?`
+      , logId, exerciseId, setNumber
+    );
+  });
+}
+
+/**
+ * Update each routine exercise's planned set count to match the finished
+ * session (added/removed sets). Retained sets keep their routine values;
+ * brand-new sets copy the first planned set's reps/rest/weight.
+ */
+export async function syncRoutineSetCountFromWorkout(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<void> {
+  const exercises = await getActiveWorkoutExercises(db, logId);
+  for (const exercise of exercises) {
+    const row = await db.getFirstAsync<{ m: number | null }>(
+      `SELECT MAX(set_number) AS m FROM sets
+       WHERE workout_log_id = ? AND exercise_id = ?`,
+      logId,
+      exercise.exercise_id
+    );
+    const sessionSets = row?.m ?? 0;
+    if (sessionSets === exercise.target_sets || sessionSets === 0) {
+      continue;
+    }
+
+    const current = await getRoutineExerciseSets(db, exercise.routine_exercise_id);
+    const template = current[0] ?? { reps: 10, rest_seconds: 90, weight: null };
+    await saveRoutineExerciseSets(
+      db,
+      exercise.routine_exercise_id,
+      Array.from({ length: sessionSets }, (_, i) => {
+        const setNumber = i + 1;
+        const existing = current.find((set) => set.set_number === setNumber);
+        return {
+          setNumber,
+          reps: existing?.reps ?? template.reps ?? 10,
+          restSeconds: existing?.rest_seconds ?? template.rest_seconds ?? 90,
+          weight: existing?.weight ?? template.weight ?? null,
+        };
+      })
+    );
+  }
 }

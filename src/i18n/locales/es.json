@@ -6,7 +6,14 @@
     "delete": "Eliminar",
     "confirm": "Confirmar",
     "loading": "Cargando…",
-    "comingSoon": "Próximamente"
+    "comingSoon": "Próximamente",
+    "name": "Nombre",
+    "description": "Descripción (opcional)",
+    "add": "Añadir",
+    "edit": "Editar",
+    "search": "Buscar",
+    "moveUp": "Mover arriba",
+    "moveDown": "Mover abajo"
   },
   "tabs": {
     "home": "Inicio",
@@ -56,5 +63,119 @@
       "name": "Sobrecarga Progresiva",
       "description": "Establece 5 récords personales en un mes"
     }
+  },
+  "routines": {
+    "newRoutine": "Nueva rutina",
+    "emptyTitle": "Aún no tienes rutinas",
+    "emptyHint": "Crea tu primera rutina para empezar a forjar fuerza.",
+    "exerciseCount_one": "{{count}} ejercicio",
+    "exerciseCount_other": "{{count}} ejercicios",
+    "deleteConfirmTitle": "¿Eliminar rutina?",
+    "deleteConfirmMessage": "Se eliminará \"{{name}}\" de tus rutinas. El historial de entrenamientos se conserva.",
+    "form": {
+      "newTitle": "Nueva rutina",
+      "editTitle": "Editar rutina",
+      "namePlaceholder": "p. ej. Día de empuje",
+      "descriptionPlaceholder": "p. ej. Pecho, hombros y tríceps"
+    },
+    "detail": {
+      "exercises": "Ejercicios",
+      "emptyTitle": "Aún no hay ejercicios",
+      "emptyHint": "Toca “Añadir ejercicio” para construir esta rutina.",
+      "addExercise": "Añadir ejercicio",
+      "editRoutine": "Editar rutina",
+      "targetSets": "Series",
+      "targetReps": "Repeticiones",
+      "targetRest": "Descanso (s)",
+      "removeExercise": "Quitar de la rutina",
+      "customBadge": "Personalizado"
+    },
+    "setsEditor": {
+      "setCount_one": "{{count}} serie",
+      "setCount_other": "{{count}} series",
+      "applyToAll": "Aplicar a todas las series",
+      "removeSet": "Quitar serie"
+    },
+    "addExercise": {
+      "title": "Añadir ejercicio",
+      "searchPlaceholder": "Buscar ejercicios…",
+      "allMuscles": "Todos",
+      "createCustom": "Crear “{{name}}”",
+      "emptyTitle": "Sin resultados",
+      "emptyHint": "Nada coincide con tu búsqueda. Crea un ejercicio personalizado.",
+      "attribution": "Ilustraciones: Everkinetic, ampliadas por Bryl Lim (CC BY-SA 4.0)"
+    }
+  },
+  "exercises": {
+    "form": {
+      "newTitle": "Nuevo ejercicio",
+      "editTitle": "Editar ejercicio",
+      "namePlaceholder": "p. ej. Sentadilla búlgara",
+      "muscleGroup": "Grupo muscular principal",
+      "equipment": "Equipamiento",
+      "equipmentPlaceholder": "p. ej. Barra, Mancuerna, Peso corporal",
+      "type": "Tipo de ejercicio",
+      "deleteTitle": "¿Eliminar ejercicio?",
+      "deleteMessage": "Se eliminará \"{{name}}\" dondequiera que se use."
+    },
+    "types": {
+      "weightReps": "Peso × repeticiones",
+      "bodyweightReps": "Peso corporal × repeticiones",
+      "duration": "Duración",
+      "distanceDuration": "Distancia y duración",
+      "assistedBodyweight": "Peso corporal asistido"
+    },
+    "muscles": {
+      "adductors": "Aductores",
+      "back": "Espalda",
+      "biceps": "Bíceps",
+      "calves": "Gemelos",
+      "chest": "Pecho",
+      "core": "Core",
+      "forearms": "Antebrazos",
+      "glutes": "Glúteos",
+      "hamstrings": "Isquiotibiales",
+      "hips": "Caderas",
+      "lats": "Dorsales",
+      "lowerBack": "Zona lumbar",
+      "legs": "Piernas",
+      "mobility": "Movilidad",
+      "posteriorChain": "Cadena posterior",
+      "quads": "Cuádriceps",
+      "rearDelts": "Deltoides posteriores",
+      "shoulders": "Hombros",
+      "triceps": "Tríceps",
+      "upperBack": "Espalda alta"
+    }
+  },
+  "workout": {
+    "startWorkout": "Iniciar Entrenamiento",
+    "finishWorkout": "Terminar Entrenamiento",
+    "discardWorkout": "Descartar entrenamiento",
+    "finishEarlyConfirmTitle": "¿Terminar entrenamiento?",
+    "finishEarlyConfirmMessage": "Todavía tienes {{count}} series sin completar. ¿Terminar de todos modos?",
+    "cancelWorkout": "Cancelar entrenamiento",
+    "cancelConfirmTitle": "¿Cancelar entrenamiento?",
+    "cancelConfirmMessage": "Se descartará la sesión actual y todas las series registradas.",
+    "elapsed": "Tiempo",
+    "exercisesDone": "{{done}} de {{total}} ejercicios",
+    "setsDone": "{{done}} de {{total}} series",
+    "set": "Serie {{number}}",
+    "weight": "Peso (kg)",
+    "reps": "Repeticiones",
+    "restAfterSet": "Descanso tras la serie (s)",
+    "markDone": "Marcar como hecha",
+    "undo": "Deshacer",
+    "addSet": "Añadir serie",
+    "finishExercise": "Terminar ejercicio",
+    "rest": "Descanso",
+    "skip": "Omitir",
+    "extendRest": "Añadir 30 segundos",
+    "summaryTitle": "¡Entrenamiento completado!",
+    "summaryBody": "{{time}} · {{volume}} kg de volumen · {{sets}} series",
+    "saveChangesTitle": "¿Guardar los cambios del entrenamiento?",
+    "saveChangesMessage": "Añadiste o quitaste series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
+    "saveToRoutine": "Guardar en la rutina",
+    "keepRoutine": "Mantener rutina"
   }
 }

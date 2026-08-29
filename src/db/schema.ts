@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 2;
+export const DATABASE_VERSION = 7;
 
 /**
  * Migration 1 — initial tables.
@@ -119,5 +119,99 @@ INSERT INTO achievements (name, description, icon, key, unlocked_at) VALUES
   ('Progressive Overload', 'Set 5 personal records in a month', '📈', 'progressive_overload', NULL);
 `;
 
-/** Ordered list of migrations, index = version they upgrade the DB to. */
-export const MIGRATIONS: readonly string[] = [SCHEMA_V1, SCHEMA_V2];
+/**
+ * Migration 3 — exercise catalog + custom exercises.
+ *
+ * Extends `exercises` so it can host the 302-exercise catalog from
+ * `@bryllim/workout-guide` (`source = 'catalog'`, identified by `slug`)
+ * alongside user-created exercises (`source = 'custom'`). Custom rows
+ * are the only ones the user can create/update/delete.
+ */
+export const SCHEMA_V3 = `
+ALTER TABLE exercises ADD COLUMN slug TEXT;
+ALTER TABLE exercises ADD COLUMN source TEXT NOT NULL DEFAULT 'custom';
+ALTER TABLE exercises ADD COLUMN exercise_type TEXT;
+ALTER TABLE exercises ADD COLUMN equipment TEXT;
+ALTER TABLE exercises ADD COLUMN primary_muscle TEXT;
+ALTER TABLE exercises ADD COLUMN secondary_muscles TEXT; -- JSON array (catalog exercises)
+ALTER TABLE exercises ADD COLUMN is_stretch INTEGER NOT NULL DEFAULT 0;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_exercises_slug ON exercises(slug) WHERE slug IS NOT NULL;
+CREATE INDEX IF NOT EXISTS idx_exercises_source ON exercises(source);
+`;
+
+
+/**
+ * Migration 4 — workout session set logging.
+ *
+ * Adds per-set rest tracking and a natural key on `sets` so a set row can
+ * be upserted (logged weight/reps/completed/rest) by
+ * `(workout_log_id, exercise_id, set_number)`.
+ */
+export const SCHEMA_V4 = `
+ALTER TABLE sets ADD COLUMN rest_seconds INTEGER NOT NULL DEFAULT 0;
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_sets_workout_exercise_set
+  ON sets(workout_log_id, exercise_id, set_number);
+`;
+
+/**
+ * Migration 5 — planned rest time per routine exercise.
+ *
+ * Stores the default rest between sets (in seconds) on `routine_exercises`
+ * so it can be configured while editing the routine and used as the default
+ * when a workout session is started.
+ */
+export const SCHEMA_V5 = `
+ALTER TABLE routine_exercises ADD COLUMN rest_seconds INTEGER NOT NULL DEFAULT 90;
+`;
+
+/**
+ * Migration 6 — per-set targets for routine exercises.
+ *
+ * Each set in a routine now carries its own reps, rest and optional planned
+ * weight (``routine_exercise_sets``). Existing aggregate data is backfilled
+ * one row per set from ``routine_exercises.sets/reps/rest_seconds``.
+ */
+export const SCHEMA_V6 = `
+CREATE TABLE IF NOT EXISTS routine_exercise_sets (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  routine_exercise_id INTEGER NOT NULL,
+  set_number INTEGER NOT NULL,
+  reps INTEGER NOT NULL DEFAULT 10,
+  rest_seconds INTEGER NOT NULL DEFAULT 90,
+  weight REAL,
+  UNIQUE (routine_exercise_id, set_number),
+  FOREIGN KEY (routine_exercise_id) REFERENCES routine_exercises(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_routine_exercise_sets_re
+  ON routine_exercise_sets(routine_exercise_id);
+
+WITH RECURSIVE cnt(x) AS (SELECT 1 UNION ALL SELECT x + 1 FROM cnt WHERE x < 99)
+INSERT INTO routine_exercise_sets (routine_exercise_id, set_number, reps, rest_seconds, weight)
+SELECT re.id, cnt.x, re.reps, re.rest_seconds, NULL
+FROM routine_exercises re
+JOIN cnt ON cnt.x <= re.sets
+WHERE NOT EXISTS (SELECT 1 FROM routine_exercise_sets s WHERE s.routine_exercise_id = re.id);
+`;
+
+/**
+ * Migration 7 — workout set-structure edit flag.
+ *
+ * Tracks whether the user added or removed sets during a session, so the
+ * finish flow can offer to sync the new set count back to the routine.
+ */
+export const SCHEMA_V7 = `
+ALTER TABLE workout_logs ADD COLUMN sets_edited INTEGER NOT NULL DEFAULT 0;
+`;
+
+export const MIGRATIONS: readonly string[] = [
+  SCHEMA_V1,
+  SCHEMA_V2,
+  SCHEMA_V3,
+  SCHEMA_V4,
+  SCHEMA_V5,
+  SCHEMA_V6,
+  SCHEMA_V7,
+];

@@ -6,7 +6,14 @@
     "delete": "Delete",
     "confirm": "Confirm",
     "loading": "Loading…",
-    "comingSoon": "Coming soon"
+    "comingSoon": "Coming soon",
+    "name": "Name",
+    "description": "Description (optional)",
+    "add": "Add",
+    "edit": "Edit",
+    "search": "Search",
+    "moveUp": "Move up",
+    "moveDown": "Move down"
   },
   "tabs": {
     "home": "Home",
@@ -56,5 +63,119 @@
       "name": "Progressive Overload",
       "description": "Set 5 personal records in a month"
     }
+  },
+  "routines": {
+    "newRoutine": "New Routine",
+    "emptyTitle": "No routines yet",
+    "emptyHint": "Create your first routine to start building strength.",
+    "exerciseCount_one": "{{count}} exercise",
+    "exerciseCount_other": "{{count}} exercises",
+    "deleteConfirmTitle": "Delete routine?",
+    "deleteConfirmMessage": "This will remove \"{{name}}\" from your routines. Workout history is kept.",
+    "form": {
+      "newTitle": "New routine",
+      "editTitle": "Edit routine",
+      "namePlaceholder": "e.g. Push Day",
+      "descriptionPlaceholder": "e.g. Chest, shoulders and triceps"
+    },
+    "detail": {
+      "exercises": "Exercises",
+      "emptyTitle": "No exercises yet",
+      "emptyHint": "Tap “Add exercise” to build this routine.",
+      "addExercise": "Add exercise",
+      "editRoutine": "Edit routine",
+      "targetSets": "Sets",
+      "targetReps": "Reps",
+      "targetRest": "Rest (s)",
+      "removeExercise": "Remove from routine",
+      "customBadge": "Custom"
+    },
+    "setsEditor": {
+      "setCount_one": "{{count}} set",
+      "setCount_other": "{{count}} sets",
+      "applyToAll": "Apply to all sets",
+      "removeSet": "Remove set"
+    },
+    "addExercise": {
+      "title": "Add exercise",
+      "searchPlaceholder": "Search exercises…",
+      "allMuscles": "All",
+      "createCustom": "Create “{{name}}”",
+      "emptyTitle": "No matches",
+      "emptyHint": "Nothing matches your search. Create a custom exercise instead.",
+      "attribution": "Artwork: Everkinetic, expanded by Bryl Lim (CC BY-SA 4.0)"
+    }
+  },
+  "exercises": {
+    "form": {
+      "newTitle": "New exercise",
+      "editTitle": "Edit exercise",
+      "namePlaceholder": "e.g. Bulgarian Split Squat",
+      "muscleGroup": "Primary muscle group",
+      "equipment": "Equipment",
+      "equipmentPlaceholder": "e.g. Barbell, Dumbbell, Bodyweight",
+      "type": "Exercise type",
+      "deleteTitle": "Delete exercise?",
+      "deleteMessage": "This will remove \"{{name}}\" everywhere it is used."
+    },
+    "types": {
+      "weightReps": "Weight × reps",
+      "bodyweightReps": "Bodyweight × reps",
+      "duration": "Duration",
+      "distanceDuration": "Distance & duration",
+      "assistedBodyweight": "Assisted bodyweight"
+    },
+    "muscles": {
+      "adductors": "Adductors",
+      "back": "Back",
+      "biceps": "Biceps",
+      "calves": "Calves",
+      "chest": "Chest",
+      "core": "Core",
+      "forearms": "Forearms",
+      "glutes": "Glutes",
+      "hamstrings": "Hamstrings",
+      "hips": "Hips",
+      "lats": "Lats",
+      "lowerBack": "Lower back",
+      "legs": "Legs",
+      "mobility": "Mobility",
+      "posteriorChain": "Posterior chain",
+      "quads": "Quads",
+      "rearDelts": "Rear delts",
+      "shoulders": "Shoulders",
+      "triceps": "Triceps",
+      "upperBack": "Upper back"
+    }
+  },
+  "workout": {
+    "startWorkout": "Start Workout",
+    "finishWorkout": "Finish Workout",
+    "discardWorkout": "Discard workout",
+    "finishEarlyConfirmTitle": "Finish workout?",
+    "finishEarlyConfirmMessage": "You still have {{count}} unfinished sets. Finish anyway?",
+    "cancelWorkout": "Cancel workout",
+    "cancelConfirmTitle": "Cancel workout?",
+    "cancelConfirmMessage": "This will discard the current session and all logged sets.",
+    "elapsed": "Elapsed",
+    "exercisesDone": "{{done}} of {{total}} exercises",
+    "setsDone": "{{done}} of {{total}} sets",
+    "set": "Set {{number}}",
+    "weight": "Weight (kg)",
+    "reps": "Reps",
+    "restAfterSet": "Rest after set (s)",
+    "markDone": "Mark as done",
+    "undo": "Undo",
+    "addSet": "Add set",
+    "finishExercise": "Finish exercise",
+    "rest": "Rest",
+    "skip": "Skip",
+    "extendRest": "Add 30 seconds",
+    "summaryTitle": "Workout complete!",
+    "summaryBody": "{{time}} · {{volume}} kg volume · {{sets}} sets",
+    "saveChangesTitle": "Save workout changes?",
+    "saveChangesMessage": "You added or removed sets during this workout. Save these changes to your routine?",
+    "saveToRoutine": "Save to routine",
+    "keepRoutine": "Keep routine"
   }
 }
