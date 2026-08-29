@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { seedExerciseCatalog } from './exercises';
 import { DATABASE_VERSION, MIGRATIONS } from './schema';
 
 export const DATABASE_NAME = 'anvil.db';
@@ -20,7 +21,7 @@ export function getDb(): Promise<SQLite.SQLiteDatabase> {
 
 async function openAndMigrate(): Promise<SQLite.SQLiteDatabase> {
   const db = await SQLite.openDatabaseAsync(DATABASE_NAME);
-  await migrateDbIfNeeded(db);
+  await initializeDatabase(db);
   return db;
 }
 
@@ -45,4 +46,15 @@ export async function migrateDbIfNeeded(db: SQLite.SQLiteDatabase): Promise<void
   }
 
   await db.execAsync(`PRAGMA user_version = ${DATABASE_VERSION}`);
+}
+
+/**
+ * Full app-database bootstrap: apply pending migrations, then make sure the
+ * exercise catalog from @bryllim/workout-guide is seeded (idempotent).
+ *
+ * Pass as `onInit` to `SQLiteProvider` and use from `getDb()`.
+ */
+export async function initializeDatabase(db: SQLite.SQLiteDatabase): Promise<void> {
+  await migrateDbIfNeeded(db);
+  await seedExerciseCatalog(db);
 }
