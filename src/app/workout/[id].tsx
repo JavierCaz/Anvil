@@ -4,9 +4,10 @@ import { useSQLiteContext } from 'expo-sqlite';
 import dayjs from 'dayjs';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
+import { useDialog } from '@/components/AppDialog';
 import {
   cancelWorkout,
   completeWorkout,
@@ -32,6 +33,7 @@ export default function WorkoutSessionScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const dialog = useDialog();
   const { id } = useLocalSearchParams<{ id: string }>();
   const logId = Number(id);
 
@@ -73,32 +75,39 @@ export default function WorkoutSessionScreen() {
   const backHref = log?.routine_id ? (`/routine/${log.routine_id}` as const) : ('/routines' as const);
 
   const handleCancel = () => {
-    Alert.alert(t('workout.cancelConfirmTitle'), t('workout.cancelConfirmMessage'), [
-      { text: t('common.cancel'), style: 'cancel' },
-      {
-        text: t('common.delete'),
-        style: 'destructive',
-        onPress: () => {
-          void cancelWorkout(db, logId).then(() => {
-            router.dismissTo(backHref);
-          });
+    dialog.alert({
+      title: t('workout.cancelConfirmTitle'),
+      message: t('workout.cancelConfirmMessage'),
+      icon: 'exit-outline',
+      buttons: [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            void cancelWorkout(db, logId).then(() => {
+              router.dismissTo(backHref);
+            });
+          },
         },
-      },
-    ]);
+      ],
+    });
   };
 
   const completeAndSummarize = () => {
     void completeWorkout(db, logId).then(async () => {
       const summary = await getWorkoutSummary(db, logId);
-      Alert.alert(
-        t('workout.summaryTitle'),
-        t('workout.summaryBody', {
+      dialog.alert({
+        title: t('workout.summaryTitle'),
+        message: t('workout.summaryBody', {
           time: formatStopwatch(summary.durationSeconds),
           volume: summary.totalVolumeKg.toFixed(1),
           sets: summary.setsCompleted,
         }),
-        [{ text: t('common.confirm'), onPress: () => router.dismissTo(backHref) }]
-      );
+        icon: 'trophy-outline',
+        tone: 'success',
+        buttons: [{ text: t('common.confirm'), onPress: () => router.dismissTo(backHref) }],
+      });
     });
   };
 
@@ -108,29 +117,35 @@ export default function WorkoutSessionScreen() {
         completeAndSummarize();
         return;
       }
-      Alert.alert(t('workout.saveChangesTitle'), t('workout.saveChangesMessage'), [
-        { text: t('workout.keepRoutine'), style: 'cancel', onPress: completeAndSummarize },
-        {
-          text: t('workout.saveToRoutine'),
-          onPress: () => {
-            void syncRoutineSetCountFromWorkout(db, logId).then(completeAndSummarize);
+      dialog.alert({
+        title: t('workout.saveChangesTitle'),
+        message: t('workout.saveChangesMessage'),
+        buttons: [
+          { text: t('workout.keepRoutine'), style: 'cancel', onPress: completeAndSummarize },
+          {
+            text: t('workout.saveToRoutine'),
+            onPress: () => {
+              void syncRoutineSetCountFromWorkout(db, logId).then(completeAndSummarize);
+            },
           },
-        },
-      ]);
+        ],
+      });
     });
   };
 
   const handleFinish = () => {
     const incomplete = exercises.filter((e) => e.completed_sets < e.target_sets).length;
     if (incomplete > 0) {
-      Alert.alert(
-        t('workout.finishEarlyConfirmTitle'),
-        t('workout.finishEarlyConfirmMessage', { count: incomplete }),
-        [
+      dialog.alert({
+        title: t('workout.finishEarlyConfirmTitle'),
+        message: t('workout.finishEarlyConfirmMessage', { count: incomplete }),
+        icon: 'warning-outline',
+        tone: 'warning',
+        buttons: [
           { text: t('common.cancel'), style: 'cancel' },
           { text: t('workout.finishWorkout'), style: 'destructive', onPress: finish },
-        ]
-      );
+        ],
+      });
       return;
     }
     finish();

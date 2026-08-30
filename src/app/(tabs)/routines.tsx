@@ -3,8 +3,9 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '@/components/Screen';
+import { useDialog } from '@/components/AppDialog';
 import { deleteRoutine, getRoutines } from '@/db/routines';
 import type { RoutineWithCount } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -14,6 +15,7 @@ export default function RoutinesScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const dialog = useDialog();
 
   const [routines, setRoutines] = useState<RoutineWithCount[]>([]);
 
@@ -32,10 +34,12 @@ export default function RoutinesScreen() {
   );
 
   const confirmDelete = (routine: RoutineWithCount) => {
-    Alert.alert(
-      t('routines.deleteConfirmTitle'),
-      t('routines.deleteConfirmMessage', { name: routine.name }),
-      [
+    dialog.alert({
+      title: t('routines.deleteConfirmTitle'),
+      message: t('routines.deleteConfirmMessage', { name: routine.name }),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.delete'),
@@ -46,19 +50,22 @@ export default function RoutinesScreen() {
             });
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   const showActions = (routine: RoutineWithCount) => {
-    Alert.alert(routine.name, undefined, [
-      {
-        text: t('common.edit'),
-        onPress: () => router.push(`/routine/${routine.id}/edit`),
-      },
-      { text: t('common.delete'), style: 'destructive', onPress: () => confirmDelete(routine) },
-      { text: t('common.cancel'), style: 'cancel' },
-    ]);
+    dialog.alert({
+      title: routine.name,
+      buttons: [
+        {
+          text: t('common.edit'),
+          onPress: () => router.push(`/routine/${routine.id}/edit`),
+        },
+        { text: t('common.delete'), style: 'destructive', onPress: () => confirmDelete(routine) },
+        { text: t('common.cancel'), style: 'cancel' },
+      ],
+    });
   };
 
   const openRoutine = (routine: RoutineWithCount) => {

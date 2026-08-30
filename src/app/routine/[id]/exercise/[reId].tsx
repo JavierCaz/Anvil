@@ -3,9 +3,10 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ExerciseSetEditor, type SetEditorItem } from '@/components/ExerciseSetEditor';
 import { Screen } from '@/components/Screen';
+import { useDialog } from '@/components/AppDialog';
 import {
   getRoutineExercise,
   getRoutineExerciseSets,
@@ -28,6 +29,7 @@ export default function RoutineSetEditorScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const dialog = useDialog();
   const { reId } = useLocalSearchParams<{ reId: string }>();
   const routineExerciseId = Number(reId);
 
@@ -113,10 +115,12 @@ export default function RoutineSetEditorScreen() {
   };
 
   const confirmRemoveFromRoutine = () => {
-    Alert.alert(
-      t('routines.deleteConfirmTitle'),
-      t('routines.detail.removeExercise'),
-      [
+    dialog.alert({
+      title: t('routines.deleteConfirmTitle'),
+      message: t('routines.detail.removeExercise'),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.delete'),
@@ -127,8 +131,8 @@ export default function RoutineSetEditorScreen() {
             });
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   return (

@@ -50,4 +50,14 @@ export async function setAppLanguage(language: AppLanguage): Promise<void> {
   await Storage.setItem(LANGUAGE_STORAGE_KEY, language);
 }
 
+/**
+ * Forget the persisted language choice and fall back to the default
+ * resolution (device locale → `en`). Used when erasing all data.
+ */
+export async function resetAppLanguage(): Promise<void> {
+  await Storage.removeItem(LANGUAGE_STORAGE_KEY);
+  // eslint-disable-next-line import/no-named-as-default-member
+  await i18n.changeLanguage(detectInitialLanguage());
+}
+
 export { i18n };

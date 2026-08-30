@@ -2,6 +2,7 @@
   "common": {
     "appName": "Anvil",
     "cancel": "Cancelar",
+    "ok": "OK",
     "save": "Guardar",
     "delete": "Eliminar",
     "confirm": "Confirmar",
@@ -22,7 +23,6 @@
   },
   "theme": {
     "title": "Tema",
-    "system": "Sistema",
     "light": "Claro",
     "dark": "Oscuro"
   },
@@ -36,7 +36,24 @@
     "appearance": "Apariencia",
     "language": "Idioma",
     "weeklyGoal": "Meta semanal de entrenamiento",
-    "weeklyGoalHint": "¿Cuántos días a la semana planeas entrenar?"
+    "weeklyGoalHint": "¿Cuántos días a la semana planeas entrenar?",
+    "data": "Datos",
+    "exportData": "Exportar datos",
+    "importData": "Importar datos",
+    "eraseAllData": "Borrar todos los datos",
+    "exportFailed": "No se pudieron exportar los datos. Inténtalo de nuevo.",
+    "importTitle": "Importar respaldo",
+    "importMessage": "Esto reemplazará todos los datos actuales con el respaldo. Esta acción no se puede deshacer.",
+    "importConfirm": "Importar",
+    "importSuccess": "Respaldo importado correctamente.",
+    "importFailed": "El archivo seleccionado no es un respaldo válido de Anvil.",
+    "eraseTitle": "¿Borrar todos los datos?",
+    "eraseMessage": "Se eliminarán permanentemente todas las rutinas, ejercicios, entrenamientos, récords y preferencias. Esta acción no se puede deshacer.",
+    "eraseConfirm": "Borrar",
+    "eraseSuccess": "Se han borrado todos los datos.",
+    "eraseFailed": "No se pudieron borrar los datos. Inténtalo de nuevo.",
+    "webUnsupported": "No disponible en la web",
+    "webUnsupportedMessage": "Exportar, importar y borrar solo están disponibles en la app móvil."
   },
   "statistics": {
     "filters": {

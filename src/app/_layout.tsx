@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SQLiteProvider } from 'expo-sqlite';
+import { AppDialogProvider } from '@/components/AppDialog';
 import { AndroidNavigationBar } from '@/components/android-navigation-bar';
 import { DATABASE_NAME, initializeDatabase } from '@/db/database';
 import { AppThemeProvider, useAppTheme } from '@/theme/app-theme-provider';
@@ -21,7 +22,9 @@ export default function RootLayout() {
     <SQLiteProvider databaseName={DATABASE_NAME} onInit={initializeDatabase}>
       <AppThemeProvider>
         <AndroidNavigationBar />
-        <RootNavigator />
+        <AppDialogProvider>
+          <RootNavigator />
+        </AppDialogProvider>
       </AppThemeProvider>
     </SQLiteProvider>
   );
