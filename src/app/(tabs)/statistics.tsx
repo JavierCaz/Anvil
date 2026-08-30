@@ -1,7 +1,8 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useMemo, useState } from 'react';
+import { useFocusEffect } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Bar, CartesianChart, Pie, PolarChart } from 'victory-native';
@@ -86,28 +87,32 @@ export default function StatisticsScreen() {
   const bounds = useMemo(() => getRangeBounds(range), [range]);
   const granularity = GRANULARITY[range];
 
-  useEffect(() => {
-    let active = true;
+  // Reload on every focus so stats reflect completed workouts immediately
+  // (tab screens stay mounted and a plain effect would go stale).
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
 
-    async function load() {
-      const [sessionStats, muscleSlices, dayCounts] = await Promise.all([
-        getSessionStats(db, bounds.from, bounds.to),
-        getMuscleDistribution(db, bounds.from, bounds.to),
-        getWorkoutDayCounts(db, bounds.from, bounds.to),
-      ]);
-      if (!active) {
-        return;
+      async function load() {
+        const [sessionStats, muscleSlices, dayCounts] = await Promise.all([
+          getSessionStats(db, bounds.from, bounds.to),
+          getMuscleDistribution(db, bounds.from, bounds.to),
+          getWorkoutDayCounts(db, bounds.from, bounds.to),
+        ]);
+        if (!active) {
+          return;
+        }
+        setStats(sessionStats);
+        setMuscles(muscleSlices);
+        setSeries(buildTimeSeries(dayCounts, granularity, bounds.from, bounds.to));
       }
-      setStats(sessionStats);
-      setMuscles(muscleSlices);
-      setSeries(buildTimeSeries(dayCounts, granularity, bounds.from, bounds.to));
-    }
 
-    void load();
-    return () => {
-      active = false;
-    };
-  }, [db, range, bounds, granularity]);
+      void load();
+      return () => {
+        active = false;
+      };
+    }, [db, bounds, granularity])
+  );
 
   // Categorical palette built from semantic theme colors (never hardcode hex).
   const chartPalette = useMemo(

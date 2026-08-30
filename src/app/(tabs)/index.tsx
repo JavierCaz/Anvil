@@ -2,18 +2,19 @@ import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useFocusEffect, useRouter } from 'expo-router';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { AchievementCard } from '@/components/AchievementCard';
+import { AchievementDetailModal } from '@/components/AchievementDetailModal';
 import { Screen } from '@/components/Screen';
 import { WeekStrip, type WeekDayItem } from '@/components/WeekStrip';
+import { getAchievementByKey } from '@/constants/achievements';
 import {
-  computeAchievementProgress,
-  getAchievementByKey,
-} from '@/constants/achievements';
-import { getAchievements } from '@/db/achievements';
+  buildAchievementItems,
+  getAchievements,
+  type AchievementProgressItem,
+} from '@/db/achievements';
 import { getWorkoutDaysInRange, getWorkoutStats } from '@/db/workouts';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -21,11 +22,7 @@ import { useAppTheme } from '@/theme/app-theme-provider';
 interface HomeData {
   weekDays: WeekDayItem[];
   workoutCountThisWeek: number;
-  achievements: {
-    definitionKey: string;
-    progress: number;
-    unlocked: boolean;
-  }[];
+  achievements: AchievementProgressItem[];
 }
 
 /** Monday of the current week, independent of the dayjs locale week start. */
@@ -43,6 +40,7 @@ export default function HomeScreen() {
   const weeklyGoal = useWeeklyGoalStore((state) => state.weeklyWorkouts);
 
   const [data, setData] = useState<HomeData | null>(null);
+  const [selectedAchievement, setSelectedAchievement] = useState<AchievementProgressItem | null>(null);
 
   const monday = useMemo(() => getMonday(i18n.language), [i18n.language]);
   const weekDays = useMemo<WeekDayItem[]>(
@@ -60,45 +58,54 @@ export default function HomeScreen() {
     [monday]
   );
 
-  useEffect(() => {
-    let active = true;
+  // Reload on every focus so newly unlocked achievements / fresh stats show
+  // immediately when returning from a workout (tab screens stay mounted).
+  useFocusEffect(
+    useCallback(() => {
+      let active = true;
 
-    async function load() {
-      const stats = await getWorkoutStats(db);
-      const rows = await getAchievements(db);
-      const workedOut = await getWorkoutDaysInRange(
-        db,
-        weekDays[0].iso,
-        weekDays[6].iso
-      );
+      async function load() {
+        const stats = await getWorkoutStats(db, { weeklyGoal });
+        const rows = await getAchievements(db);
+        const workedOut = await getWorkoutDaysInRange(
+          db,
+          weekDays[0].iso,
+          weekDays[6].iso
+        );
 
-      if (!active) {
-        return;
+        if (!active) {
+          return;
+        }
+
+        const achievements = buildAchievementItems(rows, stats);
+
+        setData({
+          weekDays: weekDays.map((day) => ({ ...day, workedOut: workedOut.has(day.iso) })),
+          workoutCountThisWeek: [...workedOut].filter((iso) =>
+            weekDays.some((day) => day.iso === iso)
+          ).length,
+          achievements,
+        });
       }
 
-      const achievements = rows.map((row) => {
-        const { progress } = computeAchievementProgress(row.key, stats);
-        return {
-          definitionKey: row.key,
-          progress,
-          unlocked: row.unlocked_at !== null,
-        };
-      });
+      void load();
+      return () => {
+        active = false;
+      };
+    }, [db, weekDays, weeklyGoal])
+  );
 
-      setData({
-        weekDays: weekDays.map((day) => ({ ...day, workedOut: workedOut.has(day.iso) })),
-        workoutCountThisWeek: [...workedOut].filter((iso) =>
-          weekDays.some((day) => day.iso === iso)
-        ).length,
-        achievements,
-      });
-    }
-
-    void load();
-    return () => {
-      active = false;
-    };
-  }, [db, weekDays]);
+  // Summary: most recently unlocked first, then the closest-to-unlocking, capped at 3.
+  const summaryItems = useMemo(() => {
+    const items = data?.achievements ?? [];
+    const unlocked = items
+      .filter((item) => item.unlocked)
+      .sort((a, b) => (b.unlockedAt ?? '').localeCompare(a.unlockedAt ?? ''));
+    const inProgress = items
+      .filter((item) => !item.unlocked)
+      .sort((a, b) => b.progress - a.progress);
+    return [...unlocked, ...inProgress].slice(0, 3);
+  }, [data]);
 
   return (
     <Screen>
@@ -127,28 +134,76 @@ export default function HomeScreen() {
         {data && <WeekStrip days={data.weekDays} />}
 
         <View style={styles.achievementsHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>
-            {t('home.achievements')}
-          </Text>
+          <View style={styles.achievementsTitleRow}>
+            <Text style={[styles.sectionTitle, { color: colors.text }]}>
+              {t('home.achievements')}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('home.seeAll')}
+              hitSlop={8}
+              onPress={() => router.push('/achievements')}
+              style={({ pressed }) => [styles.seeAllButton, { opacity: pressed ? 0.6 : 1 }]}
+            >
+              <Text style={[styles.seeAllLabel, { color: colors.primary }]}>
+                {t('home.seeAll')}
+              </Text>
+              <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+            </Pressable>
+          </View>
           <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
             {t('home.achievementsHint')}
           </Text>
         </View>
-        {data?.achievements.map((item) => {
+
+        {summaryItems.map((item) => {
           const definition = getAchievementByKey(item.definitionKey);
           if (!definition) {
             return null;
           }
           return (
-            <AchievementCard
+            <Pressable
               key={definition.key}
-              definition={definition}
-              progress={item.progress}
-              unlocked={item.unlocked}
-            />
+              accessibilityRole="button"
+              onPress={() => setSelectedAchievement(item)}
+              style={({ pressed }) => [
+                styles.summaryRow,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: item.unlocked ? colors.primary : colors.border,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <Text style={styles.summaryIcon}>{definition.icon}</Text>
+              <Text style={[styles.summaryName, { color: colors.text }]} numberOfLines={1}>
+                {t(definition.nameKey)}
+              </Text>
+              <Text
+                style={[
+                  styles.summaryPercent,
+                  { color: item.unlocked ? colors.primary : colors.textSecondary },
+                ]}
+              >
+                {item.unlocked ? t('achievements.unlocked') : `${Math.round(item.progress * 100)}%`}
+              </Text>
+            </Pressable>
           );
         })}
       </ScrollView>
+
+      {selectedAchievement && (() => {
+        const definition = getAchievementByKey(selectedAchievement.definitionKey);
+        return definition ? (
+          <AchievementDetailModal
+            definition={definition}
+            progress={selectedAchievement.progress}
+            unlocked={selectedAchievement.unlocked}
+            unlockedAt={selectedAchievement.unlockedAt}
+            onClose={() => setSelectedAchievement(null)}
+          />
+        ) : null;
+      })()}
     </Screen>
   );
 }
@@ -179,6 +234,42 @@ const styles = StyleSheet.create({
   achievementsHeader: {
     marginTop: 16,
     gap: 2,
+  },
+  achievementsTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  seeAllButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 2,
+  },
+  seeAllLabel: {
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  summaryIcon: {
+    fontSize: 20,
+  },
+  summaryName: {
+    flex: 1,
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  summaryPercent: {
+    fontSize: 13,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
   },
   sectionTitle: {
     fontSize: 17,

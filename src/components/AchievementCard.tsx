@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { ACHIEVEMENT_TIER_COLORS } from '@/constants/achievements';
 import type { AchievementDefinition } from '@/constants/achievements';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
@@ -8,14 +9,19 @@ interface AchievementCardProps {
   definition: AchievementDefinition;
   progress: number;
   unlocked: boolean;
+  /** When provided, the card becomes tappable (opens the detail modal). */
+  onPress?: () => void;
 }
 
-/** Achievement card: icon, translated name/description, and a progress bar. */
-export function AchievementCard({ definition, progress, unlocked }: AchievementCardProps) {
+/** Achievement card: icon, translated name/description, tier badge, progress bar. */
+export function AchievementCard({ definition, progress, unlocked, onPress }: AchievementCardProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
 
-  return (
+  const tierColor = definition.tier ? ACHIEVEMENT_TIER_COLORS[definition.tier] : null;
+  const showProgress = definition.metric !== undefined;
+
+  const card = (
     <View
       style={[
         styles.card,
@@ -34,27 +40,47 @@ export function AchievementCard({ definition, progress, unlocked }: AchievementC
           <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
             {t(definition.nameKey)}
           </Text>
+          {tierColor && (
+            <View style={[styles.tierBadge, { backgroundColor: tierColor }]}>
+              <Text style={styles.tierLabel}>{t(`achievements.tiers.${definition.tier}`)}</Text>
+            </View>
+          )}
           {unlocked && <Ionicons name="checkmark-circle" size={18} color={colors.primary} />}
         </View>
         <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>
           {t(definition.descriptionKey)}
         </Text>
 
-        <View style={styles.progressRow}>
-          <View style={[styles.track, { backgroundColor: colors.border }]}>
-            <View
-              style={[
-                styles.fill,
-                { backgroundColor: colors.primary, width: `${Math.round(progress * 100)}%` },
-              ]}
-            />
+        {showProgress && (
+          <View style={styles.progressRow}>
+            <View style={[styles.track, { backgroundColor: colors.border }]}>
+              <View
+                style={[
+                  styles.fill,
+                  { backgroundColor: colors.primary, width: `${Math.round(progress * 100)}%` },
+                ]}
+              />
+            </View>
+            <Text style={[styles.percent, { color: colors.textSecondary }]}>
+              {Math.round(progress * 100)}%
+            </Text>
           </View>
-          <Text style={[styles.percent, { color: colors.textSecondary }]}>
-            {Math.round(progress * 100)}%
-          </Text>
-        </View>
+        )}
       </View>
     </View>
+  );
+
+  if (!onPress) {
+    return card;
+  }
+  return (
+    <Pressable
+      accessibilityRole="button"
+      onPress={onPress}
+      style={({ pressed }) => [pressed && { opacity: 0.7 }]}
+    >
+      {card}
+    </Pressable>
   );
 }
 
@@ -90,6 +116,18 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 15,
     fontWeight: '700',
+  },
+  tierBadge: {
+    borderRadius: 6,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+  },
+  tierLabel: {
+    color: '#FFFFFF',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.3,
   },
   description: {
     fontSize: 13,
