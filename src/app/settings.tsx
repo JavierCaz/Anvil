@@ -1,51 +1,65 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useSQLiteContext } from 'expo-sqlite';
 import { Screen } from '@/components/Screen';
-import { setAppLanguage, type AppLanguage } from '@/i18n';
+import { useDialog } from '@/components/AppDialog';
+import { resetAppLanguage, setAppLanguage, type AppLanguage } from '@/i18n';
+import { type BackupPreferences } from '@/db/backup';
+import { eraseAllData, exportBackupFile, importBackupFile } from '@/db/backup-file';
 import {
   useWeeklyGoalStore,
   WEEKLY_WORKOUTS_MAX,
   WEEKLY_WORKOUTS_MIN,
 } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
-import { useThemeStore, type ThemePreference } from '@/theme/theme-store';
+import { useThemeStore } from '@/theme/theme-store';
 
-const THEME_OPTIONS: { value: ThemePreference; labelKey: string }[] = [
-  { value: 'system', labelKey: 'theme.system' },
-  { value: 'light', labelKey: 'theme.light' },
-  { value: 'dark', labelKey: 'theme.dark' },
-];
-
-const LANGUAGE_OPTIONS: { value: AppLanguage; labelKey: string }[] = [
-  { value: 'en', labelKey: 'language.english' },
-  { value: 'es', labelKey: 'language.spanish' },
-];
-
-interface CheckRowProps {
-  label: string;
-  selected: boolean;
-  onPress: () => void;
+interface SwitchRowProps {
+  offLabel: string;
+  onLabel: string;
+  value: boolean;
+  onValueChange: (value: boolean) => void;
 }
 
-function CheckRow({ label, selected, onPress }: CheckRowProps) {
+function SwitchRow({ offLabel, onLabel, value, onValueChange }: SwitchRowProps) {
   const { colors } = useAppTheme();
   return (
-    <Pressable onPress={onPress} style={styles.row}>
-      <Text style={[styles.rowLabel, { color: colors.text }]}>{label}</Text>
-      <Ionicons
-        name={selected ? 'checkmark-circle' : 'ellipse-outline'}
-        size={22}
-        color={selected ? colors.primary : colors.textSecondary}
+    <View style={styles.row}>
+      <Text
+        style={[
+          styles.rowLabel,
+          { color: value ? colors.textSecondary : colors.text },
+        ]}
+      >
+        {offLabel}
+      </Text>
+      <Switch
+        value={value}
+        onValueChange={onValueChange}
+        trackColor={{ false: colors.border, true: colors.primary }}
+        ios_backgroundColor={colors.border}
       />
-    </Pressable>
+      <Text
+        style={[
+          styles.rowLabel,
+          { color: value ? colors.text : colors.textSecondary },
+        ]}
+      >
+        {onLabel}
+      </Text>
+    </View>
   );
 }
 
 export default function SettingsScreen() {
-  const { colors } = useAppTheme();
+  const { scheme, colors } = useAppTheme();
   const { t, i18n } = useTranslation();
+  const db = useSQLiteContext();
+  const dialog = useDialog();
+  const [busyAction, setBusyAction] = useState<'export' | 'import' | 'erase' | null>(null);
 
   const preference = useThemeStore((state) => state.preference);
   const setPreference = useThemeStore((state) => state.setPreference);
@@ -53,6 +67,134 @@ export default function SettingsScreen() {
   const setWeeklyWorkouts = useWeeklyGoalStore((state) => state.setWeeklyWorkouts);
 
   const language = i18n.language as AppLanguage;
+
+  // `system` is the default. The switch mirrors the resolved scheme until
+  // the user makes an explicit light/dark override.
+  const isDark = preference === 'dark' || (preference === 'system' && scheme === 'dark');
+  const notifyWebUnsupported = () => {
+    dialog.alert({
+      title: t('settings.webUnsupported'),
+      message: t('settings.webUnsupportedMessage'),
+      icon: 'globe-outline',
+    });
+  };
+
+  const runExport = async () => {
+    try {
+      await exportBackupFile(db);
+    } catch {
+      dialog.alert({
+        title: t('settings.data'),
+        message: t('settings.exportFailed'),
+        icon: 'alert-circle',
+        tone: 'error',
+      });
+    }
+  };
+
+  const confirmExport = () => {
+    if (Platform.OS === 'web') return notifyWebUnsupported();
+    setBusyAction('export');
+    void runExport().finally(() => setBusyAction(null));
+  };
+
+  const runImport = async () => {
+    try {
+      const backup = await importBackupFile(db);
+      if (backup) {
+        await restorePreferences(backup.preferences);
+        dialog.alert({
+          title: t('settings.importTitle'),
+          message: t('settings.importSuccess'),
+          icon: 'checkmark-circle',
+          tone: 'success',
+        });
+      }
+    } catch {
+      dialog.alert({
+        title: t('settings.importTitle'),
+        message: t('settings.importFailed'),
+        icon: 'alert-circle',
+        tone: 'error',
+      });
+    }
+  };
+
+  const confirmImport = () => {
+    if (Platform.OS === 'web') return notifyWebUnsupported();
+    dialog.alert({
+      title: t('settings.importTitle'),
+      message: t('settings.importMessage'),
+      icon: 'download-outline',
+      buttons: [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('settings.importConfirm'),
+          onPress: () => {
+            setBusyAction('import');
+            void runImport().finally(() => setBusyAction(null));
+          },
+        },
+      ],
+    });
+  };
+
+  const runErase = async () => {
+    try {
+      await eraseAllData(db);
+      resetPreferences();
+      dialog.alert({
+        title: t('settings.eraseTitle'),
+        message: t('settings.eraseSuccess'),
+        icon: 'checkmark-circle',
+        tone: 'success',
+      });
+    } catch {
+      dialog.alert({
+        title: t('settings.eraseTitle'),
+        message: t('settings.eraseFailed'),
+        icon: 'alert-circle',
+        tone: 'error',
+      });
+    }
+  };
+
+  const confirmErase = () => {
+    if (Platform.OS === 'web') return notifyWebUnsupported();
+    dialog.alert({
+      title: t('settings.eraseTitle'),
+      message: t('settings.eraseMessage'),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('settings.eraseConfirm'),
+          style: 'destructive',
+          onPress: () => {
+            setBusyAction('erase');
+            void runErase().finally(() => setBusyAction(null));
+          },
+        },
+      ],
+    });
+  };
+
+  const restorePreferences = async (preferences: BackupPreferences) => {
+    if (preferences.theme) void useThemeStore.persist.rehydrate();
+    if (preferences.weeklyWorkouts) void useWeeklyGoalStore.persist.rehydrate();
+    if (preferences.language === 'en' || preferences.language === 'es') {
+      await setAppLanguage(preferences.language);
+    }
+  };
+
+  const resetPreferences = () => {
+    useThemeStore.getState().setPreference(useThemeStore.getInitialState().preference);
+    useWeeklyGoalStore
+      .getState()
+      .setWeeklyWorkouts(useWeeklyGoalStore.getInitialState().weeklyWorkouts);
+    void resetAppLanguage();
+  };
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
@@ -67,28 +209,24 @@ export default function SettingsScreen() {
           {t('settings.appearance')}
         </Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {THEME_OPTIONS.map((option) => (
-            <CheckRow
-              key={option.value}
-              label={t(option.labelKey)}
-              selected={preference === option.value}
-              onPress={() => setPreference(option.value)}
-            />
-          ))}
+          <SwitchRow
+            offLabel={t('theme.light')}
+            onLabel={t('theme.dark')}
+            value={isDark}
+            onValueChange={(dark) => setPreference(dark ? 'dark' : 'light')}
+          />
         </View>
 
         <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.language')}
         </Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {LANGUAGE_OPTIONS.map((option) => (
-            <CheckRow
-              key={option.value}
-              label={t(option.labelKey)}
-              selected={language === option.value}
-              onPress={() => void setAppLanguage(option.value)}
-            />
-          ))}
+          <SwitchRow
+            offLabel={t('language.english')}
+            onLabel={t('language.spanish')}
+            value={language === 'es'}
+            onValueChange={(es) => void setAppLanguage(es ? 'es' : 'en')}
+          />
         </View>
 
         <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
@@ -142,6 +280,52 @@ export default function SettingsScreen() {
             </Pressable>
           </View>
         </View>
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+          {t('settings.data')}
+        </Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <Pressable
+            accessibilityRole="button"
+            disabled={busyAction !== null}
+            onPress={confirmExport}
+            style={styles.row}
+          >
+            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settings.exportData')}</Text>
+            {busyAction === 'export' ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Ionicons name="share-outline" size={22} color={colors.textSecondary} />
+            )}
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <Pressable
+            accessibilityRole="button"
+            disabled={busyAction !== null}
+            onPress={confirmImport}
+            style={styles.row}
+          >
+            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settings.importData')}</Text>
+            {busyAction === 'import' ? (
+              <ActivityIndicator size="small" color={colors.primary} />
+            ) : (
+              <Ionicons name="download-outline" size={22} color={colors.textSecondary} />
+            )}
+          </Pressable>
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <Pressable
+            accessibilityRole="button"
+            disabled={busyAction !== null}
+            onPress={confirmErase}
+            style={styles.row}
+          >
+            <Text style={[styles.rowLabel, { color: colors.error }]}>{t('settings.eraseAllData')}</Text>
+            {busyAction === 'erase' ? (
+              <ActivityIndicator size="small" color={colors.error} />
+            ) : (
+              <Ionicons name="trash-outline" size={22} color={colors.error} />
+            )}
+          </Pressable>
+        </View>
       </ScrollView>
     </Screen>
   );
@@ -172,6 +356,9 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 16,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
   },
   goalCard: {
     paddingVertical: 14,

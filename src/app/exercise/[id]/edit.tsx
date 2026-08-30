@@ -2,9 +2,10 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import { ExerciseForm } from '@/components/ExerciseForm';
 import { Screen } from '@/components/Screen';
+import { useDialog } from '@/components/AppDialog';
 import { deleteExercise, getExerciseById, updateExercise } from '@/db/exercises';
 import type { Exercise } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -14,6 +15,7 @@ export default function EditExerciseScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const dialog = useDialog();
   const { id } = useLocalSearchParams<{ id: string }>();
   const exerciseId = Number(id);
 
@@ -46,10 +48,12 @@ export default function EditExerciseScreen() {
   };
 
   const confirmDelete = () => {
-    Alert.alert(
-      t('exercises.form.deleteTitle'),
-      t('exercises.form.deleteMessage', { name: exercise?.name ?? '' }),
-      [
+    dialog.alert({
+      title: t('exercises.form.deleteTitle'),
+      message: t('exercises.form.deleteMessage', { name: exercise?.name ?? '' }),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.delete'),
@@ -60,8 +64,8 @@ export default function EditExerciseScreen() {
             });
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   return (

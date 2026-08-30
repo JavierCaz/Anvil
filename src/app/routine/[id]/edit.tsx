@@ -2,9 +2,10 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import { RoutineForm } from '@/components/RoutineForm';
 import { Screen } from '@/components/Screen';
+import { useDialog } from '@/components/AppDialog';
 import { deleteRoutine, getRoutine, updateRoutine } from '@/db/routines';
 import type { Routine } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -14,6 +15,7 @@ export default function EditRoutineScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const dialog = useDialog();
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
 
@@ -40,10 +42,12 @@ export default function EditRoutineScreen() {
   };
 
   const confirmDelete = () => {
-    Alert.alert(
-      t('routines.deleteConfirmTitle'),
-      t('routines.deleteConfirmMessage', { name: routine?.name ?? '' }),
-      [
+    dialog.alert({
+      title: t('routines.deleteConfirmTitle'),
+      message: t('routines.deleteConfirmMessage', { name: routine?.name ?? '' }),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
         { text: t('common.cancel'), style: 'cancel' },
         {
           text: t('common.delete'),
@@ -54,8 +58,8 @@ export default function EditRoutineScreen() {
             });
           },
         },
-      ]
-    );
+      ],
+    });
   };
 
   return (

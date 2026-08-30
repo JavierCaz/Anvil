@@ -1,4 +1,5 @@
 import * as SQLite from 'expo-sqlite';
+import { seedAchievements } from './achievements';
 import { seedExerciseCatalog } from './exercises';
 import { DATABASE_VERSION, MIGRATIONS } from './schema';
 
@@ -57,4 +58,5 @@ export async function migrateDbIfNeeded(db: SQLite.SQLiteDatabase): Promise<void
 export async function initializeDatabase(db: SQLite.SQLiteDatabase): Promise<void> {
   await migrateDbIfNeeded(db);
   await seedExerciseCatalog(db);
+  await seedAchievements(db);
 }

@@ -2,6 +2,7 @@
   "common": {
     "appName": "Anvil",
     "cancel": "Cancel",
+    "ok": "OK",
     "save": "Save",
     "delete": "Delete",
     "confirm": "Confirm",
@@ -22,7 +23,6 @@
   },
   "theme": {
     "title": "Theme",
-    "system": "System",
     "light": "Light",
     "dark": "Dark"
   },
@@ -36,7 +36,24 @@
     "appearance": "Appearance",
     "language": "Language",
     "weeklyGoal": "Weekly workout goal",
-    "weeklyGoalHint": "How many days per week do you plan to train?"
+    "weeklyGoalHint": "How many days per week do you plan to train?",
+    "data": "Data",
+    "exportData": "Export data",
+    "importData": "Import data",
+    "eraseAllData": "Erase all data",
+    "exportFailed": "Could not export the data. Please try again.",
+    "importTitle": "Import backup",
+    "importMessage": "This will replace all current data with the backup. This cannot be undone.",
+    "importConfirm": "Import",
+    "importSuccess": "Backup imported successfully.",
+    "importFailed": "The selected file is not a valid Anvil backup.",
+    "eraseTitle": "Erase all data?",
+    "eraseMessage": "This will permanently delete all routines, exercises, workouts, personal records and preferences. This cannot be undone.",
+    "eraseConfirm": "Erase",
+    "eraseSuccess": "All data has been erased.",
+    "eraseFailed": "Could not erase the data. Please try again.",
+    "webUnsupported": "Not available on web",
+    "webUnsupportedMessage": "Export, import and erase are only available in the mobile app."
   },
   "statistics": {
     "filters": {
