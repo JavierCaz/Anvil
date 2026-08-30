@@ -20,7 +20,9 @@ import {
   upsertSet,
 } from '@/db/workouts';
 import type { ActiveWorkoutExercise, WorkoutSet } from '@/db/types';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { displayToKg, formatWeight, weightUnitLabel } from '@/utils/weight';
 
 const DEFAULT_REST_SECONDS = 90;
 
@@ -40,6 +42,7 @@ export default function WorkoutExerciseScreen() {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const toast = useToast();
+  const unit = useUnitsStore((state) => state.unitSystem);
   const { id, exerciseId } = useLocalSearchParams<{ id: string; exerciseId: string }>();
   const logId = Number(id);
   const exerciseIdNum = Number(exerciseId);
@@ -150,9 +153,9 @@ export default function WorkoutExerciseScreen() {
   const handleComplete = (setNumber: number) => {
     const draft = drafts[setNumber] ?? { weight: '', reps: String(targetReps) };
     const restSeconds = restConfig[setNumber] ?? defaultRest;
-    const weight = parseNumber(draft.weight);
+    const weightKg = displayToKg(parseNumber(draft.weight), unit);
     void upsertSet(db, logId, exerciseIdNum, setNumber, {
-      weight,
+      weight: weightKg,
       reps: Math.round(parseNumber(draft.reps)),
       restSeconds,
       completed: 1,
@@ -172,14 +175,15 @@ export default function WorkoutExerciseScreen() {
 
       // Weight comparatives: unlock every object reached by this set and toast
       // the highest newly-unlocked one; the rest are counted as extras.
-      void unlockWeightComparatives(db, weight).then((unlocked) => {
+      void unlockWeightComparatives(db, weightKg).then((unlocked) => {
         if (unlocked.length === 0) {
           return;
         }
         const top = unlocked[unlocked.length - 1];
         const extras = unlocked.length - 1;
         const detail = t('notifications.comparativeDetail', {
-          weight: String(weight),
+          weight: formatWeight(weightKg, unit),
+          unit: weightUnitLabel(unit),
           exercise: exercise?.exercise_name ?? '',
         });
         toast.show({
@@ -196,7 +200,7 @@ export default function WorkoutExerciseScreen() {
 
   const handleUndo = (setNumber: number) => {
     void upsertSet(db, logId, exerciseIdNum, setNumber, {
-      weight: parseNumber(drafts[setNumber]?.weight ?? ''),
+      weight: displayToKg(parseNumber(drafts[setNumber]?.weight ?? ''), unit),
       reps: Math.round(parseNumber(drafts[setNumber]?.reps ?? String(targetReps))),
       restSeconds: restConfig[setNumber] ?? defaultRest,
       completed: 0,

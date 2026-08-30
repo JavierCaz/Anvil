@@ -3,7 +3,9 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { ACHIEVEMENT_TIER_COLORS } from '@/constants/achievements';
 import type { AchievementDefinition } from '@/constants/achievements';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { formatWeightGrouped, weightUnitLabel } from '@/utils/weight';
 
 interface AchievementCardProps {
   definition: AchievementDefinition;
@@ -17,9 +19,15 @@ interface AchievementCardProps {
 export function AchievementCard({ definition, progress, unlocked, onPress }: AchievementCardProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const unit = useUnitsStore((state) => state.unitSystem);
 
   const tierColor = definition.tier ? ACHIEVEMENT_TIER_COLORS[definition.tier] : null;
   const showProgress = definition.metric !== undefined;
+  // Volume achievements describe their kg threshold; interpolate in the user's unit.
+  const descriptionParams =
+    definition.metric === 'totalVolume' && definition.target !== undefined
+      ? { weight: formatWeightGrouped(definition.target, unit), unit: weightUnitLabel(unit) }
+      : undefined;
 
   const card = (
     <View
@@ -48,7 +56,7 @@ export function AchievementCard({ definition, progress, unlocked, onPress }: Ach
           {unlocked && <Ionicons name="checkmark-circle" size={18} color={colors.primary} />}
         </View>
         <Text style={[styles.description, { color: colors.textSecondary }]} numberOfLines={2}>
-          {t(definition.descriptionKey)}
+          {t(definition.descriptionKey, descriptionParams)}
         </Text>
 
         {showProgress && (

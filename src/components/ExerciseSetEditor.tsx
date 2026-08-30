@@ -3,7 +3,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { weightUnitLabel } from '@/utils/weight';
 
 export const REST_STEP_SECONDS = 15;
 export const REST_MAX_SECONDS = 300;
@@ -182,6 +184,8 @@ function SetCard({
 }: SetCardProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const unit = useUnitsStore((state) => state.unitSystem);
+  const unitLabel = weightUnitLabel(unit);
 
   if (mode === 'workout' && item.done) {
     return (
@@ -194,7 +198,7 @@ function SetCard({
         </View>
         <Text style={[styles.setSummary, { color: colors.text }]}>
           {item.weight
-            ? `${item.weight} kg × ${item.reps || fallbackReps}`
+            ? `${item.weight} ${unitLabel} × ${item.reps || fallbackReps}`
             : `${item.reps || fallbackReps} reps`}
           {item.restSeconds > 0 ? ` · ${t('workout.rest')}: ${item.restSeconds}s` : ''}
         </Text>
@@ -231,7 +235,7 @@ function SetCard({
         </Text>
         {!expanded && (
           <Text style={[styles.collapsedSummary, { color: colors.textSecondary }]} numberOfLines={1}>
-            {`${item.weight ? `${item.weight} kg × ` : ''}${item.reps || fallbackReps} reps · ${item.restSeconds}s ${t('workout.rest')}`}
+            {`${item.weight ? `${item.weight} ${unitLabel} × ` : ''}${item.reps || fallbackReps} reps · ${item.restSeconds}s ${t('workout.rest')}`}
           </Text>
         )}
         <Ionicons
@@ -246,7 +250,7 @@ function SetCard({
           <View style={styles.inputRow}>
             <View style={[styles.inputField, { borderColor: colors.border }]}>
               <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                {t('workout.weight')}
+                {t('workout.weight', { unit: weightUnitLabel(unit) })}
               </Text>
               <TextInput
                 value={item.weight}

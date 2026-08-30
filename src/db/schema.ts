@@ -114,7 +114,7 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_achievements_key ON achievements(key);
 
 INSERT INTO achievements (name, description, icon, key, unlocked_at) VALUES
   ('First Workout', 'Complete your first workout session', '🏋️', 'first_workout', NULL),
-  ('1000kg Club', 'Reach 1000 kg of total lifting volume', '💪', 'thousand_kg_club', NULL),
+  ('Ton Club', 'Reach a metric ton of total lifting volume', '💪', 'thousand_kg_club', NULL),
   ('Consistency King', 'Work out 30 days in a row', '👑', 'consistency_king', NULL),
   ('Progressive Overload', 'Set 5 personal records in a month', '📈', 'progressive_overload', NULL);
 `;

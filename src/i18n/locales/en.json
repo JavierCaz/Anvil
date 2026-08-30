@@ -31,10 +31,16 @@
     "english": "English",
     "spanish": "Español"
   },
+  "units": {
+    "title": "Units",
+    "metric": "Metric",
+    "imperial": "Imperial"
+  },
   "settings": {
     "title": "Settings",
     "appearance": "Appearance",
     "language": "Language",
+    "units": "Units",
     "weeklyGoal": "Weekly workout goal",
     "weeklyGoalHint": "How many days per week do you plan to train?",
     "data": "Data",
@@ -115,8 +121,8 @@
       "description": "Complete your first workout session"
     },
     "thousandKgClub": {
-      "name": "1000kg Club",
-      "description": "Reach 1,000 kg of total lifting volume"
+      "name": "Ton Club",
+      "description": "Reach {{weight}} {{unit}} of total lifting volume"
     },
     "progressiveOverload": {
       "name": "Progressive Overload",
@@ -139,16 +145,16 @@
       "description": "Complete 250 workouts"
     },
     "volume10k": {
-      "name": "10,000 kg Forged",
-      "description": "Reach 10,000 kg of total lifting volume"
+      "name": "10K Forged",
+      "description": "Reach {{weight}} {{unit}} of total lifting volume"
     },
     "volume100k": {
-      "name": "100,000 kg Forged",
-      "description": "Reach 100,000 kg of total lifting volume"
+      "name": "100K Forged",
+      "description": "Reach {{weight}} {{unit}} of total lifting volume"
     },
     "volume1m": {
-      "name": "Million-Kilo Anvil",
-      "description": "Reach 1,000,000 kg of total lifting volume"
+      "name": "Million Anvil",
+      "description": "Reach {{weight}} {{unit}} of total lifting volume"
     },
     "consistency4w": {
       "name": "4-Week Consistency",
@@ -215,7 +221,7 @@
   },
   "notifications": {
     "comparativeLifted": "You just lifted {{object}}!",
-    "comparativeDetail": "{{weight}} kg · {{exercise}}",
+    "comparativeDetail": "{{weight}} {{unit}} · {{exercise}}",
     "comparativeMore": "+{{count}} more unlocked"
   },
   "routines": {
@@ -305,14 +311,14 @@
   "recap": {
     "title": "Workout Complete",
     "sets": "{{count}} sets",
-    "volume": "kg volume",
+    "volume": "{{unit}} volume",
     "volumeDelta": "vs last time",
     "recordsForged": "{{count}} records forged",
     "newWeightPr": "New weight PR",
     "newOneRmPr": "New 1RM PR",
     "milestoneUnlocked": "Milestone unlocked",
     "nextMilestone": "Next milestone",
-    "nextMilestoneToGo": "{{weight}} kg to go",
+    "nextMilestoneToGo": "{{weight}} {{unit}} to go",
     "consistency": "Consistency",
     "workoutsThisWeek": "{{done}}/{{goal}} workouts this week",
     "perfectWeek": "Perfect week",
@@ -333,7 +339,7 @@
     "exercisesDone": "{{done}} of {{total}} exercises",
     "setsDone": "{{done}} of {{total}} sets",
     "set": "Set {{number}}",
-    "weight": "Weight (kg)",
+    "weight": "Weight ({{unit}})",
     "reps": "Reps",
     "restAfterSet": "Rest after set (s)",
     "markDone": "Mark as done",

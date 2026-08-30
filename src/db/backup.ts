@@ -137,6 +137,7 @@ export interface BackupPreferences {
   theme?: string;
   language?: string;
   weeklyWorkouts?: string;
+  units?: string;
 }
 
 export interface BackupFile {
@@ -214,6 +215,7 @@ function sanitizePreferences(value: unknown): BackupPreferences {
   if (typeof value.theme === 'string') preferences.theme = value.theme;
   if (typeof value.language === 'string') preferences.language = value.language;
   if (typeof value.weeklyWorkouts === 'string') preferences.weeklyWorkouts = value.weeklyWorkouts;
+  if (typeof value.units === 'string') preferences.units = value.units;
   return preferences;
 }
 

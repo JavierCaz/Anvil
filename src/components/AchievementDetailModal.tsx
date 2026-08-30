@@ -9,7 +9,9 @@ import {
   type AchievementDefinition,
   type AchievementMetric,
 } from '@/constants/achievements';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { formatWeightGrouped, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
 interface AchievementDetailModalProps {
   definition: AchievementDefinition;
@@ -25,11 +27,11 @@ function formatNumber(value: number): string {
 }
 
 /** Human-readable unit suffix per aggregate metric. */
-function metricUnit(metric: AchievementMetric, t: (key: string) => string): string {
+function metricUnit(metric: AchievementMetric, t: (key: string) => string, unit: 'metric' | 'imperial'): string {
   switch (metric) {
     case 'maxWeight':
     case 'totalVolume':
-      return 'kg';
+      return weightUnitLabel(unit);
     case 'totalWorkouts':
       return t('achievements.metrics.workouts');
     case 'consistencyStreak':
@@ -54,6 +56,7 @@ export function AchievementDetailModal({
   const { colors } = useAppTheme();
   const { t, i18n } = useTranslation();
   const insets = useSafeAreaInsets();
+  const unit = useUnitsStore((state) => state.unitSystem);
 
   // Stable Animated values (lazy state, not refs — satisfies the React Compiler ref rule).
   const [scale] = useState(() => new Animated.Value(0.92));
@@ -76,9 +79,17 @@ export function AchievementDetailModal({
         const metric = definition.metric as AchievementMetric;
         const target = definition.target as number;
         const current = Math.round(progress * target);
-        return `${formatNumber(current)} / ${formatNumber(target)} ${metricUnit(metric, t)}`;
+        const isWeightMetric = metric === 'maxWeight' || metric === 'totalVolume';
+        const currentDisplay = isWeightMetric ? kgToDisplay(current, unit) : current;
+        const targetDisplay = isWeightMetric ? kgToDisplay(target, unit) : target;
+        return `${formatNumber(currentDisplay)} / ${formatNumber(targetDisplay)} ${metricUnit(metric, t, unit)}`;
       })()
     : null;
+  // Volume achievements describe their kg threshold; interpolate in the user's unit.
+  const descriptionParams =
+    definition.metric === 'totalVolume' && definition.target !== undefined
+      ? { weight: formatWeightGrouped(definition.target, unit), unit: weightUnitLabel(unit) }
+      : undefined;
 
   const unlockedDate = unlocked && unlockedAt ? dayjs(unlockedAt).locale(i18n.language).format('MMM D, YYYY') : null;
 
@@ -124,7 +135,7 @@ export function AchievementDetailModal({
           </View>
 
           <Text style={[styles.description, { color: colors.textSecondary }]}>
-            {t(definition.descriptionKey)}
+            {t(definition.descriptionKey, descriptionParams)}
           </Text>
 
           {/* Progress */}

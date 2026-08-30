@@ -31,10 +31,16 @@
     "english": "English",
     "spanish": "Español"
   },
+  "units": {
+    "title": "Unidades",
+    "metric": "Métrico",
+    "imperial": "Imperial"
+  },
   "settings": {
     "title": "Ajustes",
     "appearance": "Apariencia",
     "language": "Idioma",
+    "units": "Unidades",
     "weeklyGoal": "Meta semanal de entrenamiento",
     "weeklyGoalHint": "¿Cuántos días a la semana planeas entrenar?",
     "data": "Datos",
@@ -115,8 +121,8 @@
       "description": "Completa tu primera sesión de entrenamiento"
     },
     "thousandKgClub": {
-      "name": "Club de los 1000 kg",
-      "description": "Alcanza 1,000 kg de volumen total levantado"
+      "name": "Club de la Tonelada",
+      "description": "Alcanza {{weight}} {{unit}} de volumen total levantado"
     },
     "progressiveOverload": {
       "name": "Sobrecarga Progresiva",
@@ -139,16 +145,16 @@
       "description": "Completa 250 entrenamientos"
     },
     "volume10k": {
-      "name": "10,000 kg Forjados",
-      "description": "Alcanza 10,000 kg de volumen total levantado"
+      "name": "10K Forjados",
+      "description": "Alcanza {{weight}} {{unit}} de volumen total levantado"
     },
     "volume100k": {
-      "name": "100,000 kg Forjados",
-      "description": "Alcanza 100,000 kg de volumen total levantado"
+      "name": "100K Forjados",
+      "description": "Alcanza {{weight}} {{unit}} de volumen total levantado"
     },
     "volume1m": {
       "name": "Yunque del Millón",
-      "description": "Alcanza 1,000,000 kg de volumen total levantado"
+      "description": "Alcanza {{weight}} {{unit}} de volumen total levantado"
     },
     "consistency4w": {
       "name": "4 Semanas de Constancia",
@@ -215,7 +221,7 @@
   },
   "notifications": {
     "comparativeLifted": "¡Acabas de levantar {{object}}!",
-    "comparativeDetail": "{{weight}} kg · {{exercise}}",
+    "comparativeDetail": "{{weight}} {{unit}} · {{exercise}}",
     "comparativeMore": "+{{count}} más desbloqueados"
   },
   "routines": {
@@ -305,14 +311,14 @@
   "recap": {
     "title": "Entrenamiento completado",
     "sets": "{{count}} series",
-    "volume": "kg de volumen",
+    "volume": "{{unit}} de volumen",
     "volumeDelta": "vs la última vez",
     "recordsForged": "{{count}} récords forjados",
     "newWeightPr": "Nuevo récord de peso",
     "newOneRmPr": "Nuevo récord 1RM",
     "milestoneUnlocked": "Hito desbloqueado",
     "nextMilestone": "Siguiente hito",
-    "nextMilestoneToGo": "Faltan {{weight}} kg",
+    "nextMilestoneToGo": "Faltan {{weight}} {{unit}}",
     "consistency": "Constancia",
     "workoutsThisWeek": "{{done}}/{{goal}} entrenamientos esta semana",
     "perfectWeek": "Semana perfecta",
@@ -333,7 +339,7 @@
     "exercisesDone": "{{done}} de {{total}} ejercicios",
     "setsDone": "{{done}} de {{total}} series",
     "set": "Serie {{number}}",
-    "weight": "Peso (kg)",
+    "weight": "Peso ({{unit}})",
     "reps": "Repeticiones",
     "restAfterSet": "Descanso tras la serie (s)",
     "markDone": "Marcar como hecha",

@@ -4,7 +4,9 @@ import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-nati
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { getAchievementByKey } from '@/constants/achievements';
 import type { DetectedPR, WorkoutRecap as RecapData } from '@/db/gamification';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { formatWeight, formatWeightWithUnit, weightUnitLabel } from '@/utils/weight';
 
 interface WorkoutRecapModalProps {
   recap: RecapData;
@@ -17,12 +19,6 @@ function formatDuration(totalSeconds: number): string {
   const minutes = Math.floor((totalSeconds % 3600) / 60);
   return [hours, minutes].map((value) => String(value).padStart(2, '0')).join(':');
 }
-
-/** Milestone/volume weights render as integers below 10 with one decimal. */
-function formatWeight(weight: number): string {
-  return weight % 1 === 0 ? String(weight) : weight.toFixed(1);
-}
-
 /**
  * Post-workout gamification recap — the main emotional payoff. Shown as a
  * modal when a workout completes; only relevant sections are rendered.
@@ -31,6 +27,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const insets = useSafeAreaInsets();
+  const unit = useUnitsStore((state) => state.unitSystem);
 
   const { summary, consistency, prs, milestonesUnlocked, nextMilestone, achievementsUnlocked } = recap;
   const showMilestones = milestonesUnlocked.length > 0 || nextMilestone !== null;
@@ -46,7 +43,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {pr.exerciseName}
           </Text>
           <Text style={[styles.prDetail, { color: colors.textSecondary }]}>
-            {formatWeight(pr.weight)} kg × {pr.reps}
+            {formatWeightWithUnit(pr.weight, unit)} × {pr.reps}
           </Text>
         </View>
         <View style={[styles.prBadge, { backgroundColor: colors.primary }]}>
@@ -89,9 +86,11 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
               </View>
               <View style={[styles.statCell, { backgroundColor: colors.background }]}>
                 <Text style={[styles.statValue, { color: colors.text }]}>
-                  {formatWeight(summary.totalVolumeKg)}
+                  {formatWeight(summary.totalVolumeKg, unit)}
                 </Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('recap.volume', { volume: '' })}</Text>
+                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+                  {t('recap.volume', { unit: weightUnitLabel(unit) })}
+                </Text>
               </View>
               {recap.volumeDeltaPct !== null && (
                 <View style={[styles.statCell, { backgroundColor: colors.background }]}>
@@ -127,7 +126,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                       {t(milestone.nameKey)}
                     </Text>
                     <Text style={[styles.milestoneKg, { color: colors.textSecondary }]}>
-                      {formatWeight(milestone.thresholdKg)} kg
+                      {formatWeightWithUnit(milestone.thresholdKg, unit)}
                     </Text>
                   </View>
                 ))}
@@ -137,11 +136,12 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                       {t('recap.nextMilestone')}
                     </Text>
                     <Text style={[styles.nextValue, { color: colors.text }]} numberOfLines={1}>
-                      {nextMilestone.icon} {t(nextMilestone.nameKey)} — {formatWeight(nextMilestone.thresholdKg)} kg
+                      {nextMilestone.icon} {t(nextMilestone.nameKey)} — {formatWeightWithUnit(nextMilestone.thresholdKg, unit)}
                     </Text>
                     <Text style={[styles.nextToGo, { color: colors.textSecondary }]}>
                       {t('recap.nextMilestoneToGo', {
-                        weight: formatWeight(Math.max(0, nextMilestone.thresholdKg - recap.maxWeightKg)),
+                        weight: formatWeight(Math.max(0, nextMilestone.thresholdKg - recap.maxWeightKg), unit),
+                        unit: weightUnitLabel(unit),
                       })}
                     </Text>
                   </View>

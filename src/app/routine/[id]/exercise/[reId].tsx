@@ -14,7 +14,9 @@ import {
   saveRoutineExerciseSets,
 } from '@/db/routines';
 import type { RoutineExerciseWithExercise } from '@/db/types';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { displayToKg, kgToDisplay } from '@/utils/weight';
 
 interface SetDraft {
   weight: string;
@@ -30,6 +32,7 @@ export default function RoutineSetEditorScreen() {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const dialog = useDialog();
+  const unit = useUnitsStore((state) => state.unitSystem);
   const { reId } = useLocalSearchParams<{ reId: string }>();
   const routineExerciseId = Number(reId);
 
@@ -49,7 +52,7 @@ export default function RoutineSetEditorScreen() {
       setExercise(exerciseRow);
       setSets(
         setRows.map((row) => ({
-          weight: row.weight && row.weight > 0 ? String(row.weight) : '',
+          weight: row.weight && row.weight > 0 ? String(kgToDisplay(row.weight, unit)) : '',
           reps: String(row.reps),
           restSeconds: row.rest_seconds,
         }))
@@ -59,7 +62,7 @@ export default function RoutineSetEditorScreen() {
     return () => {
       active = false;
     };
-  }, [db, routineExerciseId]);
+  }, [db, routineExerciseId, unit]);
 
   const setItems: SetEditorItem[] = sets.map((set, index) => ({
     setNumber: index + 1,
@@ -107,7 +110,7 @@ export default function RoutineSetEditorScreen() {
         setNumber: index + 1,
         reps: Math.max(1, Math.round(parseNumber(set.reps) || 1)),
         restSeconds: set.restSeconds,
-        weight: parseNumber(set.weight) || null,
+        weight: parseNumber(set.weight) ? displayToKg(parseNumber(set.weight), unit) : null,
       }))
     ).then(() => {
       router.back();

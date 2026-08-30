@@ -99,10 +99,10 @@ export const ACHIEVEMENT_SEED = [
   { key: 'experience_100', name: 'Century', description: 'Complete 100 workouts', icon: '🎖️' },
   { key: 'experience_250', name: 'Iron Veteran', description: 'Complete 250 workouts', icon: '🏅' },
   // Volume
-  { key: 'thousand_kg_club', name: '1000kg Club', description: 'Reach 1000 kg of total lifting volume', icon: '💪' },
-  { key: 'volume_10k', name: '10,000 kg Forged', description: 'Reach 10,000 kg of total lifting volume', icon: '🏋️' },
-  { key: 'volume_100k', name: '100,000 kg Forged', description: 'Reach 100,000 kg of total lifting volume', icon: '⚙️' },
-  { key: 'volume_1m', name: 'Million-Kilo Anvil', description: 'Reach 1,000,000 kg of total lifting volume', icon: '🪨' },
+  { key: 'thousand_kg_club', name: 'Ton Club', description: 'Reach a metric ton of total lifting volume', icon: '💪' },
+  { key: 'volume_10k', name: '10K Forged', description: 'Reach 10,000 of total lifting volume', icon: '🏋️' },
+  { key: 'volume_100k', name: '100K Forged', description: 'Reach 100,000 of total lifting volume', icon: '⚙️' },
+  { key: 'volume_1m', name: 'Million Anvil', description: 'Reach 1,000,000 of total lifting volume', icon: '🪨' },
   // Consistency
   { key: 'consistency_4w', name: '4-Week Consistency', description: 'Meet your weekly goal 4 weeks in a row', icon: '🗓️' },
   { key: 'consistency_8w', name: '8-Week Consistency', description: 'Meet your weekly goal 8 weeks in a row', icon: '📅' },

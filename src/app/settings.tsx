@@ -14,6 +14,7 @@ import {
   WEEKLY_WORKOUTS_MAX,
   WEEKLY_WORKOUTS_MIN,
 } from '@/store/workout-goals';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { useThemeStore } from '@/theme/theme-store';
 
@@ -65,6 +66,8 @@ export default function SettingsScreen() {
   const setPreference = useThemeStore((state) => state.setPreference);
   const weeklyWorkouts = useWeeklyGoalStore((state) => state.weeklyWorkouts);
   const setWeeklyWorkouts = useWeeklyGoalStore((state) => state.setWeeklyWorkouts);
+  const unitSystem = useUnitsStore((state) => state.unitSystem);
+  const setUnitSystem = useUnitsStore((state) => state.setUnitSystem);
 
   const language = i18n.language as AppLanguage;
 
@@ -183,6 +186,7 @@ export default function SettingsScreen() {
   const restorePreferences = async (preferences: BackupPreferences) => {
     if (preferences.theme) void useThemeStore.persist.rehydrate();
     if (preferences.weeklyWorkouts) void useWeeklyGoalStore.persist.rehydrate();
+    if (preferences.units) void useUnitsStore.persist.rehydrate();
     if (preferences.language === 'en' || preferences.language === 'es') {
       await setAppLanguage(preferences.language);
     }
@@ -193,6 +197,7 @@ export default function SettingsScreen() {
     useWeeklyGoalStore
       .getState()
       .setWeeklyWorkouts(useWeeklyGoalStore.getInitialState().weeklyWorkouts);
+    useUnitsStore.getState().setUnitSystem(useUnitsStore.getInitialState().unitSystem);
     void resetAppLanguage();
   };
 
@@ -226,6 +231,18 @@ export default function SettingsScreen() {
             onLabel={t('language.spanish')}
             value={language === 'es'}
             onValueChange={(es) => void setAppLanguage(es ? 'es' : 'en')}
+          />
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+          {t('settings.units')}
+        </Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <SwitchRow
+            offLabel={t('units.metric')}
+            onLabel={t('units.imperial')}
+            value={unitSystem === 'imperial'}
+            onValueChange={(imperial) => setUnitSystem(imperial ? 'imperial' : 'metric')}
           />
         </View>
 
