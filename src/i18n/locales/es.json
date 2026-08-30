@@ -38,6 +38,26 @@
     "weeklyGoal": "Meta semanal de entrenamiento",
     "weeklyGoalHint": "¿Cuántos días a la semana planeas entrenar?"
   },
+  "statistics": {
+    "filters": {
+      "week": "Semana",
+      "month": "Mes",
+      "year": "Año",
+      "all": "Todo"
+    },
+    "sessions": "Sesiones de entrenamiento",
+    "totalTime": "Tiempo total",
+    "avgDuration": "Duración media",
+    "setsCompleted": "Series completadas",
+    "hoursShort": "h",
+    "minutesShort": "min",
+    "musclesTitle": "Músculos ejercitados",
+    "workoutsPerDay": "Entrenamientos por día",
+    "workoutsPerWeek": "Entrenamientos por semana",
+    "workoutsPerMonth": "Entrenamientos por mes",
+    "noData": "Sin entrenamientos en este período",
+    "other": "Otro"
+  },
   "home": {
     "tagline": "Forja tu fuerza. Sigue tu progreso.",
     "startWorkout": "Iniciar Entrenamiento",

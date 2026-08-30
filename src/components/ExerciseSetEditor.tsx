@@ -42,6 +42,9 @@ interface ExerciseSetEditorProps {
   onCompleteSet?: (setNumber: number) => void;
   /** Workout mode: reopen this set. */
   onUndoSet?: (setNumber: number) => void;
+  /** Controlled accordion state (the workout screen drives auto-advance). */
+  expanded?: number | null;
+  onExpandedChange?: (next: number | null) => void;
 }
 
 /**
@@ -66,17 +69,33 @@ export function ExerciseSetEditor({
   onApplyToAll,
   onCompleteSet,
   onUndoSet,
+  expanded: expandedProp,
+  onExpandedChange,
 }: ExerciseSetEditorProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
-  // Routine mode: the first set starts expanded so editing begins immediately.
-  // Workout mode: the first incomplete set starts expanded for logging.
-  const [expanded, setExpanded] = useState<number | null>(() => {
+  const isControlled = onExpandedChange !== undefined;
+  // Routine mode (uncontrolled): the first set starts expanded so editing
+  // begins immediately. Workout mode (uncontrolled): first incomplete set.
+  const [internalExpanded, setInternalExpanded] = useState<number | null>(() => {
+    if (isControlled) {
+      return expandedProp ?? null;
+    }
     if (mode === 'routine') {
       return sets[0]?.setNumber ?? null;
     }
     return sets.find((set) => !set.done)?.setNumber ?? null;
   });
+  const activeExpanded = isControlled ? (expandedProp ?? null) : internalExpanded;
+
+  const handleToggle = (setNumber: number) => {
+    const next = activeExpanded === setNumber ? null : setNumber;
+    if (isControlled) {
+      onExpandedChange?.(next);
+    } else {
+      setInternalExpanded(next);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -95,7 +114,7 @@ export function ExerciseSetEditor({
       </View>
 
       {sets.map((item) => {
-        const isExpanded = expanded === item.setNumber;
+        const isExpanded = activeExpanded === item.setNumber;
         return (
           <SetCard
             key={item.setNumber}
@@ -103,7 +122,7 @@ export function ExerciseSetEditor({
             item={item}
             fallbackReps={fallbackReps}
             expanded={isExpanded}
-            onToggle={() => setExpanded(isExpanded ? null : item.setNumber)}
+            onToggle={() => handleToggle(item.setNumber)}
             onWeightChange={(value) => onWeightChange(item.setNumber, value)}
             onRepsChange={(value) => onRepsChange(item.setNumber, value)}
             onRestChange={(seconds) => onRestChange(item.setNumber, seconds)}

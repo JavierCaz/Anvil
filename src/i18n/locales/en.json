@@ -38,6 +38,26 @@
     "weeklyGoal": "Weekly workout goal",
     "weeklyGoalHint": "How many days per week do you plan to train?"
   },
+  "statistics": {
+    "filters": {
+      "week": "Week",
+      "month": "Month",
+      "year": "Year",
+      "all": "All time"
+    },
+    "sessions": "Workout sessions",
+    "totalTime": "Total time",
+    "avgDuration": "Avg. session duration",
+    "setsCompleted": "Sets completed",
+    "hoursShort": "h",
+    "minutesShort": "min",
+    "musclesTitle": "Muscles exercised",
+    "workoutsPerDay": "Workouts per day",
+    "workoutsPerWeek": "Workouts per week",
+    "workoutsPerMonth": "Workouts per month",
+    "noData": "No workouts in this period",
+    "other": "Other"
+  },
   "home": {
     "tagline": "Forge your strength. Track your progress.",
     "startWorkout": "Start Workout",
