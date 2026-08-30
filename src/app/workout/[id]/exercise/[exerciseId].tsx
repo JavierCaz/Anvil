@@ -46,6 +46,7 @@ export default function WorkoutExerciseScreen() {
   const [drafts, setDrafts] = useState<Record<number, SetDraft>>({});
   const [restConfig, setRestConfig] = useState<Record<number, number>>({});
   const [setCount, setSetCount] = useState(0);
+  const [expandedSet, setExpandedSet] = useState<number | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [activeRest, setActiveRest] = useState<ActiveRest | null>(null);
 
@@ -65,12 +66,12 @@ export default function WorkoutExerciseScreen() {
       setExercise(exerciseRow);
       setSets(setRows);
       setLoaded(true);
-      setSetCount(
-        Math.max(
-          exerciseRow?.target_sets ?? 0,
-          setRows.reduce((max, set) => Math.max(max, set.set_number), 0)
-        )
+      const count = Math.max(
+        exerciseRow?.target_sets ?? 0,
+        setRows.reduce((max, set) => Math.max(max, set.set_number), 0)
       );
+      setSetCount(count);
+      setExpandedSet(firstIncompleteSet(count, setRows));
     });
     return () => {
       active = false;
@@ -121,7 +122,9 @@ export default function WorkoutExerciseScreen() {
   };
 
   const handleAddSet = () => {
-    setSetCount((count) => Math.min(99, count + 1));
+    const next = Math.min(99, setCount + 1);
+    setSetCount(next);
+    setExpandedSet(next);
     void markWorkoutSetsEdited(db, logId);
   };
 
@@ -130,6 +133,7 @@ export default function WorkoutExerciseScreen() {
     setSetCount((count) => Math.max(1, count - 1));
     setDrafts((current) => shiftMapDown(current, setNumber));
     setRestConfig((current) => shiftMapDown(current, setNumber));
+    setExpandedSet(null);
     setActiveRest(null);
     void deleteSetAndShift(db, logId, exerciseIdNum, setNumber).then(reload);
     void markWorkoutSetsEdited(db, logId);
@@ -154,6 +158,13 @@ export default function WorkoutExerciseScreen() {
       if (restSeconds > 0) {
         setActiveRest({ setNumber, seconds: restSeconds });
       }
+      // Auto-advance the accordion to the next set when the open one is done.
+      setExpandedSet((current) => {
+        if (current !== setNumber) {
+          return current;
+        }
+        return setNumber + 1 <= setCount ? setNumber + 1 : null;
+      });
     });
   };
 
@@ -185,7 +196,6 @@ export default function WorkoutExerciseScreen() {
             showsVerticalScrollIndicator={false}
           >
             <ExerciseSetEditor
-              key={setCount}
               mode="workout"
               exerciseName={exercise.exercise_name}
               slug={exercise.exercise_slug}
@@ -193,6 +203,8 @@ export default function WorkoutExerciseScreen() {
               fallbackReps={targetReps}
               doneCount={doneCount}
               totalSets={setCount}
+              expanded={expandedSet}
+              onExpandedChange={setExpandedSet}
               onWeightChange={(number, value) => updateDraft(number, { weight: value })}
               onRepsChange={(number, value) => updateDraft(number, { reps: value })}
               onRestChange={setRestFor}
@@ -267,4 +279,15 @@ function shiftMapDown<T>(map: Record<number, T>, removedNumber: number): Record<
     next[number > removedNumber ? number - 1 : number] = value;
   }
   return next;
+}
+
+/** Lowest set number (1..total) that isn't completed yet, or null when all are done. */
+function firstIncompleteSet(total: number, rows: WorkoutSet[]): number | null {
+  const done = new Set(rows.filter((row) => row.completed === 1).map((row) => row.set_number));
+  for (let number = 1; number <= total; number++) {
+    if (!done.has(number)) {
+      return number;
+    }
+  }
+  return null;
 }
