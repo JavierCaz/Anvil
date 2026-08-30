@@ -8,13 +8,15 @@ import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
+import { WorkoutRecapModal } from '@/components/WorkoutRecap';
+import { getWorkoutRecap, type WorkoutRecap } from '@/db/gamification';
+import { useWeeklyGoalStore } from '@/store/workout-goals';
 import {
   cancelWorkout,
   completeWorkout,
   getActiveWorkoutExercises,
   getWorkoutLog,
   getWorkoutRoutineName,
-  getWorkoutSummary,
   syncRoutineSetCountFromWorkout,
   wasWorkoutSetsEdited,
 } from '@/db/workouts';
@@ -41,6 +43,7 @@ export default function WorkoutSessionScreen() {
   const [routineName, setRoutineName] = useState('');
   const [exercises, setExercises] = useState<ActiveWorkoutExercise[]>([]);
   const [now, setNow] = useState(() => Date.now());
+  const [recap, setRecap] = useState<WorkoutRecap | null>(null);
 
   // Live stopwatch tick — elapsed is derived from `started_at`, so it stays
   // accurate even if the screen was backgrounded.
@@ -95,20 +98,20 @@ export default function WorkoutSessionScreen() {
   };
 
   const completeAndSummarize = () => {
-    void completeWorkout(db, logId).then(async () => {
-      const summary = await getWorkoutSummary(db, logId);
-      dialog.alert({
-        title: t('workout.summaryTitle'),
-        message: t('workout.summaryBody', {
-          time: formatStopwatch(summary.durationSeconds),
-          volume: summary.totalVolumeKg.toFixed(1),
-          sets: summary.setsCompleted,
-        }),
-        icon: 'trophy-outline',
-        tone: 'success',
-        buttons: [{ text: t('common.confirm'), onPress: () => router.dismissTo(backHref) }],
-      });
+    void completeWorkout(db, logId).then(async (completed) => {
+      // Only analyze once — a double-finish must not re-insert PRs.
+      if (!completed) {
+        return;
+      }
+      const weeklyGoal = useWeeklyGoalStore.getState().weeklyWorkouts;
+      const recapData = await getWorkoutRecap(db, logId, weeklyGoal);
+      setRecap(recapData);
     });
+  };
+
+  const handleRecapClose = () => {
+    setRecap(null);
+    router.dismissTo(backHref);
   };
 
   const finish = () => {
@@ -261,6 +264,8 @@ export default function WorkoutSessionScreen() {
           </Text>
         </Pressable>
       </View>
+
+      {recap && <WorkoutRecapModal recap={recap} onClose={handleRecapClose} />}
     </Screen>
   );
 }

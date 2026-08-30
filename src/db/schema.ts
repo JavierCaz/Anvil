@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 7;
+export const DATABASE_VERSION = 8;
 
 /**
  * Migration 1 — initial tables.
@@ -205,6 +205,29 @@ WHERE NOT EXISTS (SELECT 1 FROM routine_exercise_sets s WHERE s.routine_exercise
 export const SCHEMA_V7 = `
 ALTER TABLE workout_logs ADD COLUMN sets_edited INTEGER NOT NULL DEFAULT 0;
 `;
+/**
+ * Migration 8 — gamification achievement catalog reconciliation.
+ *
+ * Re-keys milestones that changed names at the same threshold (preserving
+ * `unlocked_at`), deletes milestones that were removed from the catalog, and
+ * drops the 30-day daily-streak badge (weekly consistency replaced it).
+ * New achievement rows are seeded idempotently by `seedAchievements`.
+ */
+export const SCHEMA_V8 = `
+UPDATE achievements SET key = 'comparative_bicycle' WHERE key = 'comparative_car_tire';
+UPDATE achievements SET key = 'comparative_panda' WHERE key = 'comparative_fridge';
+UPDATE achievements SET key = 'comparative_motorcycle' WHERE key = 'comparative_motorcycle_engine';
+
+DELETE FROM achievements WHERE key IN (
+  'comparative_milk',
+  'comparative_dog',
+  'comparative_washing_machine',
+  'comparative_pig',
+  'comparative_man',
+  'comparative_gorilla',
+  'consistency_king'
+);
+`;
 
 export const MIGRATIONS: readonly string[] = [
   SCHEMA_V1,
@@ -214,4 +237,5 @@ export const MIGRATIONS: readonly string[] = [
   SCHEMA_V5,
   SCHEMA_V6,
   SCHEMA_V7,
+  SCHEMA_V8,
 ];

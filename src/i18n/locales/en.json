@@ -81,9 +81,35 @@
     "thisWeek": "This week",
     "workoutsOf": "{{done}} of {{goal}} workouts",
     "achievements": "Achievements",
-    "achievementsHint": "Keep training to unlock more achievements."
+    "achievementsHint": "Keep training to unlock more achievements.",
+    "seeAll": "See all"
   },
   "achievements": {
+    "title": "Achievements",
+    "unlockedCount": "{{unlocked}} of {{total}} unlocked",
+    "unlocked": "Unlocked",
+    "metrics": {
+      "workouts": "workouts",
+      "weeks": "weeks",
+      "prs": "PRs"
+    },
+    "details": {
+      "unlockedOn": "Unlocked on {{date}}",
+      "locked": "Keep training to unlock"
+    },
+    "categories": {
+      "strength": "Strength",
+      "volume": "Volume",
+      "consistency": "Consistency",
+      "experience": "Experience",
+      "special": "Special"
+    },
+    "tiers": {
+      "bronze": "Bronze",
+      "silver": "Silver",
+      "gold": "Gold",
+      "diamond": "Diamond"
+    },
     "firstWorkout": {
       "name": "First Workout",
       "description": "Complete your first workout session"
@@ -92,14 +118,105 @@
       "name": "1000kg Club",
       "description": "Reach 1,000 kg of total lifting volume"
     },
-    "consistencyKing": {
-      "name": "Consistency King",
-      "description": "Work out 30 days in a row"
-    },
     "progressiveOverload": {
       "name": "Progressive Overload",
       "description": "Set 5 personal records in a month"
+    },
+    "experience10": {
+      "name": "Ten Sessions",
+      "description": "Complete 10 workouts"
+    },
+    "experience50": {
+      "name": "Fifty Sessions",
+      "description": "Complete 50 workouts"
+    },
+    "experience100": {
+      "name": "Century",
+      "description": "Complete 100 workouts"
+    },
+    "experience250": {
+      "name": "Iron Veteran",
+      "description": "Complete 250 workouts"
+    },
+    "volume10k": {
+      "name": "10,000 kg Forged",
+      "description": "Reach 10,000 kg of total lifting volume"
+    },
+    "volume100k": {
+      "name": "100,000 kg Forged",
+      "description": "Reach 100,000 kg of total lifting volume"
+    },
+    "volume1m": {
+      "name": "Million-Kilo Anvil",
+      "description": "Reach 1,000,000 kg of total lifting volume"
+    },
+    "consistency4w": {
+      "name": "4-Week Consistency",
+      "description": "Meet your weekly goal 4 weeks in a row"
+    },
+    "consistency8w": {
+      "name": "8-Week Consistency",
+      "description": "Meet your weekly goal 8 weeks in a row"
+    },
+    "consistency12w": {
+      "name": "12-Week Consistency",
+      "description": "Meet your weekly goal 12 weeks in a row"
+    },
+    "earlyBird": {
+      "name": "Early Bird",
+      "description": "Work out before 6 AM"
+    },
+    "nightShift": {
+      "name": "Night Shift",
+      "description": "Work out after midnight"
+    },
+    "oneMoreRep": {
+      "name": "One More Rep",
+      "description": "Exceed the planned reps for a set"
+    },
+    "perfectWeek": {
+      "name": "Perfect Week",
+      "description": "Meet your weekly workout goal"
+    },
+    "comparatives": {
+      "watermelon": {
+        "name": "Watermelon",
+        "description": "Lift the weight of a watermelon in a single set"
+      },
+      "bicycle": {
+        "name": "Bicycle",
+        "description": "Lift the weight of a bicycle in a single set"
+      },
+      "adult": {
+        "name": "Adult Person",
+        "description": "Lift the weight of an adult person in a single set"
+      },
+      "panda": {
+        "name": "Panda",
+        "description": "Lift the weight of a panda in a single set"
+      },
+      "motorcycle": {
+        "name": "Motorcycle",
+        "description": "Lift the weight of a motorcycle in a single set"
+      },
+      "piano": {
+        "name": "Grand Piano",
+        "description": "Lift the weight of a grand piano in a single set"
+      },
+      "polarBear": {
+        "name": "Polar Bear",
+        "description": "Lift the weight of a polar bear in a single set"
+      },
+      "car": {
+        "name": "Compact Car",
+        "description": "Lift the weight of a compact car in a single set"
+      }
     }
+  },
+  "notifications": {
+    "comparativeLifted": "You just lifted {{object}}!",
+    "comparativeDetail": "{{weight}} kg · {{exercise}}",
+    "comparativeMore": "+{{count}} more unlocked"
   },
   "routines": {
     "newRoutine": "New Routine",
@@ -185,6 +302,24 @@
       "upperBack": "Upper back"
     }
   },
+  "recap": {
+    "title": "Workout Complete",
+    "sets": "{{count}} sets",
+    "volume": "kg volume",
+    "volumeDelta": "vs last time",
+    "recordsForged": "{{count}} records forged",
+    "newWeightPr": "New weight PR",
+    "newOneRmPr": "New 1RM PR",
+    "milestoneUnlocked": "Milestone unlocked",
+    "nextMilestone": "Next milestone",
+    "nextMilestoneToGo": "{{weight}} kg to go",
+    "consistency": "Consistency",
+    "workoutsThisWeek": "{{done}}/{{goal}} workouts this week",
+    "perfectWeek": "Perfect week",
+    "weekStreak_one": "{{count}}-week consistency streak",
+    "weekStreak_other": "{{count}}-week consistency streak",
+    "achievementsUnlocked": "Achievements unlocked"
+  },
   "workout": {
     "startWorkout": "Start Workout",
     "finishWorkout": "Finish Workout",
@@ -208,8 +343,6 @@
     "rest": "Rest",
     "skip": "Skip",
     "extendRest": "Add 30 seconds",
-    "summaryTitle": "Workout complete!",
-    "summaryBody": "{{time}} · {{volume}} kg volume · {{sets}} sets",
     "saveChangesTitle": "Save workout changes?",
     "saveChangesMessage": "You added or removed sets during this workout. Save these changes to your routine?",
     "saveToRoutine": "Save to routine",

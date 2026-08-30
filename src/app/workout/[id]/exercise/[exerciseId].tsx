@@ -10,6 +10,8 @@ import {
 } from '@/components/ExerciseSetEditor';
 import { RestTimer } from '@/components/RestTimer';
 import { Screen } from '@/components/Screen';
+import { useToast } from '@/components/ToastProvider';
+import { unlockWeightComparatives } from '@/db/achievements';
 import {
   deleteSetAndShift,
   getActiveWorkoutExercise,
@@ -37,6 +39,7 @@ export default function WorkoutExerciseScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const toast = useToast();
   const { id, exerciseId } = useLocalSearchParams<{ id: string; exerciseId: string }>();
   const logId = Number(id);
   const exerciseIdNum = Number(exerciseId);
@@ -147,8 +150,9 @@ export default function WorkoutExerciseScreen() {
   const handleComplete = (setNumber: number) => {
     const draft = drafts[setNumber] ?? { weight: '', reps: String(targetReps) };
     const restSeconds = restConfig[setNumber] ?? defaultRest;
+    const weight = parseNumber(draft.weight);
     void upsertSet(db, logId, exerciseIdNum, setNumber, {
-      weight: parseNumber(draft.weight),
+      weight,
       reps: Math.round(parseNumber(draft.reps)),
       restSeconds,
       completed: 1,
@@ -164,6 +168,28 @@ export default function WorkoutExerciseScreen() {
           return current;
         }
         return setNumber + 1 <= setCount ? setNumber + 1 : null;
+      });
+
+      // Weight comparatives: unlock every object reached by this set and toast
+      // the highest newly-unlocked one; the rest are counted as extras.
+      void unlockWeightComparatives(db, weight).then((unlocked) => {
+        if (unlocked.length === 0) {
+          return;
+        }
+        const top = unlocked[unlocked.length - 1];
+        const extras = unlocked.length - 1;
+        const detail = t('notifications.comparativeDetail', {
+          weight: String(weight),
+          exercise: exercise?.exercise_name ?? '',
+        });
+        toast.show({
+          icon: top.icon,
+          title: t('notifications.comparativeLifted', { object: t(top.nameKey) }),
+          description:
+            extras > 0
+              ? `${detail} · ${t('notifications.comparativeMore', { count: extras })}`
+              : detail,
+        });
       });
     });
   };

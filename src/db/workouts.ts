@@ -1,6 +1,7 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import dayjs from 'dayjs';
 import { getRoutineExerciseSets, saveRoutineExerciseSets } from './routines';
+import { getWeeklyConsistency } from './stats';
 import type {
   ActiveWorkoutExercise,
   RoutineExerciseSet,
@@ -8,6 +9,9 @@ import type {
   WorkoutSet,
   WorkoutSummary,
 } from './types';
+
+/** Matches `useWeeklyGoalStore`'s default when no goal is supplied. */
+const DEFAULT_WEEKLY_GOAL = 3;
 
 export interface WorkoutStats {
   /** Total completed workout sessions. */
@@ -18,22 +22,44 @@ export interface WorkoutStats {
   currentStreak: number;
   /** Personal records set in the current calendar month. */
   prsThisMonth: number;
+  /** Heaviest single set ever completed (kg). Drives weight milestones. */
+  maxWeightKg: number;
+  /** Consecutive weeks meeting the weekly training goal (0 when goal is disabled). */
+  consistencyStreakWeeks: number;
+}
+
+export interface GetWorkoutStatsOptions {
+  /** The user's weekly training goal (days per week). Defaults to 3 (store default). */
+  weeklyGoal?: number;
 }
 
 /**
  * Workout-related stats used by achievements and the home screen.
  */
-export async function getWorkoutStats(db: SQLiteDatabase): Promise<WorkoutStats> {
+export async function getWorkoutStats(
+  db: SQLiteDatabase,
+  options?: GetWorkoutStatsOptions
+): Promise<WorkoutStats> {
   const totalWorkouts =
-    (await db.getFirstAsync<{ c: number }>('SELECT COUNT(*) AS c FROM workout_logs'))?.c ?? 0;
+    (await db.getFirstAsync<{ c: number }>(
+      'SELECT COUNT(*) AS c FROM workout_logs WHERE completed_at IS NOT NULL'
+    ))?.c ?? 0;
 
   const totalVolumeKg =
     (await db.getFirstAsync<{ v: number }>(`
       SELECT COALESCE(SUM(s.weight * s.reps), 0) AS v
       FROM sets s
       JOIN workout_logs wl ON s.workout_log_id = wl.id
-      WHERE s.completed = 1
+      WHERE s.completed = 1 AND wl.completed_at IS NOT NULL
     `))?.v ?? 0;
+
+  const maxWeightKg =
+    (await db.getFirstAsync<{ m: number }>(`
+      SELECT COALESCE(MAX(s.weight), 0) AS m
+      FROM sets s
+      JOIN workout_logs wl ON s.workout_log_id = wl.id
+      WHERE s.completed = 1 AND wl.completed_at IS NOT NULL AND s.weight > 0
+    `))?.m ?? 0;
 
   const now = dayjs();
   const monthStart = now.startOf('month');
@@ -45,11 +71,18 @@ export async function getWorkoutStats(db: SQLiteDatabase): Promise<WorkoutStats>
       monthEnd.toISOString()
     ))?.c ?? 0;
 
+  const { consistencyStreakWeeks } = await getWeeklyConsistency(
+    db,
+    options?.weeklyGoal ?? DEFAULT_WEEKLY_GOAL
+  );
+
   return {
     totalWorkouts,
     totalVolumeKg,
     currentStreak: await getCurrentStreak(db),
     prsThisMonth,
+    maxWeightKg,
+    consistencyStreakWeeks,
   };
 }
 
@@ -61,6 +94,7 @@ async function getCurrentStreak(db: SQLiteDatabase): Promise<number> {
   const rows = await db.getAllAsync<{ d: string }>(
     `SELECT DISTINCT date(datetime(started_at, 'localtime')) AS d
      FROM workout_logs
+     WHERE completed_at IS NOT NULL
      ORDER BY d DESC`
   );
   const workoutDays = new Set(rows.map((row) => row.d));
@@ -90,7 +124,8 @@ export async function getWorkoutDaysInRange(
   const rows = await db.getAllAsync<{ d: string }>(
     `SELECT DISTINCT date(datetime(started_at, 'localtime')) AS d
      FROM workout_logs
-     WHERE date(datetime(started_at, 'localtime')) BETWEEN ? AND ?
+     WHERE completed_at IS NOT NULL
+       AND date(datetime(started_at, 'localtime')) BETWEEN ? AND ?
      ORDER BY d`,
     fromISO,
     toISO

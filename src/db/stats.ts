@@ -35,6 +35,17 @@ export interface DayCount {
   count: number;
 }
 
+export interface WeeklyConsistency {
+  /** Distinct local days this ISO week (Monday start) with a completed workout. */
+  weeklyDays: number;
+  /** The user's intended weekly training frequency. */
+  weeklyGoal: number;
+  /** `weeklyDays >= weeklyGoal` (always false when `weeklyGoal` is 0). */
+  hitThisWeek: boolean;
+  /** Consecutive weeks meeting the goal, ending at the current week (if hit) or the last completed week. An in-progress week never breaks it. */
+  consistencyStreakWeeks: number;
+}
+
 /** Helper: appends an optional `started_at >= ? AND started_at < ?` clause. */
 function rangeParams(fromISO: string | null | undefined, toISO: string | null | undefined) {
   const where: string[] = [];
@@ -125,6 +136,63 @@ export async function getWorkoutDayCounts(
   );
 }
 
+// ---------------------------------------------------------------------------
+// Weekly consistency (sustainable training: weeks, not daily streaks)
+// ---------------------------------------------------------------------------
+
+/**
+ * Consecutive weeks meeting the user's weekly training goal, derived from
+ * completed workouts (`completed_at`). Rest days are fine — only a full week
+ * below the goal breaks the streak. The current in-progress week contributes
+ * to `weeklyDays`/`hitThisWeek` but never breaks the streak. When `weeklyGoal`
+ * is 0 the feature is disabled entirely.
+ */
+export async function getWeeklyConsistency(
+  db: SQLiteDatabase,
+  weeklyGoal: number
+): Promise<WeeklyConsistency> {
+  const goal = Math.max(0, Math.round(weeklyGoal));
+
+  const rows = await db.getAllAsync<{ day: string }>(
+    `SELECT DISTINCT date(datetime(completed_at, 'localtime')) AS day
+     FROM workout_logs
+     WHERE completed_at IS NOT NULL
+     ORDER BY day ASC`
+  );
+  const workoutDays = new Set(rows.map((row) => row.day));
+
+  const countDaysInRange = (from: dayjs.Dayjs, to: dayjs.Dayjs): number => {
+    let count = 0;
+    let cursor = from;
+    while (!cursor.isAfter(to, 'day')) {
+      if (workoutDays.has(cursor.format('YYYY-MM-DD'))) {
+        count += 1;
+      }
+      cursor = cursor.add(1, 'day');
+    }
+    return count;
+  };
+
+  const now = dayjs();
+  const currentMonday = mondayOf(now);
+  const weeklyDays = countDaysInRange(currentMonday, now);
+  const hitThisWeek = goal > 0 && weeklyDays >= goal;
+
+  // Streak counts hit weeks ending at the current week (if already hit) or the
+  // last fully-completed week, walking backward until a week misses the goal.
+  let consistencyStreakWeeks = hitThisWeek ? 1 : 0;
+  let cursor = currentMonday.subtract(7, 'day');
+  while (goal > 0) {
+    const weekDays = countDaysInRange(cursor, cursor.add(6, 'day'));
+    if (weekDays < goal) {
+      break;
+    }
+    consistencyStreakWeeks += 1;
+    cursor = cursor.subtract(7, 'day');
+  }
+
+  return { weeklyDays, weeklyGoal: goal, hitThisWeek, consistencyStreakWeeks };
+}
 // ---------------------------------------------------------------------------
 // Pure bucketing helpers (unit-testable, no DB access)
 // ---------------------------------------------------------------------------

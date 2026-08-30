@@ -81,9 +81,35 @@
     "thisWeek": "Esta semana",
     "workoutsOf": "{{done}} de {{goal}} entrenamientos",
     "achievements": "Logros",
-    "achievementsHint": "Sigue entrenando para desbloquear más logros."
+    "achievementsHint": "Sigue entrenando para desbloquear más logros.",
+    "seeAll": "Ver todos"
   },
   "achievements": {
+    "title": "Logros",
+    "unlockedCount": "{{unlocked}} de {{total}} desbloqueados",
+    "unlocked": "Desbloqueado",
+    "metrics": {
+      "workouts": "entrenamientos",
+      "weeks": "semanas",
+      "prs": "récords"
+    },
+    "details": {
+      "unlockedOn": "Desbloqueado el {{date}}",
+      "locked": "Sigue entrenando para desbloquear"
+    },
+    "categories": {
+      "strength": "Fuerza",
+      "volume": "Volumen",
+      "consistency": "Constancia",
+      "experience": "Experiencia",
+      "special": "Especiales"
+    },
+    "tiers": {
+      "bronze": "Bronce",
+      "silver": "Plata",
+      "gold": "Oro",
+      "diamond": "Diamante"
+    },
     "firstWorkout": {
       "name": "Primer Entrenamiento",
       "description": "Completa tu primera sesión de entrenamiento"
@@ -92,14 +118,105 @@
       "name": "Club de los 1000 kg",
       "description": "Alcanza 1,000 kg de volumen total levantado"
     },
-    "consistencyKing": {
-      "name": "Rey de la Constancia",
-      "description": "Entrena 30 días seguidos"
-    },
     "progressiveOverload": {
       "name": "Sobrecarga Progresiva",
       "description": "Establece 5 récords personales en un mes"
+    },
+    "experience10": {
+      "name": "Diez Sesiones",
+      "description": "Completa 10 entrenamientos"
+    },
+    "experience50": {
+      "name": "Cincuenta Sesiones",
+      "description": "Completa 50 entrenamientos"
+    },
+    "experience100": {
+      "name": "Centuria",
+      "description": "Completa 100 entrenamientos"
+    },
+    "experience250": {
+      "name": "Veterano del Hierro",
+      "description": "Completa 250 entrenamientos"
+    },
+    "volume10k": {
+      "name": "10,000 kg Forjados",
+      "description": "Alcanza 10,000 kg de volumen total levantado"
+    },
+    "volume100k": {
+      "name": "100,000 kg Forjados",
+      "description": "Alcanza 100,000 kg de volumen total levantado"
+    },
+    "volume1m": {
+      "name": "Yunque del Millón",
+      "description": "Alcanza 1,000,000 kg de volumen total levantado"
+    },
+    "consistency4w": {
+      "name": "4 Semanas de Constancia",
+      "description": "Cumple tu meta semanal 4 semanas seguidas"
+    },
+    "consistency8w": {
+      "name": "8 Semanas de Constancia",
+      "description": "Cumple tu meta semanal 8 semanas seguidas"
+    },
+    "consistency12w": {
+      "name": "12 Semanas de Constancia",
+      "description": "Cumple tu meta semanal 12 semanas seguidas"
+    },
+    "earlyBird": {
+      "name": "Madrugador",
+      "description": "Entrena antes de las 6 AM"
+    },
+    "nightShift": {
+      "name": "Turno Nocturno",
+      "description": "Entrena pasada la medianoche"
+    },
+    "oneMoreRep": {
+      "name": "Una Repetición Más",
+      "description": "Supera las repeticiones planificadas de una serie"
+    },
+    "perfectWeek": {
+      "name": "Semana Perfecta",
+      "description": "Cumple tu meta semanal de entrenamiento"
+    },
+    "comparatives": {
+      "watermelon": {
+        "name": "Sandía",
+        "description": "Levanta el peso de una sandía en una sola serie"
+      },
+      "bicycle": {
+        "name": "Bicicleta",
+        "description": "Levanta el peso de una bicicleta en una sola serie"
+      },
+      "adult": {
+        "name": "Persona adulta",
+        "description": "Levanta el peso de una persona adulta en una sola serie"
+      },
+      "panda": {
+        "name": "Panda",
+        "description": "Levanta el peso de un panda en una sola serie"
+      },
+      "motorcycle": {
+        "name": "Motocicleta",
+        "description": "Levanta el peso de una motocicleta en una sola serie"
+      },
+      "piano": {
+        "name": "Piano de cola",
+        "description": "Levanta el peso de un piano de cola en una sola serie"
+      },
+      "polarBear": {
+        "name": "Oso polar",
+        "description": "Levanta el peso de un oso polar en una sola serie"
+      },
+      "car": {
+        "name": "Auto compacto",
+        "description": "Levanta el peso de un auto compacto en una sola serie"
+      }
     }
+  },
+  "notifications": {
+    "comparativeLifted": "¡Acabas de levantar {{object}}!",
+    "comparativeDetail": "{{weight}} kg · {{exercise}}",
+    "comparativeMore": "+{{count}} más desbloqueados"
   },
   "routines": {
     "newRoutine": "Nueva rutina",
@@ -185,6 +302,24 @@
       "upperBack": "Espalda alta"
     }
   },
+  "recap": {
+    "title": "Entrenamiento completado",
+    "sets": "{{count}} series",
+    "volume": "kg de volumen",
+    "volumeDelta": "vs la última vez",
+    "recordsForged": "{{count}} récords forjados",
+    "newWeightPr": "Nuevo récord de peso",
+    "newOneRmPr": "Nuevo récord 1RM",
+    "milestoneUnlocked": "Hito desbloqueado",
+    "nextMilestone": "Siguiente hito",
+    "nextMilestoneToGo": "Faltan {{weight}} kg",
+    "consistency": "Constancia",
+    "workoutsThisWeek": "{{done}}/{{goal}} entrenamientos esta semana",
+    "perfectWeek": "Semana perfecta",
+    "weekStreak_one": "{{count}} semana de constancia",
+    "weekStreak_other": "{{count}} semanas de constancia",
+    "achievementsUnlocked": "Logros desbloqueados"
+  },
   "workout": {
     "startWorkout": "Iniciar Entrenamiento",
     "finishWorkout": "Terminar Entrenamiento",
@@ -208,8 +343,6 @@
     "rest": "Descanso",
     "skip": "Omitir",
     "extendRest": "Añadir 30 segundos",
-    "summaryTitle": "¡Entrenamiento completado!",
-    "summaryBody": "{{time}} · {{volume}} kg de volumen · {{sets}} series",
     "saveChangesTitle": "¿Guardar los cambios del entrenamiento?",
     "saveChangesMessage": "Añadiste o quitaste series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
     "saveToRoutine": "Guardar en la rutina",
