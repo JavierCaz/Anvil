@@ -10,7 +10,6 @@ import { useDialog } from '@/components/AppDialog';
 import {
   getRoutineExercise,
   getRoutineExerciseSets,
-  removeExerciseFromRoutine,
   saveRoutineExerciseSets,
 } from '@/db/routines';
 import type { RoutineExerciseWithExercise } from '@/db/types';
@@ -89,6 +88,23 @@ export default function RoutineSetEditorScreen() {
     setSets((current) => (current.length > 1 ? current.filter((_, i) => i !== setNumber - 1) : current));
   };
 
+  const confirmRemoveSet = (setNumber: number) => {
+    dialog.alert({
+      title: t('routines.setsEditor.removeSetConfirmTitle'),
+      message: t('routines.setsEditor.removeSetConfirmMessage', { number: setNumber }),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => handleRemoveSet(setNumber),
+        },
+      ],
+    });
+  };
+
   const handleApplyToAll = (setNumber: number) => {
     const template = sets[setNumber - 1];
     if (!template) {
@@ -117,27 +133,6 @@ export default function RoutineSetEditorScreen() {
     });
   };
 
-  const confirmRemoveFromRoutine = () => {
-    dialog.alert({
-      title: t('routines.deleteConfirmTitle'),
-      message: t('routines.detail.removeExercise'),
-      icon: 'trash-outline',
-      tone: 'error',
-      buttons: [
-        { text: t('common.cancel'), style: 'cancel' },
-        {
-          text: t('common.delete'),
-          style: 'destructive',
-          onPress: () => {
-            void removeExerciseFromRoutine(db, routineExerciseId).then(() => {
-              router.back();
-            });
-          },
-        },
-      ],
-    });
-  };
-
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ headerShown: true, title: exercise?.exercise_name ?? '' }} />
@@ -163,20 +158,9 @@ export default function RoutineSetEditorScreen() {
               onRepsChange={(number, value) => updateSet(number - 1, { reps: value })}
               onRestChange={(number, seconds) => updateSet(number - 1, { restSeconds: seconds })}
               onAddSet={handleAddSet}
-              onRemoveSet={handleRemoveSet}
+              onRemoveSet={confirmRemoveSet}
               onApplyToAll={handleApplyToAll}
             />
-
-            <Pressable
-              accessibilityRole="button"
-              onPress={confirmRemoveFromRoutine}
-              style={({ pressed }) => [styles.removeRow, { opacity: pressed ? 0.6 : 1 }]}
-            >
-              <Ionicons name="remove-circle-outline" size={18} color={colors.error} />
-              <Text style={[styles.removeLabel, { color: colors.error }]}>
-                {t('routines.detail.removeExercise')}
-              </Text>
-            </Pressable>
 
             {exercise.exercise_source === 'custom' && (
               <Pressable
@@ -228,10 +212,6 @@ const styles = StyleSheet.create({
     gap: 6,
     paddingVertical: 10,
     marginTop: 4,
-  },
-  removeLabel: {
-    fontSize: 14,
-    fontWeight: '600',
   },
   editExerciseLabel: {
     fontSize: 14,

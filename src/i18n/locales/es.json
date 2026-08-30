@@ -248,13 +248,17 @@
       "targetReps": "Repeticiones",
       "targetRest": "Descanso (s)",
       "removeExercise": "Quitar de la rutina",
-      "customBadge": "Personalizado"
+      "customBadge": "Personalizado",
+      "removeExerciseConfirmTitle": "¿Quitar ejercicio?",
+      "removeExerciseConfirmMessage": "Se quitará \"{{name}}\" de la rutina."
     },
     "setsEditor": {
       "setCount_one": "{{count}} serie",
       "setCount_other": "{{count}} series",
       "applyToAll": "Aplicar a todas las series",
-      "removeSet": "Quitar serie"
+      "removeSet": "Quitar serie",
+      "removeSetConfirmTitle": "¿Quitar serie?",
+      "removeSetConfirmMessage": "Se quitará la serie {{number}} del ejercicio."
     },
     "addExercise": {
       "title": "Añadir ejercicio",
@@ -353,6 +357,8 @@
     "addSet": "Añadir serie",
     "finishExercise": "Terminar ejercicio",
     "rest": "Descanso",
+    "removeSetConfirmTitle": "¿Quitar serie?",
+    "removeSetConfirmMessage": "Se quitará la serie {{number}} del entrenamiento.",
     "skip": "Omitir",
     "extendRest": "Añadir 30 segundos",
     "saveChangesTitle": "¿Guardar los cambios del entrenamiento?",

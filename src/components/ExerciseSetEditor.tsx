@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
+import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { weightUnitLabel } from '@/utils/weight';
@@ -117,9 +118,8 @@ export function ExerciseSetEditor({
 
       {sets.map((item) => {
         const isExpanded = activeExpanded === item.setNumber;
-        return (
+        const card = (
           <SetCard
-            key={item.setNumber}
             mode={mode}
             item={item}
             fallbackReps={fallbackReps}
@@ -128,11 +128,17 @@ export function ExerciseSetEditor({
             onWeightChange={(value) => onWeightChange(item.setNumber, value)}
             onRepsChange={(value) => onRepsChange(item.setNumber, value)}
             onRestChange={(seconds) => onRestChange(item.setNumber, seconds)}
-            onRemove={onRemoveSet ? () => onRemoveSet(item.setNumber) : undefined}
             onApplyToAll={onApplyToAll ? () => onApplyToAll(item.setNumber) : undefined}
             onComplete={onCompleteSet ? () => onCompleteSet(item.setNumber) : undefined}
             onUndo={onUndoSet ? () => onUndoSet(item.setNumber) : undefined}
           />
+        );
+        return onRemoveSet ? (
+          <SwipeToDelete key={item.setNumber} onDelete={() => onRemoveSet(item.setNumber)}>
+            {card}
+          </SwipeToDelete>
+        ) : (
+          <View key={item.setNumber}>{card}</View>
         );
       })}
 
@@ -162,7 +168,6 @@ interface SetCardProps {
   onWeightChange: (value: string) => void;
   onRepsChange: (value: string) => void;
   onRestChange: (seconds: number) => void;
-  onRemove?: () => void;
   onApplyToAll?: () => void;
   onComplete?: () => void;
   onUndo?: () => void;
@@ -177,7 +182,6 @@ function SetCard({
   onWeightChange,
   onRepsChange,
   onRestChange,
-  onRemove,
   onApplyToAll,
   onComplete,
   onUndo,
@@ -209,20 +213,6 @@ function SetCard({
         >
           <Text style={[styles.undoLabel, { color: colors.textSecondary }]}>{t('workout.undo')}</Text>
         </Pressable>
-        {onRemove && (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t('routines.setsEditor.removeSet')}
-            hitSlop={8}
-            onPress={onRemove}
-            style={styles.removeSet}
-          >
-            <Ionicons name="trash-outline" size={16} color={colors.textSecondary} />
-            <Text style={[styles.removeSetLabel, { color: colors.textSecondary }]}>
-              {t('routines.setsEditor.removeSet')}
-            </Text>
-          </Pressable>
-        )}
       </View>
     );
   }
@@ -342,22 +332,8 @@ function SetCard({
         </>
       )}
 
-      {onRemove && (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('routines.setsEditor.removeSet')}
-          hitSlop={8}
-          onPress={onRemove}
-          style={styles.removeSet}
-        >
-          <Ionicons name="trash-outline" size={16} color={colors.textSecondary} />
-          <Text style={[styles.removeSetLabel, { color: colors.textSecondary }]}>
-            {t('routines.setsEditor.removeSet')}
-          </Text>
-        </Pressable>
-      )}
-    </View>
-  );
+      </View>
+    );
 }
 
 const styles = StyleSheet.create({
@@ -482,17 +458,6 @@ const styles = StyleSheet.create({
   },
   undoLabel: {
     fontSize: 13,
-    fontWeight: '600',
-  },
-  removeSet: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 4,
-    paddingVertical: 2,
-  },
-  removeSetLabel: {
-    fontSize: 12,
     fontWeight: '600',
   },
   addSetButton: {

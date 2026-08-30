@@ -248,13 +248,17 @@
       "targetReps": "Reps",
       "targetRest": "Rest (s)",
       "removeExercise": "Remove from routine",
-      "customBadge": "Custom"
+      "customBadge": "Custom",
+      "removeExerciseConfirmTitle": "Remove exercise?",
+      "removeExerciseConfirmMessage": "This will remove \"{{name}}\" from the routine."
     },
     "setsEditor": {
       "setCount_one": "{{count}} set",
       "setCount_other": "{{count}} sets",
       "applyToAll": "Apply to all sets",
-      "removeSet": "Remove set"
+      "removeSet": "Remove set",
+      "removeSetConfirmTitle": "Remove set?",
+      "removeSetConfirmMessage": "This will remove set {{number}} from the exercise."
     },
     "addExercise": {
       "title": "Add exercise",
@@ -353,6 +357,8 @@
     "addSet": "Add set",
     "finishExercise": "Finish exercise",
     "rest": "Rest",
+    "removeSetConfirmTitle": "Remove set?",
+    "removeSetConfirmMessage": "This will remove set {{number}} from the workout.",
     "skip": "Skip",
     "extendRest": "Add 30 seconds",
     "saveChangesTitle": "Save workout changes?",

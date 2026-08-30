@@ -10,6 +10,7 @@ import {
 } from '@/components/ExerciseSetEditor';
 import { RestTimer } from '@/components/RestTimer';
 import { Screen } from '@/components/Screen';
+import { useDialog } from '@/components/AppDialog';
 import { useToast } from '@/components/ToastProvider';
 import { unlockWeightComparatives } from '@/db/achievements';
 import {
@@ -42,6 +43,7 @@ export default function WorkoutExerciseScreen() {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const toast = useToast();
+  const dialog = useDialog();
   const unit = useUnitsStore((state) => state.unitSystem);
   const { id, exerciseId } = useLocalSearchParams<{ id: string; exerciseId: string }>();
   const logId = Number(id);
@@ -134,15 +136,34 @@ export default function WorkoutExerciseScreen() {
     void markWorkoutSetsEdited(db, logId);
   };
 
+  const confirmRemoveSet = (setNumber: number) => {
+    dialog.alert({
+      title: t('workout.removeSetConfirmTitle'),
+      message: t('workout.removeSetConfirmMessage', { number: setNumber }),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            setSetCount((count) => Math.max(1, count - 1));
+            setDrafts((current) => shiftMapDown(current, setNumber));
+            setRestConfig((current) => shiftMapDown(current, setNumber));
+            setExpandedSet(null);
+            setActiveRest(null);
+            void deleteSetAndShift(db, logId, exerciseIdNum, setNumber).then(reload);
+            void markWorkoutSetsEdited(db, logId);
+          },
+        },
+      ],
+    });
+  };
+
   /** Drop a set from the session, renumbering the ones after it. */
   const handleRemoveSet = (setNumber: number) => {
-    setSetCount((count) => Math.max(1, count - 1));
-    setDrafts((current) => shiftMapDown(current, setNumber));
-    setRestConfig((current) => shiftMapDown(current, setNumber));
-    setExpandedSet(null);
-    setActiveRest(null);
-    void deleteSetAndShift(db, logId, exerciseIdNum, setNumber).then(reload);
-    void markWorkoutSetsEdited(db, logId);
+    confirmRemoveSet(setNumber);
   };
 
   const parseNumber = (value: string): number => {

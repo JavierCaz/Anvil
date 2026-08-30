@@ -6,8 +6,10 @@ import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
+import { SwipeToDelete } from '@/components/SwipeToDelete';
+import { useDialog } from '@/components/AppDialog';
 import { muscleI18nKey } from '@/constants/exercises';
-import { getRoutine, getRoutineExercises, moveRoutineExercise } from '@/db/routines';
+import { getRoutine, getRoutineExercises, moveRoutineExercise, removeExerciseFromRoutine } from '@/db/routines';
 import type { Routine, RoutineExerciseWithExercise } from '@/db/types';
 import { startWorkout } from '@/db/workouts';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -17,6 +19,7 @@ export default function RoutineDetailScreen() {
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
+  const dialog = useDialog();
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
 
@@ -49,6 +52,27 @@ export default function RoutineDetailScreen() {
       if (moved) {
         reload();
       }
+    });
+  };
+
+  const confirmRemoveExercise = (item: RoutineExerciseWithExercise) => {
+    dialog.alert({
+      title: t('routines.detail.removeExerciseConfirmTitle'),
+      message: t('routines.detail.removeExerciseConfirmMessage', { name: item.exercise_name }),
+      icon: 'trash-outline',
+      tone: 'error',
+      buttons: [
+        { text: t('common.cancel'), style: 'cancel' },
+        {
+          text: t('common.delete'),
+          style: 'destructive',
+          onPress: () => {
+            void removeExerciseFromRoutine(db, item.id).then(() => {
+              reload();
+            });
+          },
+        },
+      ],
     });
   };
 
@@ -124,12 +148,13 @@ export default function RoutineDetailScreen() {
           const firstReps = item.first_set_reps ?? item.reps;
           const firstRest = item.first_set_rest ?? item.rest_seconds;
           return (
-            <View
-              style={[
-                styles.row,
-                { backgroundColor: colors.surface, borderColor: colors.border },
-              ]}
-            >
+            <SwipeToDelete onDelete={() => confirmRemoveExercise(item)}>
+              <View
+                style={[
+                  styles.row,
+                  { backgroundColor: colors.surface, borderColor: colors.border },
+                ]}
+              >
               <Pressable
                 accessibilityRole="button"
                 style={styles.rowMain}
@@ -192,7 +217,8 @@ export default function RoutineDetailScreen() {
                 </Pressable>
               </View>
             </View>
-          );
+          </SwipeToDelete>
+        );
         }}
         ListFooterComponent={
           <Pressable

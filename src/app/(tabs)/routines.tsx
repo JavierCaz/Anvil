@@ -5,6 +5,7 @@ import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { Screen } from '@/components/Screen';
+import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
 import { deleteRoutine, getRoutines } from '@/db/routines';
 import type { RoutineWithCount } from '@/db/types';
@@ -54,20 +55,6 @@ export default function RoutinesScreen() {
     });
   };
 
-  const showActions = (routine: RoutineWithCount) => {
-    dialog.alert({
-      title: routine.name,
-      buttons: [
-        {
-          text: t('common.edit'),
-          onPress: () => router.push(`/routine/${routine.id}/edit`),
-        },
-        { text: t('common.delete'), style: 'destructive', onPress: () => confirmDelete(routine) },
-        { text: t('common.cancel'), style: 'cancel' },
-      ],
-    });
-  };
-
   const openRoutine = (routine: RoutineWithCount) => {
     router.push(`/routine/${routine.id}`);
   };
@@ -108,18 +95,19 @@ export default function RoutinesScreen() {
           </View>
         }
         renderItem={({ item }) => (
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => openRoutine(item)}
-            style={({ pressed }) => [
-              styles.card,
-              {
-                backgroundColor: colors.surface,
-                borderColor: colors.border,
-                opacity: pressed ? 0.7 : 1,
-              },
-            ]}
-          >
+          <SwipeToDelete onDelete={() => confirmDelete(item)}>
+            <Pressable
+              accessibilityRole="button"
+              onPress={() => openRoutine(item)}
+              style={({ pressed }) => [
+                styles.card,
+                {
+                  backgroundColor: colors.surface,
+                  borderColor: colors.border,
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
             <View style={styles.cardBody}>
               <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>
                 {item.name}
@@ -133,15 +121,8 @@ export default function RoutinesScreen() {
                 {t('routines.exerciseCount', { count: item.exercise_count })}
               </Text>
             </View>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('common.edit')}
-              hitSlop={8}
-              onPress={() => showActions(item)}
-            >
-              <Ionicons name="ellipsis-horizontal" size={20} color={colors.textSecondary} />
             </Pressable>
-          </Pressable>
+          </SwipeToDelete>
         )}
       />
     </Screen>

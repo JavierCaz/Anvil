@@ -1,6 +1,7 @@
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SQLiteProvider } from 'expo-sqlite';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { AppDialogProvider } from '@/components/AppDialog';
 import { ToastProvider } from '@/components/ToastProvider';
 import { AndroidNavigationBar } from '@/components/android-navigation-bar';
@@ -20,15 +21,17 @@ function RootNavigator() {
 
 export default function RootLayout() {
   return (
-    <SQLiteProvider databaseName={DATABASE_NAME} onInit={initializeDatabase}>
-      <AppThemeProvider>
-        <AndroidNavigationBar />
-        <AppDialogProvider>
-          <ToastProvider>
-            <RootNavigator />
-          </ToastProvider>
-        </AppDialogProvider>
-      </AppThemeProvider>
-    </SQLiteProvider>
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SQLiteProvider databaseName={DATABASE_NAME} onInit={initializeDatabase}>
+        <AppThemeProvider>
+          <AndroidNavigationBar />
+          <AppDialogProvider>
+            <ToastProvider>
+              <RootNavigator />
+            </ToastProvider>
+          </AppDialogProvider>
+        </AppThemeProvider>
+      </SQLiteProvider>
+    </GestureHandlerRootView>
   );
 }
