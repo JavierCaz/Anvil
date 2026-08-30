@@ -263,10 +263,16 @@
       "createCustom": "Create “{{name}}”",
       "emptyTitle": "No matches",
       "emptyHint": "Nothing matches your search. Create a custom exercise instead.",
-      "attribution": "Artwork: Everkinetic, expanded by Bryl Lim (CC BY-SA 4.0)"
+      "attribution": "Artwork: Everkinetic, expanded by Bryl Lim (CC BY-SA 4.0)",
+      "addToRoutine": "Add “{{name}}” to routine"
     }
   },
   "exercises": {
+    "detail": {
+      "type": "Exercise type",
+      "equipment": "Equipment",
+      "secondaryMuscles": "Secondary muscles"
+    },
     "form": {
       "newTitle": "New exercise",
       "editTitle": "Edit exercise",

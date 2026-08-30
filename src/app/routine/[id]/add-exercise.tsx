@@ -13,6 +13,7 @@ import {
   TextInput,
   View,
 } from 'react-native';
+import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
 import { muscleI18nKey } from '@/constants/exercises';
@@ -34,6 +35,7 @@ export default function AddExerciseScreen() {
   const [muscles, setMuscles] = useState<string[]>([]);
   const [exercises, setExercises] = useState<Exercise[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -166,7 +168,7 @@ export default function AddExerciseScreen() {
             return (
               <Pressable
                 accessibilityRole="button"
-                onPress={() => handlePick(item)}
+                onPress={() => setSelectedExercise(item)}
                 style={({ pressed }) => [
                   styles.row,
                   { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
@@ -201,10 +203,24 @@ export default function AddExerciseScreen() {
                     <Ionicons name="pencil" size={18} color={colors.textSecondary} />
                   </Pressable>
                 )}
-                <Ionicons name="add-circle" size={22} color={colors.primary} />
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('routines.addExercise.addToRoutine', { name: item.name })}
+                  hitSlop={8}
+                  onPress={() => handlePick(item)}
+                >
+                  <Ionicons name="add-circle" size={22} color={colors.primary} />
+                </Pressable>
               </Pressable>
             );
           }}
+        />
+      )}
+
+      {selectedExercise && (
+        <ExerciseDetailModal
+          exercise={selectedExercise}
+          onClose={() => setSelectedExercise(null)}
         />
       )}
     </Screen>
