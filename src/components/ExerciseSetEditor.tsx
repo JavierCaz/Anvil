@@ -45,6 +45,8 @@ interface ExerciseSetEditorProps {
   onCompleteSet?: (setNumber: number) => void;
   /** Workout mode: reopen this set. */
   onUndoSet?: (setNumber: number) => void;
+  /** When provided, the exercise header card is tappable (opens the exercise info card). */
+  onHeaderPress?: () => void;
   /** Controlled accordion state (the workout screen drives auto-advance). */
   expanded?: number | null;
   onExpandedChange?: (next: number | null) => void;
@@ -72,6 +74,7 @@ export function ExerciseSetEditor({
   onApplyToAll,
   onCompleteSet,
   onUndoSet,
+  onHeaderPress,
   expanded: expandedProp,
   onExpandedChange,
 }: ExerciseSetEditorProps) {
@@ -102,19 +105,29 @@ export function ExerciseSetEditor({
 
   return (
     <View style={styles.container}>
-      <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-        <ExerciseThumbnail slug={slug} />
-        <View style={styles.infoBody}>
-          <Text style={[styles.infoTitle, { color: colors.text }]} numberOfLines={1}>
-            {exerciseName}
-          </Text>
-          <Text style={[styles.infoMeta, { color: colors.textSecondary }]}>
-            {mode === 'workout'
-              ? t('workout.setsDone', { done: doneCount, total: totalSets || sets.length })
-              : t('routines.setsEditor.setCount', { count: sets.length })}
-          </Text>
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={exerciseName}
+        disabled={!onHeaderPress}
+        onPress={onHeaderPress}
+        style={({ pressed }) => [
+          onHeaderPress && pressed && { opacity: 0.7 },
+        ]}
+      >
+        <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <ExerciseThumbnail slug={slug} />
+          <View style={styles.infoBody}>
+            <Text style={[styles.infoTitle, { color: colors.text }]} numberOfLines={1}>
+              {exerciseName}
+            </Text>
+            <Text style={[styles.infoMeta, { color: colors.textSecondary }]}>
+              {mode === 'workout'
+                ? t('workout.setsDone', { done: doneCount, total: totalSets || sets.length })
+                : t('routines.setsEditor.setCount', { count: sets.length })}
+            </Text>
+          </View>
         </View>
-      </View>
+      </Pressable>
 
       {sets.map((item) => {
         const isExpanded = activeExpanded === item.setNumber;

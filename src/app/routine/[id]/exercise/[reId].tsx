@@ -4,15 +4,17 @@ import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import { ExerciseSetEditor, type SetEditorItem } from '@/components/ExerciseSetEditor';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
+import { getExerciseById } from '@/db/exercises';
 import {
   getRoutineExercise,
   getRoutineExerciseSets,
   saveRoutineExerciseSets,
 } from '@/db/routines';
-import type { RoutineExerciseWithExercise } from '@/db/types';
+import type { Exercise, RoutineExerciseWithExercise } from '@/db/types';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { displayToKg, kgToDisplay } from '@/utils/weight';
@@ -38,6 +40,7 @@ export default function RoutineSetEditorScreen() {
   const [exercise, setExercise] = useState<RoutineExerciseWithExercise | null>(null);
   const [sets, setSets] = useState<SetDraft[]>([]);
   const [loaded, setLoaded] = useState(false);
+  const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -133,6 +136,14 @@ export default function RoutineSetEditorScreen() {
     });
   };
 
+  const showExerciseInfo = () => {
+    void getExerciseById(db, exercise?.exercise_id ?? -1).then((row) => {
+      if (row) {
+        setInfoExercise(row);
+      }
+    });
+  };
+
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ headerShown: true, title: exercise?.exercise_name ?? '' }} />
@@ -154,6 +165,7 @@ export default function RoutineSetEditorScreen() {
               slug={exercise.exercise_slug}
               sets={setItems}
               fallbackReps={10}
+              onHeaderPress={showExerciseInfo}
               onWeightChange={(number, value) => updateSet(number - 1, { weight: value })}
               onRepsChange={(number, value) => updateSet(number - 1, { reps: value })}
               onRestChange={(number, seconds) => updateSet(number - 1, { restSeconds: seconds })}
@@ -175,6 +187,13 @@ export default function RoutineSetEditorScreen() {
               </Pressable>
             )}
           </ScrollView>
+
+          {infoExercise && (
+            <ExerciseDetailModal
+              exercise={infoExercise}
+              onClose={() => setInfoExercise(null)}
+            />
+          )}
 
           <View style={styles.footer}>
             <Pressable

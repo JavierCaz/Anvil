@@ -45,12 +45,11 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
   return (
     <DetailModal onClose={onClose}>
       {/* Visual */}
-      <View style={[styles.iconCircle, { backgroundColor: colors.background }]}>
-        <ExerciseThumbnail slug={exercise.slug} size={44} borderRadius={10} />
+      <View style={[styles.visualWrap, { backgroundColor: colors.background, borderColor: colors.border }]}>
+        <ExerciseThumbnail slug={exercise.slug} size={190} borderRadius={14} />
       </View>
 
       {/* Name + badges */}
-      <Text style={[styles.name, { color: colors.text }]}>{exercise.name}</Text>
       <View style={styles.badgeRow}>
         {primaryMuscle && (
           <View style={[styles.badge, { backgroundColor: colors.background }]}>
@@ -98,13 +97,15 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
 }
 
 const styles = StyleSheet.create({
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  visualWrap: {
+    width: 190,
+    height: 190,
+    borderRadius: 18,
+    borderWidth: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    overflow: 'hidden',
+    marginBottom: 14,
   },
   name: {
     fontSize: 18,

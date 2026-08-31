@@ -23,7 +23,7 @@ import {
 import type { ActiveWorkoutExercise, WorkoutSet } from '@/db/types';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
-import { displayToKg, formatWeight, weightUnitLabel } from '@/utils/weight';
+import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
 const DEFAULT_REST_SECONDS = 90;
 
@@ -80,11 +80,35 @@ export default function WorkoutExerciseScreen() {
       );
       setSetCount(count);
       setExpandedSet(firstIncompleteSet(count, setRows));
+
+      // Prefill the inputs from the routine's planned per-set targets so the
+      // user doesn't have to re-enter weight/reps/rest when the session starts.
+      const loggedByNumber = new Map(setRows.map((row) => [row.set_number, row]));
+      const initialDrafts: Record<number, SetDraft> = {};
+      const initialRest: Record<number, number> = {};
+      for (const target of exerciseRow?.set_targets ?? []) {
+        const logged = loggedByNumber.get(target.set_number);
+        if (logged) {
+          initialDrafts[target.set_number] = {
+            weight: logged.weight > 0 ? String(kgToDisplay(logged.weight, unit)) : '',
+            reps: String(logged.reps),
+          };
+          initialRest[target.set_number] = logged.rest_seconds;
+        } else {
+          initialDrafts[target.set_number] = {
+            weight: target.weight && target.weight > 0 ? String(kgToDisplay(target.weight, unit)) : '',
+            reps: String(target.reps),
+          };
+          initialRest[target.set_number] = target.rest_seconds;
+        }
+      }
+      setDrafts(initialDrafts);
+      setRestConfig(initialRest);
     });
     return () => {
       active = false;
     };
-  }, [db, logId, exerciseIdNum]);
+  }, [db, logId, exerciseIdNum, unit]);
 
   const targetReps = exercise?.target_reps ?? 0;
   const defaultRest = exercise?.target_rest_seconds ?? DEFAULT_REST_SECONDS;
