@@ -59,7 +59,9 @@
     "eraseSuccess": "All data has been erased.",
     "eraseFailed": "Could not erase the data. Please try again.",
     "webUnsupported": "Not available on web",
-    "webUnsupportedMessage": "Export, import and erase are only available in the mobile app."
+    "webUnsupportedMessage": "Export, import and erase are only available in the mobile app.",
+    "about": "About",
+    "version": "Version"
   },
   "statistics": {
     "filters": {

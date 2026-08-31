@@ -59,7 +59,9 @@
     "eraseSuccess": "Se han borrado todos los datos.",
     "eraseFailed": "No se pudieron borrar los datos. Inténtalo de nuevo.",
     "webUnsupported": "No disponible en la web",
-    "webUnsupportedMessage": "Exportar, importar y borrar solo están disponibles en la app móvil."
+    "webUnsupportedMessage": "Exportar, importar y borrar solo están disponibles en la app móvil.",
+    "about": "Acerca de",
+    "version": "Versión"
   },
   "statistics": {
     "filters": {

@@ -1,3 +1,5 @@
+import * as Application from 'expo-application';
+import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
@@ -61,6 +63,9 @@ export default function SettingsScreen() {
   const db = useSQLiteContext();
   const dialog = useDialog();
   const [busyAction, setBusyAction] = useState<'export' | 'import' | 'erase' | null>(null);
+
+  // `nativeApplicationVersion` is null on web, so fall back to the app config version.
+  const appVersion = Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? null;
 
   const preference = useThemeStore((state) => state.preference);
   const setPreference = useThemeStore((state) => state.setPreference);
@@ -342,6 +347,16 @@ export default function SettingsScreen() {
               <Ionicons name="trash-outline" size={22} color={colors.error} />
             )}
           </Pressable>
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+          {t('settings.about')}
+        </Text>
+        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <View style={styles.row}>
+            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settings.version')}</Text>
+            <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>{appVersion}</Text>
+          </View>
         </View>
       </ScrollView>
     </Screen>
