@@ -1,3 +1,8 @@
+// Initialize i18next before any screen renders. Route modules are lazy-loaded in
+// production builds, so the init must live on the always-loaded root layout —
+// otherwise useTranslation() finds no instance and t() is undefined.
+import '@/i18n';
+
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SQLiteProvider } from 'expo-sqlite';
