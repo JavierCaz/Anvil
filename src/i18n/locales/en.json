@@ -8,6 +8,7 @@
     "confirm": "Confirm",
     "loading": "Loading…",
     "comingSoon": "Coming soon",
+    "notNow": "Not now",
     "name": "Name",
     "description": "Description (optional)",
     "add": "Add",
@@ -369,9 +370,16 @@
     "removeSetConfirmMessage": "This will remove set {{number}} from the workout.",
     "skip": "Skip",
     "extendRest": "Add 30 seconds",
+    "restFinishedTitle": "Rest is over",
+    "restFinishedBody": "Time for your next set!",
     "saveChangesTitle": "Save workout changes?",
     "saveChangesMessage": "You added or removed sets during this workout. Save these changes to your routine?",
     "saveToRoutine": "Save to routine",
     "keepRoutine": "Keep routine"
+  },
+  "notifications": {
+    "promptTitle": "Enable notifications?",
+    "promptMessage": "Anvil uses notifications to sound your rest-timer alarm even when the app is in the background or your screen is locked. Everything stays on your device — no accounts, no tracking.",
+    "enable": "Enable notifications"
   }
 }

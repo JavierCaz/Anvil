@@ -82,6 +82,14 @@ export default {
       'expo-status-bar',
       'expo-web-browser',
       'expo-audio',
+      [
+        'expo-notifications',
+        {
+          // Bundle the rest-timer chime so scheduled notifications can play it
+          // while the app is backgrounded / the screen is locked.
+          sounds: ['./assets/audio/rest_finished.wav'],
+        },
+      ],
     ],
     experiments: {
       typedRoutes: true,

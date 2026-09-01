@@ -8,6 +8,7 @@
     "confirm": "Confirmar",
     "loading": "Cargando…",
     "comingSoon": "Próximamente",
+    "notNow": "Ahora no",
     "name": "Nombre",
     "description": "Descripción (opcional)",
     "add": "Añadir",
@@ -369,9 +370,16 @@
     "removeSetConfirmMessage": "Se quitará la serie {{number}} del entrenamiento.",
     "skip": "Omitir",
     "extendRest": "Añadir 30 segundos",
+    "restFinishedTitle": "Descanso terminado",
+    "restFinishedBody": "¡Hora de tu próxima serie!",
     "saveChangesTitle": "¿Guardar los cambios del entrenamiento?",
     "saveChangesMessage": "Añadiste o quitaste series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
     "saveToRoutine": "Guardar en la rutina",
     "keepRoutine": "Mantener rutina"
+  },
+  "notifications": {
+    "promptTitle": "¿Activar notificaciones?",
+    "promptMessage": "Anvil usa notificaciones para que la alarma del descanso suene aunque la app esté en segundo plano o la pantalla esté bloqueada. Todo permanece en tu dispositivo: sin cuentas ni rastreo.",
+    "enable": "Activar notificaciones"
   }
 }

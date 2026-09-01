@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import {
   ExerciseSetEditor,
   type SetEditorItem,
@@ -13,6 +14,7 @@ import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { useToast } from '@/components/ToastProvider';
 import { unlockWeightComparatives } from '@/db/achievements';
+import { getExerciseById } from '@/db/exercises';
 import {
   deleteSetAndShift,
   getActiveWorkoutExercise,
@@ -20,7 +22,7 @@ import {
   markWorkoutSetsEdited,
   upsertSet,
 } from '@/db/workouts';
-import type { ActiveWorkoutExercise, WorkoutSet } from '@/db/types';
+import type { ActiveWorkoutExercise, Exercise, WorkoutSet } from '@/db/types';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '@/utils/weight';
@@ -57,10 +59,22 @@ export default function WorkoutExerciseScreen() {
   const [expandedSet, setExpandedSet] = useState<number | null>(null);
   const [loaded, setLoaded] = useState(false);
   const [activeRest, setActiveRest] = useState<ActiveRest | null>(null);
+  const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
 
   const handleRestDone = useCallback(() => {
     setActiveRest(null);
   }, []);
+
+  const showExerciseInfo = () => {
+    if (!exercise) {
+      return;
+    }
+    void getExerciseById(db, exercise.exercise_id).then((row) => {
+      if (row) {
+        setInfoExercise(row);
+      }
+    });
+  };
 
   useEffect(() => {
     let active = true;
@@ -176,7 +190,9 @@ export default function WorkoutExerciseScreen() {
             setDrafts((current) => shiftMapDown(current, setNumber));
             setRestConfig((current) => shiftMapDown(current, setNumber));
             setExpandedSet(null);
-            setActiveRest(null);
+            // Keep the rest timer running unless it's counting down for the
+            // set being deleted.
+            setActiveRest((current) => (current && current.setNumber === setNumber ? null : current));
             void deleteSetAndShift(db, logId, exerciseIdNum, setNumber).then(reload);
             void markWorkoutSetsEdited(db, logId);
           },
@@ -250,7 +266,8 @@ export default function WorkoutExerciseScreen() {
       restSeconds: restConfig[setNumber] ?? defaultRest,
       completed: 0,
     }).then(() => {
-      setActiveRest(null);
+      // Only stop the rest timer when undoing the set it's counting down for.
+      setActiveRest((current) => (current && current.setNumber === setNumber ? null : current));
       reload();
     });
   };
@@ -274,6 +291,7 @@ export default function WorkoutExerciseScreen() {
               mode="workout"
               exerciseName={exercise.exercise_name}
               slug={exercise.exercise_slug}
+              onHeaderPress={showExerciseInfo}
               sets={setItems}
               fallbackReps={targetReps}
               doneCount={doneCount}
@@ -289,6 +307,13 @@ export default function WorkoutExerciseScreen() {
               onUndoSet={handleUndo}
             />
           </ScrollView>
+
+          {infoExercise && (
+            <ExerciseDetailModal
+              exercise={infoExercise}
+              onClose={() => setInfoExercise(null)}
+            />
+          )}
 
           <View style={styles.footer}>
             {activeRest && (
