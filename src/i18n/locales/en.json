@@ -372,7 +372,10 @@
     "saveChangesTitle": "Save workout changes?",
     "saveChangesMessage": "You added or removed sets during this workout. Save these changes to your routine?",
     "saveToRoutine": "Save to routine",
-    "keepRoutine": "Keep routine"
+    "keepRoutine": "Keep routine",
+    "updateDefaultsTitle": "Update routine set defaults?",
+    "updateDefaultsMessage": "You changed set values for: {{exercises}}. Save these as the routine's new defaults?",
+    "saveChangesAndValuesMessage": "You added or removed sets and changed set values during this workout. Save all these changes to your routine?"
   },
   "notifications": {
     "comparativeLifted": "You just lifted {{object}}!",

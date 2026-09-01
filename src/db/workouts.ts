@@ -1,6 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import dayjs from 'dayjs';
-import { getRoutineExerciseSets, saveRoutineExerciseSets } from './routines';
+import { getRoutineExerciseSets, saveRoutineExerciseSets, type SetTargetInput } from './routines';
 import { getWeeklyConsistency } from './stats';
 import type {
   ActiveWorkoutExercise,
@@ -498,5 +498,111 @@ export async function syncRoutineSetCountFromWorkout(
         };
       })
     );
+  }
+}
+
+/**
+ * An exercise whose logged set values differ from the routine's planned
+ * per-set defaults (weight / reps / rest).
+ */
+export interface RoutineSetValueChange {
+  routine_exercise_id: number;
+  exercise_id: number;
+  exercise_name: string;
+}
+
+/**
+ * Comparison tolerance for weights in kg. Absorbs float noise from
+ * display-unit round-trips (kg → lb → kg) so untouched prefilled values
+ * don't count as changes.
+ */
+const WEIGHT_EPSILON_KG = 0.01;
+
+/**
+ * Exercises in an active session whose logged (completed) set values differ
+ * from the routine's per-set defaults. Added/removed sets (count changes)
+ * are not flagged here — those are handled by `wasWorkoutSetsEdited`.
+ */
+export async function getRoutineSetValueChanges(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<RoutineSetValueChange[]> {
+  const log = await getWorkoutLog(db, logId);
+  if (!log?.routine_id) {
+    return [];
+  }
+  const exercises = await getActiveWorkoutExercises(db, logId);
+  const changes: RoutineSetValueChange[] = [];
+
+  for (const exercise of exercises) {
+    const planned = new Map(exercise.set_targets.map((set) => [set.set_number, set]));
+    if (planned.size === 0) {
+      continue;
+    }
+    const logged = (await getWorkoutSets(db, logId, exercise.exercise_id)).filter(
+      (set) => set.completed === 1
+    );
+
+    let changed = false;
+    for (const set of logged) {
+      const target = planned.get(set.set_number);
+      if (!target) {
+        continue; // added set — a count change, handled elsewhere
+      }
+      const weightDiff = Math.abs(set.weight - (target.weight ?? 0)) > WEIGHT_EPSILON_KG;
+      if (weightDiff || set.reps !== target.reps || set.rest_seconds !== target.rest_seconds) {
+        changed = true;
+        break;
+      }
+    }
+    if (changed) {
+      changes.push({
+        routine_exercise_id: exercise.routine_exercise_id,
+        exercise_id: exercise.exercise_id,
+        exercise_name: exercise.exercise_name,
+      });
+    }
+  }
+  return changes;
+}
+
+/**
+ * Overlay the logged set values back onto a routine exercise's per-set
+ * defaults (weight / reps / rest). The planned set count is preserved —
+ * only sets the user actually completed get their values updated. Count
+ * changes stay the responsibility of `syncRoutineSetCountFromWorkout`.
+ */
+export async function syncRoutineSetValuesFromWorkout(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<void> {
+  const changes = await getRoutineSetValueChanges(db, logId);
+  for (const change of changes) {
+    const planned = await getRoutineExerciseSets(db, change.routine_exercise_id);
+    const logged = new Map(
+      (await getWorkoutSets(db, logId, change.exercise_id))
+        .filter((set) => set.completed === 1)
+        .map((set) => [set.set_number, set])
+    );
+    const targets: SetTargetInput[] = planned.map((target) => {
+      const loggedSet = logged.get(target.set_number);
+      if (!loggedSet) {
+        return {
+          setNumber: target.set_number,
+          reps: target.reps,
+          restSeconds: target.rest_seconds,
+          weight: target.weight,
+        };
+      }
+      return {
+        setNumber: target.set_number,
+        reps: loggedSet.reps,
+        restSeconds: loggedSet.rest_seconds,
+        weight: loggedSet.weight > 0 ? loggedSet.weight : null,
+      };
+    });
+    if (targets.length > 0) {
+      await saveRoutineExerciseSets(db, change.routine_exercise_id, targets);
+    }
   }
 }

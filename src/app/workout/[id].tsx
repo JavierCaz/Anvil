@@ -17,9 +17,11 @@ import {
   cancelWorkout,
   completeWorkout,
   getActiveWorkoutExercises,
+  getRoutineSetValueChanges,
   getWorkoutLog,
   getWorkoutRoutineName,
   syncRoutineSetCountFromWorkout,
+  syncRoutineSetValuesFromWorkout,
   wasWorkoutSetsEdited,
 } from '@/db/workouts';
 import type { ActiveWorkoutExercise, WorkoutLog } from '@/db/types';
@@ -131,25 +133,60 @@ export default function WorkoutSessionScreen() {
   };
 
   const finish = () => {
-    void wasWorkoutSetsEdited(db, logId).then((edited) => {
-      if (!edited) {
+    void Promise.all([
+      wasWorkoutSetsEdited(db, logId),
+      getRoutineSetValueChanges(db, logId),
+    ]).then(([edited, valueChanges]) => {
+      const hasCountChange = edited;
+      const hasValueChange = valueChanges.length > 0;
+      if (!hasCountChange && !hasValueChange) {
         completeAndSummarize();
         return;
       }
+
+      // One dialog regardless of what changed; the confirm button runs every
+      // applicable sync (set count first, then set values).
+      const title =
+        hasCountChange && !hasValueChange
+          ? t('workout.saveChangesTitle')
+          : t('workout.updateDefaultsTitle');
+      const message = hasCountChange && hasValueChange
+        ? t('workout.saveChangesAndValuesMessage')
+        : hasValueChange
+          ? t('workout.updateDefaultsMessage', {
+              exercises: valueChanges.map((change) => change.exercise_name).join(', '),
+            })
+          : t('workout.saveChangesMessage');
+
       dialog.alert({
-        title: t('workout.saveChangesTitle'),
-        message: t('workout.saveChangesMessage'),
+        title,
+        message,
         buttons: [
           { text: t('workout.keepRoutine'), style: 'cancel', onPress: completeAndSummarize },
           {
             text: t('workout.saveToRoutine'),
             onPress: () => {
-              void syncRoutineSetCountFromWorkout(db, logId).then(completeAndSummarize);
+              void saveRoutineChanges().then(completeAndSummarize);
             },
           },
         ],
       });
     });
+  };
+
+  // Apply the routine-facing changes the user confirmed: sync the set count
+  // first (it can add/remove plan rows), then overlay the logged set values.
+  const saveRoutineChanges = async () => {
+    const [edited, valueChanges] = await Promise.all([
+      wasWorkoutSetsEdited(db, logId),
+      getRoutineSetValueChanges(db, logId),
+    ]);
+    if (edited) {
+      await syncRoutineSetCountFromWorkout(db, logId);
+    }
+    if (valueChanges.length > 0) {
+      await syncRoutineSetValuesFromWorkout(db, logId);
+    }
   };
 
   const handleFinish = () => {
