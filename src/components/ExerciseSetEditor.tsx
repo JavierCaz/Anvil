@@ -5,9 +5,20 @@ import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useUnitsStore } from '@/store/units';
+import { formatWeightStep, useWeightStepStore } from '@/store/weight-step';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { weightUnitLabel } from '@/utils/weight';
 
+/** Parse a numeric input string; empty/invalid input reads as 0. */
+function parseNumber(value: string): number {
+  const parsed = parseFloat(value);
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+/** Format a reps value as a non-negative integer string. */
+function formatReps(value: number): string {
+  return String(Math.max(0, Math.round(value)));
+}
 export const REST_STEP_SECONDS = 15;
 export const REST_MAX_SECONDS = 300;
 
@@ -202,7 +213,25 @@ function SetCard({
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const unit = useUnitsStore((state) => state.unitSystem);
+  const weightStep = useWeightStepStore((state) => (unit === 'imperial' ? state.stepLb : state.stepKg));
   const unitLabel = weightUnitLabel(unit);
+
+  const weightValue = parseNumber(item.weight);
+  const repsValue = parseNumber(item.reps);
+  const weightMinusDisabled = weightValue <= 0;
+  const repsMinusDisabled = repsValue <= 0;
+
+  const stepWeight = (delta: number) => {
+    onWeightChange(formatWeightStep(Math.max(0, weightValue + delta)));
+  };
+
+  const stepReps = (delta: number) => {
+    onRepsChange(formatReps(repsValue + delta));
+  };
+
+  const onRestInputChange = (value: string) => {
+    onRestChange(Math.min(REST_MAX_SECONDS, Math.max(0, Math.round(parseNumber(value)))));
+  };
 
   if (mode === 'workout' && item.done) {
     return (
@@ -250,32 +279,78 @@ function SetCard({
 
       {expanded && (
         <>
-          <View style={styles.inputRow}>
-            <View style={[styles.inputField, { borderColor: colors.border }]}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                {t('workout.weight', { unit: weightUnitLabel(unit) })}
-              </Text>
-              <TextInput
-                value={item.weight}
-                onChangeText={onWeightChange}
-                placeholder="0"
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="decimal-pad"
-                style={[styles.inputValue, { color: colors.text }]}
-              />
+          <View style={styles.inputColumn}>
+            <View style={styles.stepperField}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('workout.decreaseWeight')}
+                hitSlop={8}
+                disabled={weightMinusDisabled}
+                onPress={() => stepWeight(-weightStep)}
+              >
+                <Ionicons
+                  name="remove-circle-outline"
+                  size={26}
+                  color={weightMinusDisabled ? colors.border : colors.primary}
+                />
+              </Pressable>
+              <View style={[styles.inputField, { borderColor: colors.border }]}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                  {t('workout.weight', { unit: weightUnitLabel(unit) })}
+                </Text>
+                <TextInput
+                  value={item.weight}
+                  onChangeText={onWeightChange}
+                  placeholder="0"
+                  placeholderTextColor={colors.textSecondary}
+                  keyboardType="decimal-pad"
+                  style={[styles.inputValue, { color: colors.text }]}
+                />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('workout.increaseWeight')}
+                hitSlop={8}
+                onPress={() => stepWeight(weightStep)}
+              >
+                <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+              </Pressable>
             </View>
-            <View style={[styles.inputField, { borderColor: colors.border }]}>
-              <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
-                {t('workout.reps')}
-              </Text>
-              <TextInput
-                value={item.reps}
-                onChangeText={onRepsChange}
-                placeholder={String(fallbackReps)}
-                placeholderTextColor={colors.textSecondary}
-                keyboardType="number-pad"
-                style={[styles.inputValue, { color: colors.text }]}
-              />
+            <View style={styles.stepperField}>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('workout.decreaseReps')}
+                hitSlop={8}
+                disabled={repsMinusDisabled}
+                onPress={() => stepReps(-1)}
+              >
+                <Ionicons
+                  name="remove-circle-outline"
+                  size={26}
+                  color={repsMinusDisabled ? colors.border : colors.primary}
+                />
+              </Pressable>
+              <View style={[styles.inputField, { borderColor: colors.border }]}>
+                <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                  {t('workout.reps')}
+                </Text>
+                <TextInput
+                  value={item.reps}
+                  onChangeText={onRepsChange}
+                  placeholder={String(fallbackReps)}
+                  placeholderTextColor={colors.textSecondary}
+                  keyboardType="number-pad"
+                  style={[styles.inputValue, { color: colors.text }]}
+                />
+              </View>
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('workout.increaseReps')}
+                hitSlop={8}
+                onPress={() => stepReps(1)}
+              >
+                <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+              </Pressable>
             </View>
           </View>
 
@@ -296,7 +371,17 @@ function SetCard({
                   color={item.restSeconds <= 0 ? colors.border : colors.primary}
                 />
               </Pressable>
-              <Text style={[styles.restValue, { color: colors.text }]}>{item.restSeconds}s</Text>
+              <View style={[styles.restInputField, { borderColor: colors.border }]}>
+                <TextInput
+                  value={String(item.restSeconds)}
+                  onChangeText={onRestInputChange}
+                  accessibilityLabel={t('workout.restAfterSet')}
+                  placeholder="0"
+                  placeholderTextColor={colors.textSecondary}
+                  keyboardType="number-pad"
+                  style={[styles.restInputValue, { color: colors.text }]}
+                />
+              </View>
               <Pressable
                 accessibilityRole="button"
                 hitSlop={8}
@@ -396,9 +481,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  inputRow: {
-    flexDirection: 'row',
+  inputColumn: {
+    flexDirection: 'column',
     gap: 12,
+  },
+  stepperField: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
   },
   inputField: {
     flex: 1,
@@ -432,12 +522,19 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 10,
   },
-  restValue: {
+  restInputField: {
+    width: 56,
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 6,
+  },
+  restInputValue: {
     fontSize: 16,
     fontWeight: '700',
-    minWidth: 48,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
+    paddingVertical: 0,
   },
   applyButton: {
     flexDirection: 'row',

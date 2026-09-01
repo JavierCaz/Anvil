@@ -33,20 +33,23 @@ const PREFERENCE_KEYS = {
   language: 'anvil.language',
   weeklyWorkouts: 'anvil.goals.weeklyWorkouts',
   units: 'anvil.units',
+  weightStep: 'anvil.settings.weightStep',
 } as const;
 
 async function readPreferences(): Promise<BackupPreferences> {
-  const [theme, language, weeklyWorkouts, units] = await Promise.all([
+  const [theme, language, weeklyWorkouts, units, weightStep] = await Promise.all([
     Storage.getItem(PREFERENCE_KEYS.theme),
     Storage.getItem(PREFERENCE_KEYS.language),
     Storage.getItem(PREFERENCE_KEYS.weeklyWorkouts),
     Storage.getItem(PREFERENCE_KEYS.units),
+    Storage.getItem(PREFERENCE_KEYS.weightStep),
   ]);
   return {
     theme: theme ?? undefined,
     language: language ?? undefined,
     weeklyWorkouts: weeklyWorkouts ?? undefined,
     units: units ?? undefined,
+    weightStep: weightStep ?? undefined,
   };
 }
 
@@ -61,6 +64,9 @@ async function writePreferences(preferences: BackupPreferences): Promise<void> {
       : Promise.resolve(),
     preferences.units
       ? Storage.setItem(PREFERENCE_KEYS.units, preferences.units)
+      : Promise.resolve(),
+    preferences.weightStep
+      ? Storage.setItem(PREFERENCE_KEYS.weightStep, preferences.weightStep)
       : Promise.resolve(),
   ]);
 }

@@ -17,8 +17,19 @@ import {
   WEEKLY_WORKOUTS_MIN,
 } from '@/store/workout-goals';
 import { useUnitsStore } from '@/store/units';
+import {
+  formatWeightStep,
+  useWeightStepStore,
+  WEIGHT_STEP_KG_ADJUST,
+  WEIGHT_STEP_KG_MAX,
+  WEIGHT_STEP_KG_MIN,
+  WEIGHT_STEP_LB_ADJUST,
+  WEIGHT_STEP_LB_MAX,
+  WEIGHT_STEP_LB_MIN,
+} from '@/store/weight-step';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { useThemeStore } from '@/theme/theme-store';
+import { weightUnitLabel } from '@/utils/weight';
 
 interface SwitchRowProps {
   offLabel: string;
@@ -73,6 +84,18 @@ export default function SettingsScreen() {
   const setWeeklyWorkouts = useWeeklyGoalStore((state) => state.setWeeklyWorkouts);
   const unitSystem = useUnitsStore((state) => state.unitSystem);
   const setUnitSystem = useUnitsStore((state) => state.setUnitSystem);
+  const stepKg = useWeightStepStore((state) => state.stepKg);
+  const stepLb = useWeightStepStore((state) => state.stepLb);
+  const setStepKg = useWeightStepStore((state) => state.setStepKg);
+  const setStepLb = useWeightStepStore((state) => state.setStepLb);
+
+  // Weight increment is stored per unit system; edit the active one.
+  const isImperial = unitSystem === 'imperial';
+  const weightStep = isImperial ? stepLb : stepKg;
+  const setWeightStep = isImperial ? setStepLb : setStepKg;
+  const stepMin = isImperial ? WEIGHT_STEP_LB_MIN : WEIGHT_STEP_KG_MIN;
+  const stepMax = isImperial ? WEIGHT_STEP_LB_MAX : WEIGHT_STEP_KG_MAX;
+  const stepAdjust = isImperial ? WEIGHT_STEP_LB_ADJUST : WEIGHT_STEP_KG_ADJUST;
 
   const language = i18n.language as AppLanguage;
 
@@ -192,6 +215,7 @@ export default function SettingsScreen() {
     if (preferences.theme) void useThemeStore.persist.rehydrate();
     if (preferences.weeklyWorkouts) void useWeeklyGoalStore.persist.rehydrate();
     if (preferences.units) void useUnitsStore.persist.rehydrate();
+    if (preferences.weightStep) void useWeightStepStore.persist.rehydrate();
     if (preferences.language === 'en' || preferences.language === 'es') {
       await setAppLanguage(preferences.language);
     }
@@ -203,6 +227,12 @@ export default function SettingsScreen() {
       .getState()
       .setWeeklyWorkouts(useWeeklyGoalStore.getInitialState().weeklyWorkouts);
     useUnitsStore.getState().setUnitSystem(useUnitsStore.getInitialState().unitSystem);
+    useWeightStepStore
+      .getState()
+      .setStepKg(useWeightStepStore.getInitialState().stepKg);
+    useWeightStepStore
+      .getState()
+      .setStepLb(useWeightStepStore.getInitialState().stepLb);
     void resetAppLanguage();
   };
 
@@ -249,6 +279,52 @@ export default function SettingsScreen() {
             value={unitSystem === 'imperial'}
             onValueChange={(imperial) => setUnitSystem(imperial ? 'imperial' : 'metric')}
           />
+        </View>
+
+        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+          {t('settings.weightIncrement')}
+        </Text>
+        <View
+          style={[
+            styles.card,
+            styles.goalCard,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+        >
+          <Text style={[styles.goalHint, { color: colors.textSecondary }]}>
+            {t('settings.weightIncrementHint')}
+          </Text>
+          <View style={styles.stepper}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('workout.decreaseWeight')}
+              disabled={weightStep <= stepMin}
+              hitSlop={8}
+              onPress={() => setWeightStep(weightStep - stepAdjust)}
+            >
+              <Ionicons
+                name="remove-circle-outline"
+                size={30}
+                color={weightStep <= stepMin ? colors.textSecondary : colors.primary}
+              />
+            </Pressable>
+            <Text style={[styles.weightStepValue, { color: colors.text }]}>
+              {formatWeightStep(weightStep)} {weightUnitLabel(unitSystem)}
+            </Text>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('workout.increaseWeight')}
+              disabled={weightStep >= stepMax}
+              hitSlop={8}
+              onPress={() => setWeightStep(weightStep + stepAdjust)}
+            >
+              <Ionicons
+                name="add-circle-outline"
+                size={30}
+                color={weightStep >= stepMax ? colors.textSecondary : colors.primary}
+              />
+            </Pressable>
+          </View>
         </View>
 
         <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
@@ -409,6 +485,13 @@ const styles = StyleSheet.create({
     fontSize: 28,
     fontWeight: '800',
     minWidth: 40,
+    textAlign: 'center',
+    fontVariant: ['tabular-nums'],
+  },
+  weightStepValue: {
+    fontSize: 20,
+    fontWeight: '800',
+    minWidth: 72,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },
