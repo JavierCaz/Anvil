@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 8;
+export const DATABASE_VERSION = 9;
 
 /**
  * Migration 1 — initial tables.
@@ -229,6 +229,37 @@ DELETE FROM achievements WHERE key IN (
 );
 `;
 
+/**
+ * Migration 9 — per-exercise achievements.
+ *
+ * Strength (weight comparatives + progressive overload) and volume
+ * achievements are now scoped to the exercise that earned them. Their
+ * unlock state lives in the new `exercise_achievements` junction table
+ * (one row per (exercise_id, key)); the `achievements` rows for these
+ * keys become pure catalog entries. Legacy global unlocks are cleared
+ * here and re-attributed to qualifying exercises by
+ * `backfillPerExerciseAchievements` (src/db/achievements.ts).
+ */
+export const SCHEMA_V9 = `
+CREATE TABLE IF NOT EXISTS exercise_achievements (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  exercise_id INTEGER NOT NULL,
+  key TEXT NOT NULL,
+  unlocked_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE (exercise_id, key),
+  FOREIGN KEY (exercise_id) REFERENCES exercises(id) ON DELETE CASCADE
+);
+
+CREATE INDEX IF NOT EXISTS idx_exercise_achievements_exercise
+  ON exercise_achievements(exercise_id);
+
+-- Strength/volume achievements are now per-exercise: clear the legacy global
+-- unlock flags (backfillPerExerciseAchievements re-derives them per exercise).
+UPDATE achievements SET unlocked_at = NULL
+WHERE key LIKE 'comparative_%'
+   OR key IN ('thousand_kg_club', 'volume_10k', 'volume_100k', 'volume_1m', 'progressive_overload');
+`;
+
 export const MIGRATIONS: readonly string[] = [
   SCHEMA_V1,
   SCHEMA_V2,
@@ -238,4 +269,6 @@ export const MIGRATIONS: readonly string[] = [
   SCHEMA_V6,
   SCHEMA_V7,
   SCHEMA_V8,
+  SCHEMA_V9,
+
 ];

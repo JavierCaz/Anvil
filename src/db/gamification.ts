@@ -5,10 +5,17 @@ import {
   getWeightComparativeByKey,
   type WeightComparativeDefinition,
 } from '@/constants/weight-comparatives';
-import { getAchievements, unlockAchievementIfNew } from './achievements';
+import {
+  getAchievementByKey,
+  METRIC_READERS,
+  ACHIEVEMENTS,
+  computeExerciseAchievementProgress,
+} from '@/constants/achievements';
+import { getAchievements, unlockAchievementIfNew, unlockExerciseAchievement } from './achievements';
 import { getWeeklyConsistency, type WeeklyConsistency } from './stats';
 import {
   getActiveWorkoutExercises,
+  getExerciseStats,
   getWorkoutLog,
   getWorkoutRoutineName,
   getWorkoutSets,
@@ -16,7 +23,6 @@ import {
   getWorkoutStats,
 } from './workouts';
 import type { WorkoutSummary } from './types';
-import { getAchievementByKey, METRIC_READERS } from '@/constants/achievements';
 
 /**
  * Gamification derivations: PR detection, weekly consistency, and the
@@ -47,14 +53,29 @@ export interface WorkoutRecap {
   /** Personal records set during this session (also written to `personal_records`). */
   prs: DetectedPR[];
   /** Weight milestones unlocked during this session, ascending by threshold. */
-  milestonesUnlocked: WeightComparativeDefinition[];
+  milestonesUnlocked: (WeightComparativeDefinition & { exerciseName: string })[];
   /** The next milestone above the heaviest set ever lifted, or null when all are reached. */
   nextMilestone: WeightComparativeDefinition | null;
   /** Heaviest single completed set (kg) — drives the distance to the next milestone. */
   maxWeightKg: number;
   consistency: WeeklyConsistency;
-  /** Keys of achievements newly unlocked by this session (aggregate-earned and event-based). */
-  achievementsUnlocked: string[];
+  /** Keys of achievements newly unlocked by this session (global + per-exercise). */
+  achievementsUnlocked: UnlockedAchievement[];
+}
+
+/** An achievement unlocked by a finished session. Exercise-scoped ones carry the exercise. */
+export interface UnlockedAchievement {
+  key: string;
+  /** Exercise that earned this achievement (per-exercise achievements only). */
+  exerciseId?: number;
+  exerciseName?: string;
+}
+
+/** Per-exercise achievement unlock result, grouped by the earning exercise. */
+export interface ExerciseAchievementUnlock {
+  key: string;
+  exerciseId: number;
+  exerciseName: string;
 }
 
 interface SetRow {
@@ -275,10 +296,13 @@ export async function detectAndUnlockSpecials(
 }
 
 /**
- * Unlock aggregate achievements whose target has been reached (volume tiers,
- * experience tiers, consistency streaks, monthly PR count). Call after the
- * workout is completed and PRs are recorded so monthly counts are current.
- * Returns the newly unlocked keys.
+ * Unlock aggregate achievements whose target has been reached. Only
+ * GLOBAL-scoped achievements (experience, consistency) are evaluated here —
+ * exercise-scoped ones (volume tiers, progressive overload, weight
+ * milestones) are unlocked per exercise in
+ * `unlockEarnedExerciseAchievements`. Call after the workout is completed
+ * and PRs are recorded so monthly counts are current. Returns the newly
+ * unlocked keys.
  */
 export async function unlockEarnedAchievements(
   db: SQLiteDatabase,
@@ -296,6 +320,9 @@ export async function unlockEarnedAchievements(
     if (!definition || definition.metric === undefined || definition.target === undefined) {
       continue;
     }
+    if (definition.scope === 'exercise') {
+      continue; // earned per-exercise, not from global stats
+    }
     if (METRIC_READERS[definition.metric](stats) >= definition.target) {
       if (await unlockAchievementIfNew(db, row.key)) {
         unlocked.push(row.key);
@@ -305,6 +332,40 @@ export async function unlockEarnedAchievements(
 
   return unlocked;
 }
+
+/**
+ * Unlock exercise-scoped achievements (volume tiers + progressive overload)
+ * for the exercises in a completed session, from each exercise's own stats.
+ * Returns the newly unlocked achievements with their earning exercise.
+ */
+export async function unlockEarnedExerciseAchievements(
+  db: SQLiteDatabase,
+  exerciseIds: number[]
+): Promise<ExerciseAchievementUnlock[]> {
+  const unlocked: ExerciseAchievementUnlock[] = [];
+  for (const exerciseId of exerciseIds) {
+    const stats = await getExerciseStats(db, exerciseId);
+    const nameRow = await db.getFirstAsync<{ name: string }>(
+      'SELECT name FROM exercises WHERE id = ?',
+      exerciseId
+    );
+    const exerciseName = nameRow?.name ?? '';
+
+    for (const definition of ACHIEVEMENTS) {
+      if (definition.scope !== 'exercise' || definition.metric === undefined || definition.target === undefined) {
+        continue;
+      }
+      const { progress } = computeExerciseAchievementProgress(definition.key, stats);
+      if (progress >= 1) {
+        if (await unlockExerciseAchievement(db, exerciseId, definition.key)) {
+          unlocked.push({ key: definition.key, exerciseId, exerciseName });
+        }
+      }
+    }
+  }
+  return unlocked;
+}
+
 /**
  * Assemble everything the post-workout recap needs. Call AFTER
  * `completeWorkout` resolves so `completed_at` is set and the session counts.
@@ -320,7 +381,19 @@ export async function getWorkoutRecap(
   const prs = await detectAndRecordPRs(db, logId);
   const specialsUnlocked = await detectAndUnlockSpecials(db, logId, weeklyGoal);
   const earned = await unlockEarnedAchievements(db, weeklyGoal);
-  const achievementsUnlocked = [...new Set([...specialsUnlocked, ...earned])];
+
+  // Per-exercise unlocks for the exercises in this session.
+  const sessionExercises = await getActiveWorkoutExercises(db, logId);
+  const exerciseEarned = await unlockEarnedExerciseAchievements(
+    db,
+    sessionExercises.map((exercise) => exercise.exercise_id)
+  );
+
+  const achievementsUnlocked: UnlockedAchievement[] = [
+    ...specialsUnlocked.map((key) => ({ key })),
+    ...earned.map((key) => ({ key })),
+    ...exerciseEarned.map(({ key, exerciseId, exerciseName }) => ({ key, exerciseId, exerciseName })),
+  ];
 
   // Volume delta vs the previous completed workout of the same routine.
   let volumeDeltaPct: number | null = null;
@@ -343,18 +416,31 @@ export async function getWorkoutRecap(
   }
 
   // Weight milestones unlocked during this session (the set-level toast unlocks them).
+  const sessionExerciseIds = sessionExercises.map((exercise) => exercise.exercise_id);
+  const sessionPlaceholders = sessionExerciseIds.map(() => '?').join(', ');
   const milestoneRows =
-    log?.started_at && log?.completed_at
-      ? await db.getAllAsync<{ key: string }>(
-          `SELECT key FROM achievements
-           WHERE unlocked_at IS NOT NULL AND unlocked_at >= ? AND unlocked_at <= ?`,
+    log?.started_at && log?.completed_at && sessionExerciseIds.length > 0
+      ? await db.getAllAsync<{ key: string; exercise_name: string | null }>(
+          `SELECT ea.key, e.name AS exercise_name
+           FROM exercise_achievements ea
+           JOIN exercises e ON e.id = ea.exercise_id
+           WHERE ea.unlocked_at >= ? AND ea.unlocked_at <= ?
+             AND ea.exercise_id IN (${sessionPlaceholders})
+           ORDER BY ea.unlocked_at ASC`
+          ,
           log.started_at,
-          log.completed_at
+          log.completed_at,
+          ...sessionExerciseIds,
         )
       : [];
   const milestonesUnlocked = milestoneRows
-    .map((row) => getWeightComparativeByKey(row.key))
-    .filter((milestone): milestone is WeightComparativeDefinition => milestone !== undefined)
+    .map((row) => {
+      const milestone = getWeightComparativeByKey(row.key);
+      return milestone ? { ...milestone, exerciseName: row.exercise_name ?? '' } : null;
+    })
+    .filter(
+      (milestone): milestone is WeightComparativeDefinition & { exerciseName: string } => milestone !== null
+    )
     .sort((a, b) => a.thresholdKg - b.thresholdKg);
 
   // Next milestone beyond the heaviest completed set.

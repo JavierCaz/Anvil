@@ -32,6 +32,9 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
   const { summary, consistency, prs, milestonesUnlocked, nextMilestone, achievementsUnlocked } = recap;
   const showMilestones = milestonesUnlocked.length > 0 || nextMilestone !== null;
   const showConsistency = consistency.weeklyGoal > 0;
+  // Global unlocks are keys without exercise context; per-exercise ones carry it.
+  const globalUnlocked = achievementsUnlocked.filter((entry) => entry.exerciseId === undefined);
+  const exerciseUnlocked = achievementsUnlocked.filter((entry) => entry.exerciseId !== undefined);
 
   const renderPR = (pr: DetectedPR) => {
     const label = pr.type === 'weight' ? t('recap.newWeightPr') : t('recap.newOneRmPr');
@@ -120,11 +123,18 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                   {t('recap.milestoneUnlocked')}
                 </Text>
                 {milestonesUnlocked.map((milestone) => (
-                  <View key={milestone.key} style={styles.milestoneRow}>
+                  <View key={`${milestone.key}-${milestone.exerciseName}`} style={styles.milestoneRow}>
                     <Text style={styles.milestoneIcon}>{milestone.icon}</Text>
-                    <Text style={[styles.milestoneName, { color: colors.text }]} numberOfLines={1}>
-                      {t(milestone.nameKey)}
-                    </Text>
+                    <View style={styles.milestoneBody}>
+                      <Text style={[styles.milestoneName, { color: colors.text }]} numberOfLines={1}>
+                        {t(milestone.nameKey)}
+                      </Text>
+                      {milestone.exerciseName ? (
+                        <Text style={[styles.milestoneExercise, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {milestone.exerciseName}
+                        </Text>
+                      ) : null}
+                    </View>
                     <Text style={[styles.milestoneKg, { color: colors.textSecondary }]}>
                       {formatWeightWithUnit(milestone.thresholdKg, unit)}
                     </Text>
@@ -174,13 +184,13 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
               </View>
             )}
 
-            {/* Newly unlocked achievements (aggregate-earned + specials) */}
-            {achievementsUnlocked.length > 0 && (
+            {/* Newly unlocked achievements (global + per-exercise) */}
+            {(globalUnlocked.length > 0 || exerciseUnlocked.length > 0) && (
               <View style={styles.section}>
                 <Text style={[styles.sectionTitle, { color: colors.primary }]}>
                   {t('recap.achievementsUnlocked')}
                 </Text>
-                {achievementsUnlocked.map((key) => {
+                {globalUnlocked.map(({ key }) => {
                   const definition = getAchievementByKey(key);
                   return definition ? (
                     <View key={key} style={styles.specialRow}>
@@ -188,6 +198,22 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                       <Text style={[styles.specialName, { color: colors.text }]} numberOfLines={1}>
                         {t(definition.nameKey)}
                       </Text>
+                    </View>
+                  ) : null;
+                })}
+                {exerciseUnlocked.map(({ key, exerciseName }) => {
+                  const definition = getAchievementByKey(key);
+                  return definition ? (
+                    <View key={`${key}-${exerciseName}`} style={styles.specialRow}>
+                      <Text style={styles.specialIcon}>{definition.icon}</Text>
+                      <View style={styles.specialBody}>
+                        <Text style={[styles.specialName, { color: colors.text }]} numberOfLines={1}>
+                          {t(definition.nameKey)}
+                        </Text>
+                        <Text style={[styles.specialExercise, { color: colors.textSecondary }]} numberOfLines={1}>
+                          {exerciseName}
+                        </Text>
+                      </View>
                     </View>
                   ) : null;
                 })}
@@ -315,10 +341,16 @@ const styles = StyleSheet.create({
   milestoneIcon: {
     fontSize: 22,
   },
-  milestoneName: {
+  milestoneBody: {
     flex: 1,
+    gap: 1,
+  },
+  milestoneName: {
     fontSize: 15,
     fontWeight: '700',
+  },
+  milestoneExercise: {
+    fontSize: 12,
   },
   milestoneKg: {
     fontSize: 14,
@@ -370,10 +402,16 @@ const styles = StyleSheet.create({
   specialIcon: {
     fontSize: 20,
   },
-  specialName: {
+  specialBody: {
     flex: 1,
+    gap: 1,
+  },
+  specialName: {
     fontSize: 15,
     fontWeight: '600',
+  },
+  specialExercise: {
+    fontSize: 12,
   },
   closeButton: {
     alignItems: 'center',

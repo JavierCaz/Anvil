@@ -106,6 +106,7 @@
     },
     "details": {
       "unlockedOn": "Unlocked on {{date}}",
+      "earnedWith": "Earned with",
       "locked": "Keep training to unlock"
     },
     "categories": {
@@ -223,11 +224,6 @@
         "description": "Lift the weight of a compact car in a single set"
       }
     }
-  },
-  "notifications": {
-    "comparativeLifted": "You just lifted {{object}}!",
-    "comparativeDetail": "{{weight}} {{unit}} · {{exercise}}",
-    "comparativeMore": "+{{count}} more unlocked"
   },
   "routines": {
     "newRoutine": "New Routine",
@@ -353,6 +349,7 @@
     "elapsed": "Elapsed",
     "exercisesDone": "{{done}} of {{total}} exercises",
     "setsDone": "{{done}} of {{total}} sets",
+    "achievementsUnlocked": "Achievements unlocked",
     "set": "Set {{number}}",
     "weight": "Weight ({{unit}})",
     "reps": "Reps",
@@ -378,6 +375,9 @@
     "keepRoutine": "Keep routine"
   },
   "notifications": {
+    "comparativeLifted": "You just lifted {{object}}!",
+    "comparativeDetail": "{{weight}} {{unit}} · {{exercise}}",
+    "comparativeMore": "+{{count}} more unlocked",
     "promptTitle": "Enable notifications?",
     "promptMessage": "Anvil uses notifications to sound your rest-timer alarm even when the app is in the background or your screen is locked. Everything stays on your device — no accounts, no tracking.",
     "enable": "Enable notifications"

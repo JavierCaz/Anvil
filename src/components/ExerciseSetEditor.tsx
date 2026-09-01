@@ -58,6 +58,8 @@ interface ExerciseSetEditorProps {
   onUndoSet?: (setNumber: number) => void;
   /** When provided, the exercise header card is tappable (opens the exercise info card). */
   onHeaderPress?: () => void;
+  /** Icons of achievements unlocked for this exercise (shown under the header, workout mode). */
+  achievementIcons?: string[];
   /** Controlled accordion state (the workout screen drives auto-advance). */
   expanded?: number | null;
   onExpandedChange?: (next: number | null) => void;
@@ -86,6 +88,7 @@ export function ExerciseSetEditor({
   onCompleteSet,
   onUndoSet,
   onHeaderPress,
+  achievementIcons,
   expanded: expandedProp,
   onExpandedChange,
 }: ExerciseSetEditorProps) {
@@ -136,6 +139,20 @@ export function ExerciseSetEditor({
                 ? t('workout.setsDone', { done: doneCount, total: totalSets || sets.length })
                 : t('routines.setsEditor.setCount', { count: sets.length })}
             </Text>
+            {achievementIcons && achievementIcons.length > 0 && (
+              <View style={styles.achievementRow}>
+                {achievementIcons.slice(0, 5).map((icon, index) => (
+                  <Text key={`${icon}-${index}`} style={styles.achievementIcon}>
+                    {icon}
+                  </Text>
+                ))}
+                {achievementIcons.length > 5 && (
+                  <Text style={[styles.achievementMore, { color: colors.textSecondary }]}>
+                    +{achievementIcons.length - 5}
+                  </Text>
+                )}
+              </View>
+            )}
           </View>
         </View>
       </Pressable>
@@ -456,6 +473,20 @@ const styles = StyleSheet.create({
   },
   infoMeta: {
     fontSize: 13,
+  },
+  achievementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 4,
+  },
+  achievementIcon: {
+    fontSize: 15,
+  },
+  achievementMore: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   setCard: {
     borderRadius: 14,

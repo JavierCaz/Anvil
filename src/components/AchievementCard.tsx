@@ -22,7 +22,9 @@ export function AchievementCard({ definition, progress, unlocked, onPress }: Ach
   const unit = useUnitsStore((state) => state.unitSystem);
 
   const tierColor = definition.tier ? ACHIEVEMENT_TIER_COLORS[definition.tier] : null;
-  const showProgress = definition.metric !== undefined;
+  // Progress bars only make sense for global achievements — exercise-scoped
+  // ones are earned per exercise (the detail card lists the earning exercises).
+  const showProgress = definition.metric !== undefined && definition.scope !== 'exercise';
   // Volume achievements describe their kg threshold; interpolate in the user's unit.
   const descriptionParams =
     definition.metric === 'totalVolume' && definition.target !== undefined

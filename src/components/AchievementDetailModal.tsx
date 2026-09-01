@@ -3,6 +3,7 @@ import 'dayjs/locale/es';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { DetailModal } from '@/components/DetailModal';
+import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import {
   ACHIEVEMENT_TIER_COLORS,
   type AchievementDefinition,
@@ -18,6 +19,8 @@ interface AchievementDetailModalProps {
   unlocked: boolean;
   /** ISO timestamp when unlocked, or null while locked. */
   unlockedAt: string | null;
+  /** Exercises that earned this achievement (exercise-scoped, unlocked only). */
+  exercises?: { id: number; name: string; slug: string | null; unlockedAt: string | null }[];
   onClose: () => void;
 }
 
@@ -49,6 +52,7 @@ export function AchievementDetailModal({
   progress,
   unlocked,
   unlockedAt,
+  exercises,
   onClose,
 }: AchievementDetailModalProps) {
   const { colors } = useAppTheme();
@@ -56,7 +60,11 @@ export function AchievementDetailModal({
   const unit = useUnitsStore((state) => state.unitSystem);
 
   const tierColor = definition.tier ? ACHIEVEMENT_TIER_COLORS[definition.tier] : null;
-  const hasProgress = definition.metric !== undefined && definition.target !== undefined;
+  // Exercise-scoped achievements are earned per exercise (the card lists the
+  // earning exercises), so an aggregate progress bar is meaningless for them.
+  const hasProgress = definition.metric !== undefined
+    && definition.target !== undefined
+    && definition.scope !== 'exercise';
 
   const progressLine = hasProgress
     ? (() => {
@@ -120,17 +128,53 @@ export function AchievementDetailModal({
         </View>
       )}
 
-      {/* Status */}
-      <Text
-        style={[
-          styles.status,
-          { color: unlocked ? colors.primary : colors.textSecondary },
-        ]}
-      >
-        {unlocked && unlockedDate
-          ? t('achievements.details.unlockedOn', { date: unlockedDate })
-          : t('achievements.details.locked')}
-      </Text>
+      {/* Exercises that earned this achievement */}
+      {unlocked && exercises && exercises.length > 0 && (
+        <View style={styles.exercisesBlock}>
+          <Text style={[styles.exercisesLabel, { color: colors.textSecondary }]}>
+            {t('achievements.details.earnedWith')}
+          </Text>
+          <View style={styles.exercisesRow}>
+            {exercises.map((exercise) => {
+              const exerciseDate = exercise.unlockedAt
+                ? dayjs(exercise.unlockedAt).locale(i18n.language).format('MMM D, YYYY')
+                : null;
+              return (
+                <View key={exercise.id} style={styles.exerciseChip}>
+                  <ExerciseThumbnail slug={exercise.slug} size={28} borderRadius={6} />
+                  <View style={styles.exerciseChipBody}>
+                    <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={1}>
+                      {exercise.name}
+                    </Text>
+                    {exerciseDate && (
+                      <Text style={[styles.exerciseDate, { color: colors.textSecondary }]} numberOfLines={1}>
+                        {exerciseDate}
+                      </Text>
+                    )}
+                  </View>
+                </View>
+              );
+            })}
+          </View>
+        </View>
+      )}
+      {/* Status — the aggregate unlock date only applies to global achievements;
+          exercise-scoped ones show each exercise's date in the earned-with list. */}
+      {!unlocked && (
+        <Text
+          style={[
+            styles.status,
+            { color: colors.textSecondary },
+          ]}
+        >
+          {t('achievements.details.locked')}
+        </Text>
+      )}
+      {unlocked && definition.scope !== 'exercise' && unlockedDate && (
+        <Text style={[styles.status, { color: colors.primary }]}>
+          {t('achievements.details.unlockedOn', { date: unlockedDate })}
+        </Text>
+      )}
     </DetailModal>
   );
 }
@@ -201,6 +245,43 @@ const styles = StyleSheet.create({
     fontSize: 13,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
+  },
+  exercisesBlock: {
+    alignSelf: 'stretch',
+    gap: 6,
+    marginBottom: 14,
+  },
+  exercisesLabel: {
+    fontSize: 12,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.4,
+  },
+  exercisesRow: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  exerciseChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    borderRadius: 8,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
+    maxWidth: '48%',
+  },
+  exerciseChipBody: {
+    flexShrink: 1,
+    gap: 0,
+  },
+  exerciseName: {
+    fontSize: 12,
+    fontWeight: '600',
+  },
+  exerciseDate: {
+    fontSize: 10,
   },
   status: {
     fontSize: 13,

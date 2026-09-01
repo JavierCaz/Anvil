@@ -19,6 +19,7 @@ function data(overrides: TableFixtures = {}): Record<string, unknown[]> {
     sets: [],
     personal_records: [],
     achievements: [],
+    exercise_achievements: [],
     ...overrides,
   };
 }
@@ -56,7 +57,7 @@ describe('parseBackupFile', () => {
     expect(parsed.type).toBe('anvil-backup');
     expect(parsed.version).toBe(BACKUP_VERSION);
     expect(parsed.databaseVersion).toBe(DATABASE_VERSION);
-    expect(Object.keys(parsed.data)).toHaveLength(8);
+    expect(Object.keys(parsed.data)).toHaveLength(9);
   });
 
   it('preserves rows and preferences', () => {

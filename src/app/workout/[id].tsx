@@ -10,6 +10,8 @@ import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { WorkoutRecapModal } from '@/components/WorkoutRecap';
 import { getWorkoutRecap, type WorkoutRecap } from '@/db/gamification';
+import { getExercisesAchievements, reconcileExerciseAchievements } from '@/db/achievements';
+import type { AchievementDefinition } from '@/constants/achievements';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import {
   cancelWorkout,
@@ -42,9 +44,9 @@ export default function WorkoutSessionScreen() {
   const [log, setLog] = useState<WorkoutLog | null>(null);
   const [routineName, setRoutineName] = useState('');
   const [exercises, setExercises] = useState<ActiveWorkoutExercise[]>([]);
+  const [exerciseAchievements, setExerciseAchievements] = useState<Map<number, AchievementDefinition[]>>(new Map());
   const [now, setNow] = useState(() => Date.now());
   const [recap, setRecap] = useState<WorkoutRecap | null>(null);
-
   // Live stopwatch tick — elapsed is derived from `started_at`, so it stays
   // accurate even if the screen was backgrounded.
   useEffect(() => {
@@ -65,6 +67,14 @@ export default function WorkoutSessionScreen() {
           setRoutineName(name ?? '');
           setExercises(exerciseRows);
         }
+        return getExercisesAchievements(
+          db,
+          exerciseRows.map((exercise) => exercise.exercise_id)
+        ).then((achievements) => {
+          if (active) {
+            setExerciseAchievements(achievements);
+          }
+        });
       });
       return () => {
         active = false;
@@ -89,6 +99,12 @@ export default function WorkoutSessionScreen() {
           style: 'destructive',
           onPress: () => {
             void cancelWorkout(db, logId).then(() => {
+              // Revoke weight comparatives unlocked by the discarded session's
+              // sets (a discarded workout never counts).
+              const ids = exercises.map((exercise) => exercise.exercise_id);
+              void Promise.all(
+                ids.map((exerciseId) => reconcileExerciseAchievements(db, exerciseId))
+              );
               router.dismissTo(backHref);
             });
           },
@@ -204,6 +220,7 @@ export default function WorkoutSessionScreen() {
         }
         renderItem={({ item }) => {
           const done = item.completed_sets >= item.target_sets;
+          const achievements = exerciseAchievements.get(item.exercise_id) ?? [];
           return (
             <Pressable
               accessibilityRole="button"
@@ -225,6 +242,20 @@ export default function WorkoutSessionScreen() {
                 <Text style={[styles.rowMeta, { color: colors.textSecondary }]}>
                   {t('workout.setsDone', { done: item.completed_sets, total: item.target_sets })}
                 </Text>
+                {achievements.length > 0 && (
+                  <View style={styles.achievementRow}>
+                    {achievements.slice(0, 5).map((achievement) => (
+                      <Text key={achievement.key} style={styles.achievementIcon}>
+                        {achievement.icon}
+                      </Text>
+                    ))}
+                    {achievements.length > 5 && (
+                      <Text style={[styles.achievementMore, { color: colors.textSecondary }]}>
+                        +{achievements.length - 5}
+                      </Text>
+                    )}
+                  </View>
+                )}
               </View>
               <Ionicons
                 name={done ? 'checkmark-circle' : 'chevron-forward'}
@@ -327,6 +358,20 @@ const styles = StyleSheet.create({
   },
   rowMeta: {
     fontSize: 12,
+  },
+  achievementRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 4,
+    marginTop: 4,
+  },
+  achievementIcon: {
+    fontSize: 15,
+  },
+  achievementMore: {
+    fontSize: 12,
+    fontWeight: '600',
   },
   footer: {
     paddingHorizontal: 20,

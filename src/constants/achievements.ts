@@ -14,10 +14,14 @@ import { getWeightComparativeByKey } from './weight-comparatives';
  * Event-based "special" achievements have no `metric`/`target` — they are
  * binary and unlocked at workout completion, not from aggregate stats.
  */
-
 export type AchievementCategory = 'strength' | 'volume' | 'consistency' | 'experience' | 'special';
 export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'diamond';
 export type AchievementMetric = 'totalWorkouts' | 'totalVolume' | 'maxWeight' | 'consistencyStreak' | 'prsThisMonth';
+/**
+ * Whether the achievement is earned globally (any exercise counts toward a
+ * single unlock) or per-exercise (each exercise tracks its own unlock).
+ */
+export type AchievementScope = 'global' | 'exercise';
 
 export interface AchievementDefinition {
   key: string;
@@ -26,6 +30,8 @@ export interface AchievementDefinition {
   icon: string;
   category: AchievementCategory;
   tier?: AchievementTier;
+  /** Whether the achievement is global or scoped to each exercise. Defaults to 'global'. */
+  scope?: AchievementScope;
   /** Aggregate metric driving progress. Absent on event-based achievements. */
   metric?: AchievementMetric;
   /** Progress target for the metric. */
@@ -57,10 +63,11 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
     descriptionKey: 'achievements.progressiveOverload.description',
     icon: '📈',
     category: 'strength',
+    scope: 'exercise',
     metric: 'prsThisMonth',
     target: 5,
   },
-  // --- Volume: cumulative weight × reps. ---
+  // --- Volume: cumulative weight × reps, per exercise. ---
   {
     key: 'thousand_kg_club',
     nameKey: 'achievements.thousandKgClub.name',
@@ -68,6 +75,7 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
     icon: '💪',
     category: 'volume',
     tier: 'bronze',
+    scope: 'exercise',
     metric: 'totalVolume',
     target: 1000,
   },
@@ -78,6 +86,7 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
     icon: '🏋️',
     category: 'volume',
     tier: 'silver',
+    scope: 'exercise',
     metric: 'totalVolume',
     target: 10000,
   },
@@ -88,6 +97,7 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
     icon: '⚙️',
     category: 'volume',
     tier: 'gold',
+    scope: 'exercise',
     metric: 'totalVolume',
     target: 100000,
   },
@@ -98,6 +108,7 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
     icon: '🪨',
     category: 'volume',
     tier: 'diamond',
+    scope: 'exercise',
     metric: 'totalVolume',
     target: 1000000,
   },
@@ -222,6 +233,50 @@ export const METRIC_READERS: Record<AchievementMetric, (stats: WorkoutStats) => 
   prsThisMonth: (stats) => stats.prsThisMonth,
 };
 
+/**
+ * Per-exercise stats feeding exercise-scoped achievement progress.
+ */
+export interface ExerciseAchievementStats {
+  /** Cumulative weight × reps on this exercise (kg). */
+  totalVolumeKg: number;
+  /** Heaviest completed set on this exercise (kg). */
+  maxWeightKg: number;
+  /** Personal records set on this exercise in the current month. */
+  prsThisMonth: number;
+}
+
+/**
+ * Per-exercise metric readers (only the metrics exercise-scoped achievements use).
+ */
+export const EXERCISE_METRIC_READERS: Partial<
+  Record<AchievementMetric, (stats: ExerciseAchievementStats) => number>
+> = {
+  totalVolume: (stats) => stats.totalVolumeKg,
+  maxWeight: (stats) => stats.maxWeightKg,
+  prsThisMonth: (stats) => stats.prsThisMonth,
+};
+
+/**
+ * Progress of an exercise-scoped achievement against one exercise's stats.
+ */
+export function computeExerciseAchievementProgress(
+  key: string,
+  stats: ExerciseAchievementStats
+): AchievementProgress {
+  const definition = getAchievementByKey(key);
+  if (!definition || definition.metric === undefined || definition.target === undefined) {
+    return { current: 0, target: 0, progress: 0 };
+  }
+  const reader = EXERCISE_METRIC_READERS[definition.metric];
+  if (!reader) {
+    return { current: 0, target: 0, progress: 0 };
+  }
+  const current = reader(stats);
+  const target = definition.target;
+  const progress = target > 0 ? Math.min(1, current / target) : 0;
+  return { current, target, progress };
+}
+
 export function getAchievementByKey(key: string): AchievementDefinition | undefined {
   const achievement = ACHIEVEMENTS.find((entry) => entry.key === key);
   if (achievement) {
@@ -237,6 +292,7 @@ export function getAchievementByKey(key: string): AchievementDefinition | undefi
         descriptionKey: comparative.descriptionKey,
         icon: comparative.icon,
         category: 'strength',
+        scope: 'exercise',
         metric: 'maxWeight',
         target: comparative.thresholdKg,
       }

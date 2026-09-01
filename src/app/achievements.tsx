@@ -12,10 +12,12 @@ import {
 } from '@/constants/achievements';
 import {
   buildAchievementItems,
+  getAllExerciseUnlocks,
+  getAchievementExerciseMeta,
   getAchievements,
   type AchievementProgressItem,
 } from '@/db/achievements';
-import { getWorkoutStats } from '@/db/workouts';
+import { getAllExerciseStats, getWorkoutStats } from '@/db/workouts';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
@@ -34,14 +36,23 @@ export default function AchievementsScreen() {
       let active = true;
 
       async function load() {
-        const [stats, rows] = await Promise.all([
+        const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
           getWorkoutStats(db, { weeklyGoal }),
           getAchievements(db),
+          getAllExerciseStats(db),
+          getAllExerciseUnlocks(db),
+          getAchievementExerciseMeta(db),
         ]);
         if (!active) {
           return;
         }
-        setItems(buildAchievementItems(rows, stats));
+        setItems(
+          buildAchievementItems(rows, stats, {
+            exerciseStats,
+            unlockedExerciseKeys: exerciseUnlocks,
+            exerciseMeta,
+          })
+        );
       }
 
       void load();
@@ -106,6 +117,7 @@ export default function AchievementsScreen() {
             progress={selectedAchievement.progress}
             unlocked={selectedAchievement.unlocked}
             unlockedAt={selectedAchievement.unlockedAt}
+            exercises={selectedAchievement.exercises}
             onClose={() => setSelectedAchievement(null)}
           />
         ) : null;

@@ -106,6 +106,7 @@
     },
     "details": {
       "unlockedOn": "Desbloqueado el {{date}}",
+      "earnedWith": "Logrado con",
       "locked": "Sigue entrenando para desbloquear"
     },
     "categories": {
@@ -223,11 +224,6 @@
         "description": "Levanta el peso de un auto compacto en una sola serie"
       }
     }
-  },
-  "notifications": {
-    "comparativeLifted": "¡Acabas de levantar {{object}}!",
-    "comparativeDetail": "{{weight}} {{unit}} · {{exercise}}",
-    "comparativeMore": "+{{count}} más desbloqueados"
   },
   "routines": {
     "newRoutine": "Nueva rutina",
@@ -353,6 +349,7 @@
     "elapsed": "Tiempo",
     "exercisesDone": "{{done}} de {{total}} ejercicios",
     "setsDone": "{{done}} de {{total}} series",
+    "achievementsUnlocked": "Logros desbloqueados",
     "set": "Serie {{number}}",
     "weight": "Peso ({{unit}})",
     "reps": "Repeticiones",
@@ -378,6 +375,9 @@
     "keepRoutine": "Mantener rutina"
   },
   "notifications": {
+    "comparativeLifted": "¡Acabas de levantar {{object}}!",
+    "comparativeDetail": "{{weight}} {{unit}} · {{exercise}}",
+    "comparativeMore": "+{{count}} más desbloqueados",
     "promptTitle": "¿Activar notificaciones?",
     "promptMessage": "Anvil usa notificaciones para que la alarma del descanso suene aunque la app esté en segundo plano o la pantalla esté bloqueada. Todo permanece en tu dispositivo: sin cuentas ni rastreo.",
     "enable": "Activar notificaciones"

@@ -12,10 +12,12 @@ import { WeekStrip, type WeekDayItem } from '@/components/WeekStrip';
 import { getAchievementByKey } from '@/constants/achievements';
 import {
   buildAchievementItems,
+  getAllExerciseUnlocks,
+  getAchievementExerciseMeta,
   getAchievements,
   type AchievementProgressItem,
 } from '@/db/achievements';
-import { getWorkoutDaysInRange, getWorkoutStats } from '@/db/workouts';
+import { getAllExerciseStats, getWorkoutDaysInRange, getWorkoutStats } from '@/db/workouts';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
@@ -63,10 +65,14 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
-
       async function load() {
-        const stats = await getWorkoutStats(db, { weeklyGoal });
-        const rows = await getAchievements(db);
+        const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
+          getWorkoutStats(db, { weeklyGoal }),
+          getAchievements(db),
+          getAllExerciseStats(db),
+          getAllExerciseUnlocks(db),
+          getAchievementExerciseMeta(db),
+        ]);
         const workedOut = await getWorkoutDaysInRange(
           db,
           weekDays[0].iso,
@@ -77,7 +83,11 @@ export default function HomeScreen() {
           return;
         }
 
-        const achievements = buildAchievementItems(rows, stats);
+        const achievements = buildAchievementItems(rows, stats, {
+          exerciseStats,
+          unlockedExerciseKeys: exerciseUnlocks,
+          exerciseMeta,
+        });
 
         setData({
           weekDays: weekDays.map((day) => ({ ...day, workedOut: workedOut.has(day.iso) })),
@@ -200,6 +210,7 @@ export default function HomeScreen() {
             progress={selectedAchievement.progress}
             unlocked={selectedAchievement.unlocked}
             unlockedAt={selectedAchievement.unlockedAt}
+            exercises={selectedAchievement.exercises}
             onClose={() => setSelectedAchievement(null)}
           />
         ) : null;

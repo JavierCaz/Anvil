@@ -25,10 +25,12 @@ export type BackupTableName =
   | 'workout_logs'
   | 'sets'
   | 'personal_records'
-  | 'achievements';
+  | 'achievements'
+  | 'exercise_achievements';
 
 /** All tables included in a backup (in FK-safe order for deletion). */
 export const BACKUP_TABLES: readonly BackupTableName[] = [
+  'exercise_achievements',
   'routines',
   'exercises',
   'routine_exercises',
@@ -49,7 +51,9 @@ const BACKUP_INSERT_ORDER: readonly BackupTableName[] = [
   'sets',
   'personal_records',
   'achievements',
+  'exercise_achievements',
 ];
+
 
 type ColumnType = 'integer' | 'real' | 'text' | 'boolean';
 
@@ -125,6 +129,12 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     name: 'text',
     description: 'text',
     icon: 'text',
+    key: 'text',
+    unlocked_at: 'text',
+  },
+  exercise_achievements: {
+    id: 'integer',
+    exercise_id: 'integer',
     key: 'text',
     unlocked_at: 'text',
   },

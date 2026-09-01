@@ -87,6 +87,100 @@ export async function getWorkoutStats(
 }
 
 /**
+ * Per-exercise metrics used by exercise-scoped achievements. Mirrors the
+ * metric fields in `WorkoutStats` but scoped to a single exercise.
+ */
+export interface ExerciseStats {
+  /** Cumulative weight × reps on this exercise across completed sessions (kg). */
+  totalVolumeKg: number;
+  /** Heaviest completed set on this exercise (kg). */
+  maxWeightKg: number;
+  /** Personal records set on this exercise in the current calendar month. */
+  prsThisMonth: number;
+}
+
+/**
+ * Per-exercise stats for a single exercise.
+ */
+export async function getExerciseStats(
+  db: SQLiteDatabase,
+  exerciseId: number
+): Promise<ExerciseStats> {
+  const volume = (await db.getFirstAsync<{ v: number }>(`
+    SELECT COALESCE(SUM(s.weight * s.reps), 0) AS v
+    FROM sets s
+    JOIN workout_logs wl ON s.workout_log_id = wl.id
+    WHERE s.exercise_id = ? AND s.completed = 1 AND wl.completed_at IS NOT NULL
+  `
+  , exerciseId))?.v ?? 0;
+
+  const maxWeight = (await db.getFirstAsync<{ m: number }>(`
+    SELECT COALESCE(MAX(s.weight), 0) AS m
+    FROM sets s
+    JOIN workout_logs wl ON s.workout_log_id = wl.id
+    WHERE s.exercise_id = ? AND s.completed = 1 AND wl.completed_at IS NOT NULL AND s.weight > 0
+  `
+  , exerciseId))?.m ?? 0;
+
+  const now = dayjs();
+  const prsThisMonth = (await db.getFirstAsync<{ c: number }>(
+    'SELECT COUNT(*) AS c FROM personal_records WHERE exercise_id = ? AND achieved_at >= ? AND achieved_at < ?',
+    exerciseId,
+    now.startOf('month').toISOString(),
+    now.endOf('month').toISOString()
+  ))?.c ?? 0;
+
+  return { totalVolumeKg: volume, maxWeightKg: maxWeight, prsThisMonth };
+}
+
+/**
+ * Per-exercise stats for every exercise, keyed by exercise id. Used to
+ * compute exercise-scoped achievement progress for the catalog screens.
+ */
+export async function getAllExerciseStats(
+  db: SQLiteDatabase
+): Promise<Map<number, ExerciseStats>> {
+  const rows = await db.getAllAsync<{ exercise_id: number; v: number }>(`
+    SELECT s.exercise_id, COALESCE(SUM(s.weight * s.reps), 0) AS v
+    FROM sets s
+    JOIN workout_logs wl ON s.workout_log_id = wl.id
+    WHERE s.completed = 1 AND wl.completed_at IS NOT NULL
+    GROUP BY s.exercise_id
+  `);
+  const byExercise = new Map<number, ExerciseStats>();
+  for (const row of rows) {
+    byExercise.set(row.exercise_id, { totalVolumeKg: row.v, maxWeightKg: 0, prsThisMonth: 0 });
+  }
+
+  const maxRows = await db.getAllAsync<{ exercise_id: number; m: number }>(`
+    SELECT s.exercise_id, COALESCE(MAX(s.weight), 0) AS m
+    FROM sets s
+    JOIN workout_logs wl ON s.workout_log_id = wl.id
+    WHERE s.completed = 1 AND wl.completed_at IS NOT NULL AND s.weight > 0
+    GROUP BY s.exercise_id
+  `);
+  for (const row of maxRows) {
+    const entry = byExercise.get(row.exercise_id) ?? { totalVolumeKg: 0, maxWeightKg: 0, prsThisMonth: 0 };
+    entry.maxWeightKg = row.m;
+    byExercise.set(row.exercise_id, entry);
+  }
+
+  const now = dayjs();
+  const prsRows = await db.getAllAsync<{ exercise_id: number; c: number }>(
+    'SELECT exercise_id, COUNT(*) AS c FROM personal_records WHERE achieved_at >= ? AND achieved_at < ? GROUP BY exercise_id',
+    now.startOf('month').toISOString(),
+    now.endOf('month').toISOString()
+  );
+  for (const row of prsRows) {
+    const entry = byExercise.get(row.exercise_id) ?? { totalVolumeKg: 0, maxWeightKg: 0, prsThisMonth: 0 };
+    entry.prsThisMonth = row.c;
+    byExercise.set(row.exercise_id, entry);
+  }
+
+  return byExercise;
+}
+
+/**
  * Consecutive days (ending today, or yesterday when today has none) that have
  * at least one workout log. Uses local time so streaks match the user's day.
  */

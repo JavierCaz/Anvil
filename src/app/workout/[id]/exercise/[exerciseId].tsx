@@ -4,6 +4,7 @@ import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AchievementDetailModal } from '@/components/AchievementDetailModal';
 import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import {
   ExerciseSetEditor,
@@ -13,7 +14,9 @@ import { RestTimer } from '@/components/RestTimer';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { useToast } from '@/components/ToastProvider';
-import { unlockWeightComparatives } from '@/db/achievements';
+import { getAchievementByKey } from '@/constants/achievements';
+import type { AchievementDefinition } from '@/constants/achievements';
+import { getExerciseAchievements, reconcileExerciseAchievements, unlockWeightComparatives } from '@/db/achievements';
 import { getExerciseById } from '@/db/exercises';
 import {
   deleteSetAndShift,
@@ -60,6 +63,8 @@ export default function WorkoutExerciseScreen() {
   const [loaded, setLoaded] = useState(false);
   const [activeRest, setActiveRest] = useState<ActiveRest | null>(null);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
+  const [achievementIcons, setAchievementIcons] = useState<string[]>([]);
+  const [toastAchievement, setToastAchievement] = useState<AchievementDefinition | null>(null);
 
   const handleRestDone = useCallback(() => {
     setActiveRest(null);
@@ -118,6 +123,11 @@ export default function WorkoutExerciseScreen() {
       }
       setDrafts(initialDrafts);
       setRestConfig(initialRest);
+      void getExerciseAchievements(db, exerciseIdNum).then((definitions) => {
+        if (active) {
+          setAchievementIcons(definitions.map((definition) => definition.icon));
+        }
+      });
     });
     return () => {
       active = false;
@@ -160,11 +170,17 @@ export default function WorkoutExerciseScreen() {
       [setNumber]: Math.min(300, Math.max(0, seconds)),
     }));
   };
+  const loadAchievementIcons = () => {
+    void getExerciseAchievements(db, exerciseIdNum).then((definitions) => {
+      setAchievementIcons(definitions.map((definition) => definition.icon));
+    });
+  };
 
   const reload = () => {
     void getWorkoutSets(db, logId, exerciseIdNum).then((rows) => {
       setSets(rows);
     });
+    loadAchievementIcons();
   };
 
   const handleAddSet = () => {
@@ -234,27 +250,40 @@ export default function WorkoutExerciseScreen() {
         return setNumber + 1 <= setCount ? setNumber + 1 : null;
       });
 
-      // Weight comparatives: unlock every object reached by this set and toast
-      // the highest newly-unlocked one; the rest are counted as extras.
-      void unlockWeightComparatives(db, weightKg).then((unlocked) => {
-        if (unlocked.length === 0) {
-          return;
+      // Weight comparatives: unlock every object reached by this set for this
+      // exercise and toast the highest newly-unlocked one; the rest count as
+      // extras. Unlocks are per-exercise.
+      void unlockWeightComparatives(db, exerciseIdNum, weightKg).then((unlocked) => {
+        if (unlocked.length > 0) {
+          const top = unlocked[unlocked.length - 1];
+          const extras = unlocked.length - 1;
+          const detail = t('notifications.comparativeDetail', {
+            weight: formatWeight(weightKg, unit),
+            unit: weightUnitLabel(unit),
+            exercise: exercise?.exercise_name ?? '',
+          });
+          toast.show({
+            icon: top.icon,
+            title: t('notifications.comparativeLifted', { object: t(top.nameKey) }),
+            description:
+              extras > 0
+                ? `${detail} · ${t('notifications.comparativeMore', { count: extras })}`
+                : detail,
+            onPress: () => {
+              // Defer mounting the native Modal out of the touch handler —
+              // mounting it synchronously makes the tap's touch-up land on the
+              // modal backdrop, which closes it instantly (first tap appears dead).
+              setTimeout(() => {
+                const definition = getAchievementByKey(top.key);
+                if (definition) {
+                  setToastAchievement(definition);
+                }
+              }, 0);
+            },
+          });
         }
-        const top = unlocked[unlocked.length - 1];
-        const extras = unlocked.length - 1;
-        const detail = t('notifications.comparativeDetail', {
-          weight: formatWeight(weightKg, unit),
-          unit: weightUnitLabel(unit),
-          exercise: exercise?.exercise_name ?? '',
-        });
-        toast.show({
-          icon: top.icon,
-          title: t('notifications.comparativeLifted', { object: t(top.nameKey) }),
-          description:
-            extras > 0
-              ? `${detail} · ${t('notifications.comparativeMore', { count: extras })}`
-              : detail,
-        });
+        // Show newly-unlocked achievement icons immediately.
+        loadAchievementIcons();
       });
     });
   };
@@ -269,6 +298,8 @@ export default function WorkoutExerciseScreen() {
       // Only stop the rest timer when undoing the set it's counting down for.
       setActiveRest((current) => (current && current.setNumber === setNumber ? null : current));
       reload();
+      // Revoke weight comparatives no longer backed by a completed set.
+      void reconcileExerciseAchievements(db, exerciseIdNum);
     });
   };
 
@@ -305,6 +336,7 @@ export default function WorkoutExerciseScreen() {
               onRemoveSet={handleRemoveSet}
               onCompleteSet={handleComplete}
               onUndoSet={handleUndo}
+              achievementIcons={achievementIcons}
             />
           </ScrollView>
 
@@ -312,6 +344,25 @@ export default function WorkoutExerciseScreen() {
             <ExerciseDetailModal
               exercise={infoExercise}
               onClose={() => setInfoExercise(null)}
+            />
+          )}
+          {toastAchievement && (
+            <AchievementDetailModal
+              definition={toastAchievement}
+              progress={1}
+              unlocked
+              unlockedAt={new Date().toISOString()}
+              exercises={
+                exercise
+                  ? [{
+                      id: exercise.exercise_id,
+                      name: exercise.exercise_name,
+                      slug: exercise.exercise_slug,
+                      unlockedAt: new Date().toISOString(),
+                    }]
+                  : undefined
+              }
+              onClose={() => setToastAchievement(null)}
             />
           )}
 

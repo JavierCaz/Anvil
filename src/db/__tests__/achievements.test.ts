@@ -4,7 +4,7 @@ import {
   getWeightComparativeByKey,
   getWeightComparativesAtOrBelow,
 } from '@/constants/weight-comparatives';
-import { unlockWeightComparatives } from '@/db/achievements';
+import { reconcileExerciseAchievements, unlockWeightComparatives } from '@/db/achievements';
 import type { WorkoutStats } from '@/db/workouts';
 
 const STATS: WorkoutStats = {
@@ -17,9 +17,9 @@ const STATS: WorkoutStats = {
 };
 
 /** Minimal fake SQLiteDatabase exposing the queries `unlockWeightComparatives` uses. */
-function createMockDb(allRows: { key: string }[]) {
+function createMockDb(alreadyUnlocked: { key: string }[]) {
   return {
-    getAllAsync: jest.fn(async () => allRows),
+    getAllAsync: jest.fn(async () => alreadyUnlocked),
     runAsync: jest.fn(async () => ({ changes: 1 })),
   } as unknown as SQLiteDatabase;
 }
@@ -57,6 +57,7 @@ describe('getAchievementByKey (milestones)', () => {
       descriptionKey: 'achievements.comparatives.panda.description',
       icon: '🐼',
       category: 'strength',
+      scope: 'exercise',
       metric: 'maxWeight',
       target: 100,
     });
@@ -111,12 +112,10 @@ describe('computeAchievementProgress', () => {
 });
 
 describe('unlockWeightComparatives', () => {
-  it('unlocks every locked milestone at or below the weight and returns them', async () => {
-    const db = createMockDb(
-      getWeightComparativesAtOrBelow(80).map((c) => ({ key: c.key }))
-    );
+  it('unlocks every locked milestone at or below the weight for the exercise and returns them', async () => {
+    const db = createMockDb([]);
 
-    const unlocked = await unlockWeightComparatives(db, 80);
+    const unlocked = await unlockWeightComparatives(db, 7, 80);
 
     expect(unlocked.map((c) => c.key)).toEqual([
       'comparative_watermelon',
@@ -130,18 +129,63 @@ describe('unlockWeightComparatives', () => {
     const db = createMockDb(
       getWeightComparativesAtOrBelow(20).map((c) => ({ key: c.key }))
     );
-    await unlockWeightComparatives(db, 20);
+    const unlocked = await unlockWeightComparatives(db, 7, 20);
 
-    (db.getAllAsync as jest.Mock).mockResolvedValueOnce([]);
-    const second = await unlockWeightComparatives(db, 20);
-
-    expect(second).toEqual([]);
+    expect(unlocked).toEqual([]);
+    expect(db.runAsync).not.toHaveBeenCalled();
   });
 
   it('does nothing below the smallest threshold', async () => {
     const db = createMockDb([]);
-    const unlocked = await unlockWeightComparatives(db, 0);
+    const unlocked = await unlockWeightComparatives(db, 7, 0);
     expect(unlocked).toEqual([]);
     expect(db.getAllAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('reconcileExerciseAchievements', () => {
+  function mockDb(maxWeight: number) {
+    return {
+      getFirstAsync: jest.fn(async () => ({ m: maxWeight })),
+      runAsync: jest.fn(async () => ({ changes: 1 })),
+    } as unknown as SQLiteDatabase;
+  }
+
+  it('revokes comparatives no longer backed by a completed set', async () => {
+    const db = mockDb(50);
+    await reconcileExerciseAchievements(db, 7);
+
+    // supported = watermelon (5), bicycle (20); adult (70) is NOT reached at 50.
+    const deleteCall = (db.runAsync as jest.Mock).mock.calls[0];
+    const sql = deleteCall[0] as string;
+    expect(sql).toContain("key LIKE 'comparative_%'");
+    expect(sql).toContain('NOT IN');
+    const params = deleteCall.slice(1);
+    expect(params[0]).toBe(7);
+    expect(params).toContain('comparative_watermelon');
+    expect(params).toContain('comparative_bicycle');
+    expect(params).not.toContain('comparative_adult');
+  });
+
+  it('revokes every comparative when no set qualifies', async () => {
+    const db = mockDb(0);
+    await reconcileExerciseAchievements(db, 7);
+
+    const deleteCall = (db.runAsync as jest.Mock).mock.calls[0];
+    const sql = deleteCall[0] as string;
+    expect(sql).toContain("key LIKE 'comparative_%'");
+    expect(sql).not.toContain('NOT IN');
+    expect(deleteCall[1]).toBe(7);
+  });
+
+  it('computes max weight from completed sets of any workout (incl. in-progress)', async () => {
+    const db = mockDb(100);
+    await reconcileExerciseAchievements(db, 7);
+
+    const query = (db.getFirstAsync as jest.Mock).mock.calls[0][0] as string;
+    expect(query).toContain('MAX(s.weight)');
+    expect(query).toContain('s.completed = 1');
+    // Must not restrict to finished workouts: an active session's done sets count.
+    expect(query).not.toContain('completed_at IS NOT NULL');
   });
 });

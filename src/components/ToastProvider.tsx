@@ -18,7 +18,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { Animated, StyleSheet, Text, View } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
@@ -29,6 +29,8 @@ export interface ToastOptions {
   description?: string;
   /** How long the toast stays on screen before auto-dismissing. */
   durationMs?: number;
+  /** Optional tap handler — dismisses the toast when invoked. */
+  onPress?: () => void;
 }
 
 interface ToastItem extends ToastOptions {
@@ -50,6 +52,13 @@ const ANIM_OUT_MS = 180;
  * 44px header; on header-less screens the toast just floats a bit lower.
  */
 const TOP_OFFSET = 56;
+
+/**
+ * Pressable with animated style support, so the entrance transform is applied
+ * directly to the touchable itself — native hit-testing then tracks the visual
+ * position and the first tap always registers.
+ */
+const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const { colors } = useAppTheme();
@@ -79,8 +88,6 @@ export function ToastProvider({ children }: { children: ReactNode }) {
   const dismiss = useCallback(() => {
     setQueue((queued) => queued.slice(1));
   }, []);
-
-  // Animate the visible toast in, hold, then animate it out before dismissing.
 
   // Animate the current toast in, hold, then animate it out.
   useEffect(() => {
@@ -116,20 +123,30 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext.Provider value={api}>
       {children}
       {current && (
-        <Animated.View
-          pointerEvents="none"
+        <View
+          pointerEvents="box-none"
           style={[
             styles.overlay,
-            { top: insets.top + TOP_OFFSET, opacity, transform: [{ translateY }] },
+            { top: insets.top + TOP_OFFSET },
           ]}
         >
-          <View
+          <AnimatedPressable
+            accessibilityRole={current.onPress ? 'button' : undefined}
+            disabled={!current.onPress}
+            onPressIn={() => {
+              current.onPress?.();
+              // Defer dismissal until after the touch gesture completes, so the
+              // touch-up isn't delivered to a freshly-mounted modal backdrop.
+              setTimeout(dismiss, 150);
+            }}
             style={[
               styles.toast,
               {
                 backgroundColor: colors.surface,
                 borderColor: colors.primary,
                 shadowColor: '#000000',
+                opacity,
+                transform: [{ translateY }],
               },
             ]}
           >
@@ -144,8 +161,8 @@ export function ToastProvider({ children }: { children: ReactNode }) {
                 </Text>
               ) : null}
             </View>
-          </View>
-        </Animated.View>
+          </AnimatedPressable>
+        </View>
       )}
     </ToastContext.Provider>
   );
