@@ -11,6 +11,7 @@ import { AppDialogProvider } from '@/components/AppDialog';
 import { ToastProvider } from '@/components/ToastProvider';
 import { AndroidNavigationBar } from '@/components/android-navigation-bar';
 import { NotificationPermissionPrompt } from '@/components/NotificationPermissionPrompt';
+import { AndroidExactAlarmPermissionPrompt } from '@/components/AndroidExactAlarmPermissionPrompt';
 import { DATABASE_NAME, initializeDatabase } from '@/db/database';
 import { AppThemeProvider, useAppTheme } from '@/theme/app-theme-provider';
 
@@ -34,6 +35,7 @@ export default function RootLayout() {
           <AppDialogProvider>
             <ToastProvider>
               <NotificationPermissionPrompt />
+              <AndroidExactAlarmPermissionPrompt />
               <RootNavigator />
             </ToastProvider>
           </AppDialogProvider>

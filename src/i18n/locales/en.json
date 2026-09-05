@@ -383,6 +383,9 @@
     "comparativeMore": "+{{count}} more unlocked",
     "promptTitle": "Enable notifications?",
     "promptMessage": "Anvil uses notifications to sound your rest-timer alarm even when the app is in the background or your screen is locked. Everything stays on your device — no accounts, no tracking.",
-    "enable": "Enable notifications"
+    "enable": "Enable notifications",
+    "exactAlarmTitle": "Allow exact alarms?",
+    "exactAlarmMessage": "Android can delay notifications while the screen is off, so your rest-timer alarm may ring late. To make it ring exactly on time, allow Anvil to set exact alarms. Everything stays on your device — no accounts, no tracking.",
+    "allowExactAlarms": "Allow exact alarms"
   }
 }

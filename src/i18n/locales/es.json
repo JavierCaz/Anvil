@@ -383,6 +383,9 @@
     "comparativeMore": "+{{count}} más desbloqueados",
     "promptTitle": "¿Activar notificaciones?",
     "promptMessage": "Anvil usa notificaciones para que la alarma del descanso suene aunque la app esté en segundo plano o la pantalla esté bloqueada. Todo permanece en tu dispositivo: sin cuentas ni rastreo.",
-    "enable": "Activar notificaciones"
+    "enable": "Activar notificaciones",
+    "exactAlarmTitle": "¿Permitir alarmas exactas?",
+    "exactAlarmMessage": "Android puede retrasar las notificaciones con la pantalla apagada, así que la alarma de descanso puede sonar tarde. Para que suene a tiempo, permite que Anvil programe alarmas exactas. Todo permanece en tu dispositivo: sin cuentas ni rastreo.",
+    "allowExactAlarms": "Permitir alarmas exactas"
   }
 }
