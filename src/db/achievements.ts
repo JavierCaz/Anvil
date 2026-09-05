@@ -419,7 +419,7 @@ export async function reconcileExerciseAchievements(
   exerciseId: number
 ): Promise<void> {
   const maxWeight =
-    (await db.getFirstAsync<{ m: number }>(`,
+    (await db.getFirstAsync<{ m: number }>(`
       SELECT COALESCE(MAX(s.weight), 0) AS m
       FROM sets s
       WHERE s.exercise_id = ? AND s.completed = 1
