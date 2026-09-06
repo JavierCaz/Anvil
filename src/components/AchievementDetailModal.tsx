@@ -11,7 +11,7 @@ import {
 } from '@/constants/achievements';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
-import { formatWeightGrouped, kgToDisplay, weightUnitLabel } from '@/utils/weight';
+import { formatWeightGrouped, formatWeightWithUnit, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
 interface AchievementDetailModalProps {
   definition: AchievementDefinition;
@@ -60,6 +60,13 @@ export function AchievementDetailModal({
   const unit = useUnitsStore((state) => state.unitSystem);
 
   const tierColor = definition.tier ? ACHIEVEMENT_TIER_COLORS[definition.tier] : null;
+  // Weight milestones (e.g. 🍉 Watermelon at 5 kg) carry the object's weight in
+  // `target` (the kg threshold) with `metric: 'maxWeight'` — surface it so the
+  // user sees how heavy the object actually is, in their unit system.
+  const milestoneWeight =
+    definition.metric === 'maxWeight' && definition.target !== undefined
+      ? formatWeightWithUnit(definition.target, unit)
+      : null;
   // Exercise-scoped achievements are earned per exercise (the card lists the
   // earning exercises), so an aggregate progress bar is meaningless for them.
   const hasProgress = definition.metric !== undefined
@@ -100,6 +107,11 @@ export function AchievementDetailModal({
             {t(`achievements.categories.${definition.category}`)}
           </Text>
         </View>
+        {milestoneWeight && (
+          <View style={[styles.weightBadge, { backgroundColor: colors.background }]}>
+            <Text style={[styles.weightLabel, { color: colors.textSecondary }]}>{milestoneWeight}</Text>
+          </View>
+        )}
         {tierColor && (
           <View style={[styles.badge, { backgroundColor: tierColor }]}>
             <Text style={styles.tierLabel}>{t(`achievements.tiers.${definition.tier}`)}</Text>
@@ -198,7 +210,7 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   badgeRow: {
-    flexDirection: 'row',
+    flexDirection: 'column',
     alignItems: 'center',
     gap: 6,
     marginBottom: 12,
@@ -220,6 +232,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.4,
+  },
+  weightBadge: {
+    borderRadius: 8,
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+  },
+  weightLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   description: {
     fontSize: 14,
