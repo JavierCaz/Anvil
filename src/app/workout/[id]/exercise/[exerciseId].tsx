@@ -297,6 +297,8 @@ export default function WorkoutExerciseScreen() {
     }).then(() => {
       // Only stop the rest timer when undoing the set it's counting down for.
       setActiveRest((current) => (current && current.setNumber === setNumber ? null : current));
+      // Undoing a done set reopens it as an editable accordion — make it the open one.
+      setExpandedSet(setNumber);
       reload();
       // Revoke weight comparatives no longer backed by a completed set.
       void reconcileExerciseAchievements(db, exerciseIdNum);

@@ -52,6 +52,12 @@ export default {
       },
       predictiveBackGestureEnabled: false,
       package: appVariant.package,
+      // Android 12+ only lets expo-notifications use an exact alarm (so the
+      // rest-timer rings on time with the screen locked) when the app holds
+      // SCHEDULE_EXACT_ALARM. Prebuild merges this additively. Granted
+      // automatically on Android 12/13; on Android 14+ the user opts in once
+      // via the Alarms-and-reminders special-access screen.
+      permissions: ['SCHEDULE_EXACT_ALARM'],
     },
     web: {
       output: 'static',
