@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import type { NativeStackNavigationProp } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import dayjs from 'dayjs';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
@@ -40,8 +41,13 @@ export default function WorkoutSessionScreen() {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const dialog = useDialog();
+  const navigation = useNavigation<NativeStackNavigationProp<ReactNavigation.RootParamList>>();
   const { id } = useLocalSearchParams<{ id: string }>();
   const logId = Number(id);
+
+  // When an internal finish/discard flow has already resolved the session, the
+  // back-prevention guard must let the resulting navigation through.
+  const allowLeaveRef = useRef(false);
 
   const [log, setLog] = useState<WorkoutLog | null>(null);
   const [routineName, setRoutineName] = useState('');
@@ -101,6 +107,8 @@ export default function WorkoutSessionScreen() {
           style: 'destructive',
           onPress: () => {
             void cancelWorkout(db, logId).then(() => {
+              // The session row is gone — let the pop below pass the guard.
+              allowLeaveRef.current = true;
               // Revoke weight comparatives unlocked by the discarded session's
               // sets (a discarded workout never counts).
               const ids = exercises.map((exercise) => exercise.exercise_id);
@@ -121,6 +129,8 @@ export default function WorkoutSessionScreen() {
       if (!completed) {
         return;
       }
+      // The session is finished — allow the exit navigation through the guard.
+      allowLeaveRef.current = true;
       const weeklyGoal = useWeeklyGoalStore.getState().weeklyWorkouts;
       const recapData = await getWorkoutRecap(db, logId, weeklyGoal);
       setRecap(recapData);
@@ -129,6 +139,7 @@ export default function WorkoutSessionScreen() {
 
   const handleRecapClose = () => {
     setRecap(null);
+    allowLeaveRef.current = true;
     router.dismissTo(backHref);
   };
 
@@ -207,11 +218,48 @@ export default function WorkoutSessionScreen() {
     finish();
   };
 
+  // The guard effect subscribes once with a lean dependency list; it reads the
+  // latest handler closures through this ref instead of forcing a re-subscription
+  // on every render.
+  const exitHandlersRef = useRef({ handleCancel, handleFinish });
+  useEffect(() => {
+    exitHandlersRef.current = { handleCancel, handleFinish };
+  });
+
+  // While a session is live, leaving the screen (header back, Android
+  // hardware back) must not silently abandon the workout — ask the user to
+  // finish or discard it first. The native back button can't be intercepted
+  // directly, so we listen for the stack's `beforeRemove` event, which fires
+  // for every removal action (back button, hardware back, programmatic pop).
+  useEffect(() => {
+    const unsubscribe = navigation.addListener('beforeRemove', (event) => {
+      if (allowLeaveRef.current || !log) {
+        return;
+      }
+
+      event.preventDefault();
+      const { handleCancel: cancelSession, handleFinish: finishSession } = exitHandlersRef.current;
+      dialog.alert({
+        title: t('workout.leaveWorkoutTitle'),
+        message: t('workout.leaveWorkoutMessage'),
+        icon: 'warning-outline',
+        tone: 'warning',
+        buttons: [
+          { text: t('workout.keepWorkingOut'), style: 'cancel' },
+          { text: t('workout.finishWorkout'), onPress: finishSession },
+          { text: t('workout.discardWorkout'), style: 'destructive', onPress: cancelSession },
+        ],
+      });
+    });
+    return unsubscribe;
+  }, [navigation, dialog, log, t]);
+
   return (
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen
         options={{
           headerShown: true,
+          gestureEnabled: false,
           title: routineName,
           headerRight: () => (
             <Pressable
