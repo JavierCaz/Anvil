@@ -9,6 +9,7 @@ import Sortable, { type SortableGridRenderItem } from 'react-native-sortables';
 import { Screen } from '@/components/Screen';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { deleteRoutine, getRoutines, reorderRoutines } from '@/db/routines';
 import type { RoutineWithCount } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -22,13 +23,16 @@ export default function RoutinesScreen() {
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
 
   const [routines, setRoutines] = useState<RoutineWithCount[]>([]);
+  const [loaded, setLoaded] = useState(false);
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      setLoaded(false);
       void getRoutines(db).then((rows) => {
         if (active) {
           setRoutines(rows);
+          setLoaded(true);
         }
       });
       return () => {
@@ -114,7 +118,7 @@ export default function RoutinesScreen() {
         </Pressable>
       </View>
 
-      {routines.length === 0 ? (
+      {loaded && routines.length === 0 ? (
         <View style={[styles.listContent, styles.listContentEmpty]}>
           <View style={styles.empty}>
             <Ionicons name="barbell-outline" size={48} color={colors.textSecondary} />
@@ -126,7 +130,7 @@ export default function RoutinesScreen() {
             </Text>
           </View>
         </View>
-      ) : (
+      ) : loaded ? (
         <Animated.ScrollView
           ref={scrollableRef}
           contentContainerStyle={styles.listContent}
@@ -142,7 +146,9 @@ export default function RoutinesScreen() {
             onDragEnd={({ data }) => handleDragEnd(data)}
           />
         </Animated.ScrollView>
-      )}
+      ) : null}
+
+      <LoadingOverlay visible={!loaded} />
     </Screen>
   );
 }

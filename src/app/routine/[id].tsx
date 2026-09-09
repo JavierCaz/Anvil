@@ -13,6 +13,7 @@ import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { muscleI18nKey } from '@/constants/exercises';
 import {
   getRoutine,
@@ -34,16 +35,19 @@ export default function RoutineDetailScreen() {
 
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [exercises, setExercises] = useState<RoutineExerciseWithExercise[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
 
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      setLoaded(false);
       void Promise.all([getRoutine(db, routineId), getRoutineExercises(db, routineId)]).then(
         ([routineRow, exerciseRows]) => {
           if (active) {
             setRoutine(routineRow);
             setExercises(exerciseRows);
+            setLoaded(true);
           }
         }
       );
@@ -182,66 +186,72 @@ export default function RoutineDetailScreen() {
         }}
       />
 
-      {routine?.description ? (
-        <Text style={[styles.description, { color: colors.textSecondary }]}>
-          {routine.description}
-        </Text>
-      ) : null}
-
-      <View style={styles.startWrap}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('workout.startWorkout')}
-          disabled={exercises.length === 0}
-          onPress={() => {
-            void startWorkout(db, routineId).then((logId) => {
-              router.push(`/workout/${logId}`);
-            });
-          }}
-          style={({ pressed }) => [
-            styles.startButton,
-            {
-              backgroundColor: exercises.length === 0 ? colors.border : colors.primary,
-              opacity: pressed ? 0.85 : 1,
-            },
-          ]}
-        >
-          <Ionicons name="play" size={18} color="#FFFFFF" />
-          <Text style={styles.startLabel}>{t('workout.startWorkout')}</Text>
-        </Pressable>
-      </View>
-
-      {exercises.length === 0 ? (
-        <View style={[styles.listContent, styles.listContentEmpty]}>
-          <View style={styles.empty}>
-            <Ionicons name="fitness-outline" size={48} color={colors.textSecondary} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {t('routines.detail.emptyTitle')}
+      {loaded && (
+        <>
+          {routine?.description ? (
+            <Text style={[styles.description, { color: colors.textSecondary }]}>
+              {routine.description}
             </Text>
-            <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
-              {t('routines.detail.emptyHint')}
-            </Text>
+          ) : null}
+
+          <View style={styles.startWrap}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('workout.startWorkout')}
+              disabled={exercises.length === 0}
+              onPress={() => {
+                void startWorkout(db, routineId).then((logId) => {
+                  router.push(`/workout/${logId}`);
+                });
+              }}
+              style={({ pressed }) => [
+                styles.startButton,
+                {
+                  backgroundColor: exercises.length === 0 ? colors.border : colors.primary,
+                  opacity: pressed ? 0.85 : 1,
+                },
+              ]}
+            >
+              <Ionicons name="play" size={18} color="#FFFFFF" />
+              <Text style={styles.startLabel}>{t('workout.startWorkout')}</Text>
+            </Pressable>
           </View>
-          {addExerciseButton}
-        </View>
-      ) : (
-        <Animated.ScrollView
-          ref={scrollableRef}
-          contentContainerStyle={styles.listContent}
-          showsVerticalScrollIndicator={false}
-        >
-          <Sortable.Grid
-            columns={1}
-            data={exercises}
-            keyExtractor={(item) => String(item.id)}
-            renderItem={renderItem}
-            rowGap={12}
-            scrollableRef={scrollableRef}
-            onDragEnd={handleDragEnd}
-          />
-          {addExerciseButton}
-        </Animated.ScrollView>
+
+          {exercises.length === 0 ? (
+            <View style={[styles.listContent, styles.listContentEmpty]}>
+              <View style={styles.empty}>
+                <Ionicons name="fitness-outline" size={48} color={colors.textSecondary} />
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                  {t('routines.detail.emptyTitle')}
+                </Text>
+                <Text style={[styles.emptyHint, { color: colors.textSecondary }]}>
+                  {t('routines.detail.emptyHint')}
+                </Text>
+              </View>
+              {addExerciseButton}
+            </View>
+          ) : (
+            <Animated.ScrollView
+              ref={scrollableRef}
+              contentContainerStyle={styles.listContent}
+              showsVerticalScrollIndicator={false}
+            >
+              <Sortable.Grid
+                columns={1}
+                data={exercises}
+                keyExtractor={(item) => String(item.id)}
+                renderItem={renderItem}
+                rowGap={12}
+                scrollableRef={scrollableRef}
+                onDragEnd={handleDragEnd}
+              />
+              {addExerciseButton}
+            </Animated.ScrollView>
+          )}
+        </>
       )}
+
+      <LoadingOverlay visible={!loaded} />
     </Screen>
   );
 }

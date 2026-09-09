@@ -3,7 +3,7 @@ import { useSQLiteContext } from 'expo-sqlite';
 import * as Haptics from 'expo-haptics';
 import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AchievementDetailModal } from '@/components/AchievementDetailModal';
 import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import {
@@ -13,6 +13,7 @@ import {
 import { RestTimer } from '@/components/RestTimer';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { useToast } from '@/components/ToastProvider';
 import { getAchievementByKey } from '@/constants/achievements';
 import type { AchievementDefinition } from '@/constants/achievements';
@@ -309,11 +310,7 @@ export default function WorkoutExerciseScreen() {
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ headerShown: true, title: exercise?.exercise_name ?? '' }} />
 
-      {!loaded || !exercise ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      ) : (
+      {loaded && exercise && (
         <>
           <ScrollView
             contentContainerStyle={styles.listContent}
@@ -390,16 +387,13 @@ export default function WorkoutExerciseScreen() {
           </View>
         </>
       )}
+
+      <LoadingOverlay visible={!loaded || !exercise} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   listContent: {
     padding: 20,
     paddingBottom: 8,

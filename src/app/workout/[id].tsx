@@ -11,6 +11,7 @@ import Sortable, { type SortableGridRenderItem } from 'react-native-sortables';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { WorkoutRecapModal } from '@/components/WorkoutRecap';
 import { getWorkoutRecap, type WorkoutRecap } from '@/db/gamification';
 import { getExercisesAchievements, reconcileExerciseAchievements } from '@/db/achievements';
@@ -60,6 +61,7 @@ export default function WorkoutSessionScreen() {
   const [exerciseAchievements, setExerciseAchievements] = useState<Map<number, AchievementDefinition[]>>(new Map());
   const [now, setNow] = useState(() => Date.now());
   const [recap, setRecap] = useState<WorkoutRecap | null>(null);
+  const [loaded, setLoaded] = useState(false);
   // The animated scroll container that hosts the sortable grid; passed to
   // Sortable.Grid so dragging auto-scrolls near the screen edges.
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
@@ -73,16 +75,19 @@ export default function WorkoutSessionScreen() {
   useFocusEffect(
     useCallback(() => {
       let active = true;
+      setLoaded(false);
       void Promise.all([
         getWorkoutLog(db, logId),
         getWorkoutRoutineName(db, logId),
         getActiveWorkoutExercises(db, logId),
       ]).then(([logRow, name, exerciseRows]) => {
-        if (active) {
-          setLog(logRow);
-          setRoutineName(name ?? '');
-          setExercises(exerciseRows);
+        if (!active) {
+          return;
         }
+        setLog(logRow);
+        setRoutineName(name ?? '');
+        setExercises(exerciseRows);
+        setLoaded(true);
         return getExercisesAchievements(
           db,
           exerciseRows.map((exercise) => exercise.exercise_id)
@@ -373,92 +378,99 @@ export default function WorkoutSessionScreen() {
         }}
       />
 
-      <Animated.ScrollView
-        ref={scrollableRef}
-        contentContainerStyle={styles.listContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <View
-          style={[
-            styles.timerCard,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <Text style={[styles.timerLabel, { color: colors.textSecondary }]}>
-            {t('workout.elapsed')}
-          </Text>
-          <Text style={[styles.timerValue, { color: colors.text }]}>
-            {formatStopwatch(elapsedSeconds)}
-          </Text>
-          <View style={[styles.progressRow, { backgroundColor: colors.background }]}>
+      {loaded && (
+        <>
+          <Animated.ScrollView
+            ref={scrollableRef}
+            contentContainerStyle={styles.listContent}
+            showsVerticalScrollIndicator={false}
+          >
             <View
               style={[
-                styles.progressFill,
-                {
-                  backgroundColor: colors.primary,
-                  width: `${exercises.length > 0 ? (doneCount / exercises.length) * 100 : 0}%`,
-                },
+                styles.timerCard,
+                { backgroundColor: colors.surface, borderColor: colors.border },
               ]}
-            />
-          </View>
-          <Text style={[styles.progressText, { color: colors.textSecondary }]}>
-            {t('workout.exercisesDone', { done: doneCount, total: exercises.length })}
-          </Text>
-        </View>
+            >
+              <Text style={[styles.timerLabel, { color: colors.textSecondary }]}>
+                {t('workout.elapsed')}
+              </Text>
+              <Text style={[styles.timerValue, { color: colors.text }]}>
+                {formatStopwatch(elapsedSeconds)}
+              </Text>
+              <View style={[styles.progressRow, { backgroundColor: colors.background }]}>
+                <View
+                  style={[
+                    styles.progressFill,
+                    {
+                      backgroundColor: colors.primary,
+                      width: `${exercises.length > 0 ? (doneCount / exercises.length) * 100 : 0}%`,
+                    },
+                  ]}
+                />
+              </View>
+              <Text style={[styles.progressText, { color: colors.textSecondary }]}>
+                {t('workout.exercisesDone', { done: doneCount, total: exercises.length })}
+              </Text>
+            </View>
 
-        {exercises.length === 0 ? (
-          <View style={styles.empty}>
-            <Ionicons name="fitness-outline" size={48} color={colors.textSecondary} />
-            <Text style={[styles.emptyTitle, { color: colors.text }]}>
-              {t('routines.detail.emptyTitle')}
-            </Text>
-          </View>
-        ) : (
-          <Sortable.Grid
-            columns={1}
-            data={exercises}
-            keyExtractor={keyExtractor}
-            renderItem={renderItem}
-            rowGap={12}
-            scrollableRef={scrollableRef}
-            onDragEnd={({ data }) => handleDragEnd(data)}
-          />
-        )}
-      </Animated.ScrollView>
+            {exercises.length === 0 ? (
+              <View style={styles.empty}>
+                <Ionicons name="fitness-outline" size={48} color={colors.textSecondary} />
+                <Text style={[styles.emptyTitle, { color: colors.text }]}>
+                  {t('routines.detail.emptyTitle')}
+                </Text>
+              </View>
+            ) : (
+              <Sortable.Grid
+                columns={1}
+                data={exercises}
+                keyExtractor={keyExtractor}
+                renderItem={renderItem}
+                rowGap={12}
+                scrollableRef={scrollableRef}
+                onDragEnd={({ data }) => handleDragEnd(data)}
+              />
+            )}
+          </Animated.ScrollView>
 
-      <View style={styles.footer}>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('workout.finishWorkout')}
-          onPress={handleFinish}
-          style={({ pressed }) => [
-            styles.finishButton,
-            { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
-          ]}
-        >
-          <Ionicons name="checkmark" size={20} color="#FFFFFF" />
-          <Text style={styles.finishLabel}>{t('workout.finishWorkout')}</Text>
-        </Pressable>
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={t('workout.discardWorkout')}
-          onPress={handleCancel}
-          style={({ pressed }) => [
-            styles.discardButton,
-            { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
-          ]}
-        >
-          <Ionicons name="trash-outline" size={18} color={colors.error} />
-          <Text style={[styles.discardLabel, { color: colors.error }]}>
-            {t('workout.discardWorkout')}
-          </Text>
-        </Pressable>
-      </View>
+          <View style={styles.footer}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('workout.finishWorkout')}
+              onPress={handleFinish}
+              style={({ pressed }) => [
+                styles.finishButton,
+                { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
+              ]}
+            >
+              <Ionicons name="checkmark" size={20} color="#FFFFFF" />
+              <Text style={styles.finishLabel}>{t('workout.finishWorkout')}</Text>
+            </Pressable>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t('workout.discardWorkout')}
+              onPress={handleCancel}
+              style={({ pressed }) => [
+                styles.discardButton,
+                { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+              ]}
+            >
+              <Ionicons name="trash-outline" size={18} color={colors.error} />
+              <Text style={[styles.discardLabel, { color: colors.error }]}>
+                {t('workout.discardWorkout')}
+              </Text>
+            </Pressable>
+          </View>
+        </>
+      )}
+
+      <LoadingOverlay visible={!loaded} />
 
       {recap && <WorkoutRecapModal recap={recap} onClose={handleRecapClose} />}
     </Screen>
   );
 }
+
 
 const styles = StyleSheet.create({
   listContent: {

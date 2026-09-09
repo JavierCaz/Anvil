@@ -3,11 +3,12 @@ import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import { ExerciseSetEditor, type SetEditorItem } from '@/components/ExerciseSetEditor';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
+import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { getExerciseById } from '@/db/exercises';
 import {
   getRoutineExercise,
@@ -148,11 +149,7 @@ export default function RoutineSetEditorScreen() {
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ headerShown: true, title: exercise?.exercise_name ?? '' }} />
 
-      {!loaded || !exercise ? (
-        <View style={styles.center}>
-          <ActivityIndicator color={colors.primary} />
-        </View>
-      ) : (
+      {loaded && exercise && (
         <>
           <ScrollView
             contentContainerStyle={styles.listContent}
@@ -210,16 +207,13 @@ export default function RoutineSetEditorScreen() {
           </View>
         </>
       )}
+
+      <LoadingOverlay visible={!loaded || !exercise} />
     </Screen>
   );
 }
 
 const styles = StyleSheet.create({
-  center: {
-    flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
   listContent: {
     padding: 20,
     paddingBottom: 8,
