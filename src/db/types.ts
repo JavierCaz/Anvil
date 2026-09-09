@@ -10,6 +10,8 @@ export interface Routine {
   name: string;
   description: string | null;
   created_at: string;
+  /** User-defined position in the Routines list (0 = first). */
+  order_index: number;
 }
 
 /** A routine plus the number of exercises it contains. */
@@ -91,6 +93,11 @@ export interface WorkoutLog {
   notes: string | null;
   /** 1 when the user added/removed sets during the session. */
   sets_edited: 0 | 1;
+  /**
+   * JSON array of routine_exercise_ids in the session's current order.
+   * `null` = follow the routine's order.
+   */
+  exercise_order: string | null;
 }
 
 export interface WorkoutSet {

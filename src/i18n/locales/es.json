@@ -378,7 +378,12 @@
     "keepRoutine": "Mantener rutina",
     "updateDefaultsTitle": "¿Actualizar los valores por defecto de la rutina?",
     "updateDefaultsMessage": "Cambiaste los valores de las series de: {{exercises}}. ¿Guardarlos como nuevos valores por defecto de la rutina?",
-    "saveChangesAndValuesMessage": "Añadiste o quitaste series y cambiaste valores de series durante este entrenamiento. ¿Guardar todos estos cambios en tu rutina?"
+    "saveChangesAndValuesMessage": "Añadiste o quitaste series y cambiaste valores de series durante este entrenamiento. ¿Guardar todos estos cambios en tu rutina?",
+    "saveOrderTitle": "¿Guardar el nuevo orden de ejercicios?",
+    "saveOrderMessage": "Cambiaste el orden de los ejercicios durante este entrenamiento. ¿Guardar el nuevo orden en tu rutina?",
+    "saveOrderAndChangesMessage": "Cambiaste el orden de los ejercicios y añadiste o quitaste series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
+    "saveOrderAndValuesMessage": "Cambiaste el orden de los ejercicios y los valores de las series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
+    "saveOrderAllMessage": "Cambiaste el orden de los ejercicios, añadiste o quitaste series y cambiaste valores de series durante este entrenamiento. ¿Guardar todos estos cambios en tu rutina?"
   },
   "notifications": {
     "comparativeLifted": "¡Acabas de levantar {{object}}!",

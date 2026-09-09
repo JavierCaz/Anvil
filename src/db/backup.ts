@@ -67,6 +67,7 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     name: 'text',
     description: 'text',
     created_at: 'text',
+    order_index: 'integer',
   },
   exercises: {
     id: 'integer',
@@ -106,6 +107,7 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     completed_at: 'text',
     notes: 'text',
     sets_edited: 'boolean',
+    exercise_order: 'text',
   },
   sets: {
     id: 'integer',

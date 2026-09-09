@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 9;
+export const DATABASE_VERSION = 11;
 
 /**
  * Migration 1 — initial tables.
@@ -260,6 +260,40 @@ WHERE key LIKE 'comparative_%'
    OR key IN ('thousand_kg_club', 'volume_10k', 'volume_100k', 'volume_1m', 'progressive_overload');
 `;
 
+/**
+ * Migration 10 — session-only exercise order.
+ *
+ * The active workout's exercise list normally follows the routine's order
+ * (`routine_exercises.order_index`). When the user reorders exercises during
+ * a session, the new order is stored here as a JSON array of
+ * `routine_exercise_id`s. `NULL` means "follow the routine order" — the
+ * value is only written once the user actually reorders, and the finish
+ * flow offers to sync it back onto the routine.
+ */
+export const SCHEMA_V10 = `
+ALTER TABLE workout_logs ADD COLUMN exercise_order TEXT;
+`;
+
+/**
+ * Migration 11 — user-defined routine ordering.
+ *
+ * Adds `routines.order_index` so the Routines tab can be reordered by drag
+ * and drop. Existing rows are backfilled newest-first to keep the current
+ * presentation (the list was previously ordered by `created_at DESC`).
+ * New routines are prepended at index 0 (`createRoutine`).
+ */
+export const SCHEMA_V11 = `
+ALTER TABLE routines ADD COLUMN order_index INTEGER NOT NULL DEFAULT 0;
+
+-- Newest routine gets index 0 (first in the list) — SQLite doesn't allow a
+-- window function directly in UPDATE, so rank manually via a self-join.
+UPDATE routines SET order_index = (
+  SELECT COUNT(*) FROM routines AS older
+  WHERE older.created_at > routines.created_at
+     OR (older.created_at = routines.created_at AND older.id > routines.id)
+);
+`;
+
 export const MIGRATIONS: readonly string[] = [
   SCHEMA_V1,
   SCHEMA_V2,
@@ -270,5 +304,6 @@ export const MIGRATIONS: readonly string[] = [
   SCHEMA_V7,
   SCHEMA_V8,
   SCHEMA_V9,
-
+  SCHEMA_V10,
+  SCHEMA_V11,
 ];

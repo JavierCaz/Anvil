@@ -1,6 +1,10 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import {
+  applyWorkoutExerciseOrder,
   getRoutineSetValueChanges,
+  getWorkoutOrderDiffersFromRoutine,
+  setWorkoutExerciseOrder,
+  syncRoutineOrderFromWorkout,
   syncRoutineSetValuesFromWorkout,
 } from '@/db/workouts';
 import type { WorkoutLog } from '@/db/types';
@@ -34,6 +38,7 @@ function logRow(overrides: Partial<WorkoutLog> = {}): WorkoutLog {
     completed_at: null,
     notes: null,
     sets_edited: 0,
+    exercise_order: null,
     ...overrides,
   };
 }
@@ -258,6 +263,123 @@ describe('syncRoutineSetValuesFromWorkout', () => {
     await syncRoutineSetValuesFromWorkout(db, 1);
 
     expect(withTransactionAsync).not.toHaveBeenCalled();
+    expect(runAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('applyWorkoutExerciseOrder', () => {
+  const row = (routine_exercise_id: number) => ({ routine_exercise_id });
+
+  it('returns rows unchanged when no stored order exists', () => {
+    expect(applyWorkoutExerciseOrder([row(1), row(2), row(3)], null)).toEqual([
+      row(1),
+      row(2),
+      row(3),
+    ]);
+  });
+
+  it('applies a stored session order', () => {
+    expect(applyWorkoutExerciseOrder([row(1), row(2), row(3)], '[2,3,1]')).toEqual([
+      row(2),
+      row(3),
+      row(1),
+    ]);
+  });
+
+  it('appends live rows missing from the stored array in routine order', () => {
+    expect(applyWorkoutExerciseOrder([row(1), row(2), row(3)], '[3]')).toEqual([
+      row(3),
+      row(1),
+      row(2),
+    ]);
+  });
+
+  it('ignores malformed stored orders', () => {
+    expect(applyWorkoutExerciseOrder([row(1), row(2)], 'not-json')).toEqual([row(1), row(2)]);
+    expect(applyWorkoutExerciseOrder([row(1), row(2)], '["a"]')).toEqual([row(1), row(2)]);
+  });
+});
+
+describe('setWorkoutExerciseOrder', () => {
+  it('stores the ordered routine exercise ids as JSON on the log', async () => {
+    const { db, runAsync } = makeDb();
+    await setWorkoutExerciseOrder(db, 1, [3, 1, 2]);
+    expect(runAsync).toHaveBeenCalledWith(
+      'UPDATE workout_logs SET exercise_order = ? WHERE id = ?',
+      '[3,1,2]',
+      1
+    );
+  });
+});
+
+describe('getWorkoutOrderDiffersFromRoutine', () => {
+  it('returns false for a session that was never reordered', async () => {
+    const { db, getFirstQueue } = makeDb();
+    getFirstQueue.push(logRow()); // exercise_order null
+    const result = await getWorkoutOrderDiffersFromRoutine(db, 1);
+    expect(result).toBe(false);
+  });
+
+  it('returns true when the session order differs from the routine order', async () => {
+    const { db, getAllQueue, getFirstQueue } = makeDb();
+    getFirstQueue.push(logRow({ exercise_order: '[20,10]' }));
+    // getActiveWorkoutExercises rows in effective (session) order + set targets.
+    getAllQueue.push([
+      exerciseRow({ routine_exercise_id: 20, exercise_id: 2, exercise_name: 'Squat' }),
+      exerciseRow(),
+    ]);
+    getAllQueue.push([targetRow(1), targetRow(2)]);
+    // routine_exercises in routine order (Bench first, Squat second).
+    getAllQueue.push([{ id: 10 }, { id: 20 }]);
+
+    await expect(getWorkoutOrderDiffersFromRoutine(db, 1)).resolves.toBe(true);
+  });
+
+  it('returns false when the session order matches the routine order', async () => {
+    const { db, getAllQueue, getFirstQueue } = makeDb();
+    getFirstQueue.push(logRow({ exercise_order: '[10,20]' }));
+    getAllQueue.push([exerciseRow(), exerciseRow({ routine_exercise_id: 20, exercise_id: 2 })]);
+    getAllQueue.push([targetRow(1), targetRow(2)]);
+    getAllQueue.push([{ id: 10 }, { id: 20 }]);
+
+    await expect(getWorkoutOrderDiffersFromRoutine(db, 1)).resolves.toBe(false);
+  });
+});
+
+describe('syncRoutineOrderFromWorkout', () => {
+  it('rewrites the routine exercise order from the session', async () => {
+    const { db, getAllQueue, getFirstQueue, runAsync } = makeDb();
+    getFirstQueue.push(logRow({ exercise_order: '[20,10]' }));
+    // Session exercises in effective order: Squat, then Bench.
+    getAllQueue.push([
+      exerciseRow({ routine_exercise_id: 20, exercise_id: 2 }),
+      exerciseRow(),
+    ]);
+    getAllQueue.push([targetRow(1), targetRow(2)]);
+
+    await syncRoutineOrderFromWorkout(db, 1);
+
+    const calls = runAsync.mock.calls as unknown[][];
+    expect(calls[0]).toEqual([
+      'UPDATE routine_exercises SET order_index = ? WHERE id = ? AND routine_id = ?',
+      0,
+      20,
+      5,
+    ]);
+    expect(calls[1]).toEqual([
+      'UPDATE routine_exercises SET order_index = ? WHERE id = ? AND routine_id = ?',
+      1,
+      10,
+      5,
+    ]);
+  });
+
+  it('is a no-op without a routine or stored order', async () => {
+    const { db, getFirstQueue, runAsync } = makeDb();
+    getFirstQueue.push(logRow({ routine_id: null }));
+    await syncRoutineOrderFromWorkout(db, 1);
+    getFirstQueue.push(logRow()); // exercise_order null
+    await syncRoutineOrderFromWorkout(db, 1);
     expect(runAsync).not.toHaveBeenCalled();
   });
 });

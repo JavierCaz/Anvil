@@ -3,17 +3,26 @@ import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-rou
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import Sortable, {
+  type SortableGridDragEndParams,
+  type SortableGridRenderItem,
+} from 'react-native-sortables';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
 import { muscleI18nKey } from '@/constants/exercises';
-import { getRoutine, getRoutineExercises, moveRoutineExercise, removeExerciseFromRoutine } from '@/db/routines';
+import {
+  getRoutine,
+  getRoutineExercises,
+  removeExerciseFromRoutine,
+  reorderRoutineExercises,
+} from '@/db/routines';
 import type { Routine, RoutineExerciseWithExercise } from '@/db/types';
 import { startWorkout } from '@/db/workouts';
 import { useAppTheme } from '@/theme/app-theme-provider';
-
 export default function RoutineDetailScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
@@ -25,6 +34,7 @@ export default function RoutineDetailScreen() {
 
   const [routine, setRoutine] = useState<Routine | null>(null);
   const [exercises, setExercises] = useState<RoutineExerciseWithExercise[]>([]);
+  const scrollableRef = useAnimatedRef<Animated.ScrollView>();
 
   useFocusEffect(
     useCallback(() => {
@@ -43,19 +53,11 @@ export default function RoutineDetailScreen() {
     }, [db, routineId])
   );
 
-  const reload = () => {
+  const reload = useCallback(() => {
     void getRoutineExercises(db, routineId).then(setExercises);
-  };
+  }, [db, routineId]);
 
-  const handleMove = (item: RoutineExerciseWithExercise, direction: 'up' | 'down') => {
-    void moveRoutineExercise(db, routineId, item.id, direction).then((moved) => {
-      if (moved) {
-        reload();
-      }
-    });
-  };
-
-  const confirmRemoveExercise = (item: RoutineExerciseWithExercise) => {
+  const confirmRemoveExercise = useCallback((item: RoutineExerciseWithExercise) => {
     dialog.alert({
       title: t('routines.detail.removeExerciseConfirmTitle'),
       message: t('routines.detail.removeExerciseConfirmMessage', { name: item.exercise_name }),
@@ -74,7 +76,92 @@ export default function RoutineDetailScreen() {
         },
       ],
     });
-  };
+  }, [db, dialog, reload, t]);
+
+  const handleDragEnd = useCallback(
+    (params: SortableGridDragEndParams<RoutineExerciseWithExercise>) => {
+      if (params.fromIndex === params.toIndex) {
+        return;
+      }
+      setExercises(params.data);
+      void reorderRoutineExercises(
+        db,
+        routineId,
+        params.data.map((item) => item.id)
+      );
+    },
+    [db, routineId]
+  );
+
+  const renderItem = useCallback<SortableGridRenderItem<RoutineExerciseWithExercise>>(
+    ({ item }) => {
+      const muscleKey = muscleI18nKey(item.exercise_primary_muscle);
+      const firstReps = item.first_set_reps ?? item.reps;
+      const firstRest = item.first_set_rest ?? item.rest_seconds;
+      // The whole row is the drag surface: sortables activates a drag after a
+      // ~200 ms hold and self-cancels on any quick movement, while the
+      // SwipeToDelete pan (wrapped outside) only claims fast horizontal
+      // swipes. Sortable.Touchable keeps a plain tap from being eaten by the
+      // drag gesture.
+      return (
+        <SwipeToDelete onDelete={() => confirmRemoveExercise(item)}>
+          <Sortable.Touchable
+            accessibilityRole="button"
+            style={[
+              styles.row,
+              { backgroundColor: colors.surface, borderColor: colors.border },
+            ]}
+            onTap={() => router.push(`/routine/${routineId}/exercise/${item.id}`)}
+          >
+            <ExerciseThumbnail slug={item.exercise_slug} />
+            <View style={styles.rowBody}>
+              <View style={styles.rowTitleLine}>
+                <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={1}>
+                  {item.exercise_name}
+                </Text>
+                {item.exercise_source === 'custom' && (
+                  <View style={[styles.badge, { backgroundColor: colors.background }]}>
+                    <Text style={[styles.badgeText, { color: colors.textSecondary }]}>
+                      {t('routines.detail.customBadge')}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
+                {muscleKey ? t(muscleKey) : ''}
+                {item.exercise_equipment ? ` · ${item.exercise_equipment}` : ''}
+              </Text>
+              <Text style={[styles.rowMeta, { color: colors.primary }]}>
+                {t('routines.detail.targetSets')}: {item.sets} ·{' '}
+                {t('routines.detail.targetReps')}: {firstReps} ·{' '}
+                {t('routines.detail.targetRest')}: {firstRest}s
+              </Text>
+            </View>
+          </Sortable.Touchable>
+        </SwipeToDelete>
+      );
+    },
+    [colors, confirmRemoveExercise, router, routineId, t]
+  );
+
+  const addExerciseButton = (
+    <Pressable
+      accessibilityRole="button"
+      onPress={() => router.push(`/routine/${routineId}/add-exercise`)}
+      style={({ pressed }) => [
+        styles.addButton,
+        {
+          borderColor: colors.primary,
+          opacity: pressed ? 0.7 : 1,
+        },
+      ]}
+    >
+      <Ionicons name="add" size={20} color={colors.primary} />
+      <Text style={[styles.addLabel, { color: colors.primary }]}>
+        {t('routines.detail.addExercise')}
+      </Text>
+    </Pressable>
+  );
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
@@ -124,15 +211,8 @@ export default function RoutineDetailScreen() {
         </Pressable>
       </View>
 
-      <FlatList
-        data={exercises}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={[
-          styles.listContent,
-          exercises.length === 0 && styles.listContentEmpty,
-        ]}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
+      {exercises.length === 0 ? (
+        <View style={[styles.listContent, styles.listContentEmpty]}>
           <View style={styles.empty}>
             <Ionicons name="fitness-outline" size={48} color={colors.textSecondary} />
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
@@ -142,103 +222,26 @@ export default function RoutineDetailScreen() {
               {t('routines.detail.emptyHint')}
             </Text>
           </View>
-        }
-        renderItem={({ item, index }) => {
-          const muscleKey = muscleI18nKey(item.exercise_primary_muscle);
-          const firstReps = item.first_set_reps ?? item.reps;
-          const firstRest = item.first_set_rest ?? item.rest_seconds;
-          return (
-            <SwipeToDelete onDelete={() => confirmRemoveExercise(item)}>
-              <View
-                style={[
-                  styles.row,
-                  { backgroundColor: colors.surface, borderColor: colors.border },
-                ]}
-              >
-              <Pressable
-                accessibilityRole="button"
-                style={styles.rowMain}
-                onPress={() => router.push(`/routine/${routineId}/exercise/${item.id}`)}
-              >
-                <ExerciseThumbnail slug={item.exercise_slug} />
-                <View style={styles.rowBody}>
-                  <View style={styles.rowTitleLine}>
-                    <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={1}>
-                      {item.exercise_name}
-                    </Text>
-                    {item.exercise_source === 'custom' && (
-                      <View style={[styles.badge, { backgroundColor: colors.background }]}>
-                        <Text style={[styles.badgeText, { color: colors.textSecondary }]}>
-                          {t('routines.detail.customBadge')}
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                  <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
-                    {muscleKey ? t(muscleKey) : ''}
-                    {item.exercise_equipment ? ` · ${item.exercise_equipment}` : ''}
-                  </Text>
-                  <Text style={[styles.rowMeta, { color: colors.primary }]}>
-                    {t('routines.detail.targetSets')}: {item.sets} ·{' '}
-                    {t('routines.detail.targetReps')}: {firstReps} ·{' '}
-                    {t('routines.detail.targetRest')}: {firstRest}s
-                  </Text>
-                </View>
-              </Pressable>
-
-              <View style={styles.rowActions}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('common.moveUp')}
-                  hitSlop={6}
-                  disabled={index === 0}
-                  onPress={() => handleMove(item, 'up')}
-                >
-                  <Ionicons
-                    name="chevron-up"
-                    size={20}
-                    color={index === 0 ? colors.border : colors.textSecondary}
-                  />
-                </Pressable>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={t('common.moveDown')}
-                  hitSlop={6}
-                  disabled={index === exercises.length - 1}
-                  onPress={() => handleMove(item, 'down')}
-                >
-                  <Ionicons
-                    name="chevron-down"
-                    size={20}
-                    color={
-                      index === exercises.length - 1 ? colors.border : colors.textSecondary
-                    }
-                  />
-                </Pressable>
-              </View>
-            </View>
-          </SwipeToDelete>
-        );
-        }}
-        ListFooterComponent={
-          <Pressable
-            accessibilityRole="button"
-            onPress={() => router.push(`/routine/${routineId}/add-exercise`)}
-            style={({ pressed }) => [
-              styles.addButton,
-              {
-                borderColor: colors.primary,
-                opacity: pressed ? 0.7 : 1,
-              },
-            ]}
-          >
-            <Ionicons name="add" size={20} color={colors.primary} />
-            <Text style={[styles.addLabel, { color: colors.primary }]}>
-              {t('routines.detail.addExercise')}
-            </Text>
-          </Pressable>
-        }
-      />
+          {addExerciseButton}
+        </View>
+      ) : (
+        <Animated.ScrollView
+          ref={scrollableRef}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Sortable.Grid
+            columns={1}
+            data={exercises}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderItem}
+            rowGap={12}
+            scrollableRef={scrollableRef}
+            onDragEnd={handleDragEnd}
+          />
+          {addExerciseButton}
+        </Animated.ScrollView>
+      )}
     </Screen>
   );
 }
@@ -291,16 +294,10 @@ const styles = StyleSheet.create({
   row: {
     flexDirection: 'row',
     alignItems: 'center',
+    gap: 12,
     borderRadius: 14,
     borderWidth: 1,
     padding: 12,
-    gap: 8,
-  },
-  rowMain: {
-    flex: 1,
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
   },
   rowBody: {
     flex: 1,
@@ -334,10 +331,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     fontWeight: '600',
     marginTop: 2,
-  },
-  rowActions: {
-    justifyContent: 'center',
-    gap: 2,
   },
   addButton: {
     flexDirection: 'row',

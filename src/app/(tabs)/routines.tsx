@@ -3,11 +3,13 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { useAnimatedRef } from 'react-native-reanimated';
+import Sortable, { type SortableGridRenderItem } from 'react-native-sortables';
 import { Screen } from '@/components/Screen';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
-import { deleteRoutine, getRoutines } from '@/db/routines';
+import { deleteRoutine, getRoutines, reorderRoutines } from '@/db/routines';
 import type { RoutineWithCount } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
@@ -17,6 +19,7 @@ export default function RoutinesScreen() {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const dialog = useDialog();
+  const scrollableRef = useAnimatedRef<Animated.ScrollView>();
 
   const [routines, setRoutines] = useState<RoutineWithCount[]>([]);
 
@@ -34,7 +37,7 @@ export default function RoutinesScreen() {
     }, [db])
   );
 
-  const confirmDelete = (routine: RoutineWithCount) => {
+  const confirmDelete = useCallback((routine: RoutineWithCount) => {
     dialog.alert({
       title: t('routines.deleteConfirmTitle'),
       message: t('routines.deleteConfirmMessage', { name: routine.name }),
@@ -53,11 +56,47 @@ export default function RoutinesScreen() {
         },
       ],
     });
-  };
+  }, [db, dialog, t]);
 
-  const openRoutine = (routine: RoutineWithCount) => {
-    router.push(`/routine/${routine.id}`);
-  };
+  const handleDragEnd = useCallback((data: RoutineWithCount[]) => {
+    setRoutines(data);
+    void reorderRoutines(
+      db,
+      data.map((routine) => routine.id)
+    );
+  }, [db]);
+
+  const renderItem = useCallback<SortableGridRenderItem<RoutineWithCount>>(
+    ({ item }) => (
+      // Hold anywhere to drag-reorder; a plain tap opens the routine; swipe
+      // right to delete (SwipeToDelete only claims fast horizontal motion).
+      <SwipeToDelete onDelete={() => confirmDelete(item)}>
+        <Sortable.Touchable
+          accessibilityRole="button"
+          style={[
+            styles.card,
+            { backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
+          onTap={() => router.push(`/routine/${item.id}`)}
+        >
+          <View style={styles.cardBody}>
+            <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>
+              {item.name}
+            </Text>
+            {item.description ? (
+              <Text style={[styles.cardDescription, { color: colors.textSecondary }]} numberOfLines={1}>
+                {item.description}
+              </Text>
+            ) : null}
+            <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>
+              {t('routines.exerciseCount', { count: item.exercise_count })}
+            </Text>
+          </View>
+        </Sortable.Touchable>
+      </SwipeToDelete>
+    ),
+    [colors, confirmDelete, router, t]
+  );
 
   return (
     <Screen>
@@ -75,15 +114,8 @@ export default function RoutinesScreen() {
         </Pressable>
       </View>
 
-      <FlatList
-        data={routines}
-        keyExtractor={(item) => String(item.id)}
-        contentContainerStyle={[
-          styles.listContent,
-          routines.length === 0 && styles.listContentEmpty,
-        ]}
-        showsVerticalScrollIndicator={false}
-        ListEmptyComponent={
+      {routines.length === 0 ? (
+        <View style={[styles.listContent, styles.listContentEmpty]}>
           <View style={styles.empty}>
             <Ionicons name="barbell-outline" size={48} color={colors.textSecondary} />
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
@@ -93,38 +125,24 @@ export default function RoutinesScreen() {
               {t('routines.emptyHint')}
             </Text>
           </View>
-        }
-        renderItem={({ item }) => (
-          <SwipeToDelete onDelete={() => confirmDelete(item)}>
-            <Pressable
-              accessibilityRole="button"
-              onPress={() => openRoutine(item)}
-              style={({ pressed }) => [
-                styles.card,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: colors.border,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
-            >
-            <View style={styles.cardBody}>
-              <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>
-                {item.name}
-              </Text>
-              {item.description ? (
-                <Text style={[styles.cardDescription, { color: colors.textSecondary }]} numberOfLines={1}>
-                  {item.description}
-                </Text>
-              ) : null}
-              <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>
-                {t('routines.exerciseCount', { count: item.exercise_count })}
-              </Text>
-            </View>
-            </Pressable>
-          </SwipeToDelete>
-        )}
-      />
+        </View>
+      ) : (
+        <Animated.ScrollView
+          ref={scrollableRef}
+          contentContainerStyle={styles.listContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Sortable.Grid
+            columns={1}
+            data={routines}
+            keyExtractor={(item) => String(item.id)}
+            renderItem={renderItem}
+            rowGap={12}
+            scrollableRef={scrollableRef}
+            onDragEnd={({ data }) => handleDragEnd(data)}
+          />
+        </Animated.ScrollView>
+      )}
     </Screen>
   );
 }

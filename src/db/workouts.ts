@@ -270,7 +270,7 @@ export async function getActiveWorkoutExercises(
   db: SQLiteDatabase,
   logId: number
 ): Promise<ActiveWorkoutExercise[]> {
-  const rows = await db.getAllAsync<ActiveWorkoutExercise>(
+  const rows = await db.getAllAsync<ActiveWorkoutExercise & { exercise_order: string | null }>(
     `SELECT re.id AS routine_exercise_id,
             e.id AS exercise_id,
             e.name AS exercise_name,
@@ -283,6 +283,7 @@ export async function getActiveWorkoutExercises(
             re.reps AS target_reps,
             re.rest_seconds AS target_rest_seconds,
             re.order_index AS order_index,
+            wl.exercise_order AS exercise_order,
             (SELECT COUNT(*) FROM sets s
               WHERE s.workout_log_id = ? AND s.exercise_id = e.id AND s.completed = 1)
               AS completed_sets
@@ -315,10 +316,57 @@ export async function getActiveWorkoutExercises(
     byRoutineExercise.set(target.routine_exercise_id, list);
   }
 
-  return rows.map((row) => ({
+  // A session-only reorder (workout_logs.exercise_order) wins over the
+  // routine's order. Without one, rows stay in routine order.
+  const ordered = applyWorkoutExerciseOrder(rows, rows[0]?.exercise_order ?? null);
+  return ordered.map(({ exercise_order: _stored, ...row }) => ({
     ...row,
     set_targets: byRoutineExercise.get(row.routine_exercise_id) ?? [],
   }));
+}
+
+interface RoutineExerciseIdentity {
+  routine_exercise_id: number;
+}
+
+/**
+ * Merge the routine-ordered exercise rows with a session's stored order
+ * (JSON array of routine_exercise_ids). Stored ids come first, in stored
+ * order; live rows missing from the stored array follow in routine order.
+ * A null/empty/invalid stored order leaves the routine order untouched.
+ */
+export function applyWorkoutExerciseOrder<T extends RoutineExerciseIdentity>(
+  rows: readonly T[],
+  storedOrder: string | null | undefined
+): T[] {
+  if (!storedOrder) {
+    return [...rows];
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(storedOrder);
+  } catch {
+    return [...rows];
+  }
+  if (!Array.isArray(parsed) || parsed.some((value) => typeof value !== 'number')) {
+    return [...rows];
+  }
+
+  const remaining = new Map(rows.map((row) => [row.routine_exercise_id, row]));
+  const ordered: T[] = [];
+  for (const id of parsed) {
+    const row = remaining.get(id);
+    if (row) {
+      ordered.push(row);
+      remaining.delete(id);
+    }
+  }
+  for (const row of rows) {
+    if (remaining.has(row.routine_exercise_id)) {
+      ordered.push(row);
+    }
+  }
+  return ordered;
 }
 
 /** One exercise (with target volume and per-set targets) inside an active session. */
@@ -605,4 +653,84 @@ export async function syncRoutineSetValuesFromWorkout(
       await saveRoutineExerciseSets(db, change.routine_exercise_id, targets);
     }
   }
+}
+
+// ---------------------------------------------------------------------------
+// Session-only exercise order
+// ---------------------------------------------------------------------------
+
+/**
+ * Persist the current exercise order of a session. The stored value is a JSON
+ * array of routine_exercise_ids; callers pass the session's full ordered list
+ * (all current exercises, not a partial move).
+ */
+export async function setWorkoutExerciseOrder(
+  db: SQLiteDatabase,
+  logId: number,
+  orderedRoutineExerciseIds: number[]
+): Promise<void> {
+  await db.runAsync(
+    'UPDATE workout_logs SET exercise_order = ? WHERE id = ?',
+    JSON.stringify(orderedRoutineExerciseIds),
+    logId
+  );
+}
+
+/**
+ * True when the session's effective exercise order differs from the routine's
+ * current order. A session that was never reordered (or a workout without a
+ * routine) reports false.
+ */
+export async function getWorkoutOrderDiffersFromRoutine(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<boolean> {
+  const log = await getWorkoutLog(db, logId);
+  if (!log?.routine_id || !log.exercise_order) {
+    return false;
+  }
+  const session = await getActiveWorkoutExercises(db, logId);
+  const routineRows = await db.getAllAsync<{ id: number }>(
+    `SELECT id FROM routine_exercises
+     WHERE routine_id = ?
+     ORDER BY order_index ASC, id ASC`,
+    log.routine_id
+  );
+
+  const sessionIds = session.map((exercise) => exercise.routine_exercise_id);
+  const routineIds = routineRows.map((row) => row.id);
+  if (sessionIds.length !== routineIds.length) {
+    return true;
+  }
+  return sessionIds.some((id, index) => id !== routineIds[index]);
+}
+
+/**
+ * Reorder the routine's exercises to match this session's effective order.
+ * No-op when the workout has no routine or was never reordered.
+ */
+export async function syncRoutineOrderFromWorkout(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<void> {
+  const log = await getWorkoutLog(db, logId);
+  if (!log?.routine_id || !log.exercise_order) {
+    return;
+  }
+  const session = await getActiveWorkoutExercises(db, logId);
+  const orderedIds = session.map((exercise) => exercise.routine_exercise_id);
+  if (orderedIds.length === 0) {
+    return;
+  }
+
+  await db.withTransactionAsync(async () => {
+    for (let index = 0; index < orderedIds.length; index++) {
+      await db.runAsync(
+        'UPDATE routine_exercises SET order_index = ? WHERE id = ? AND routine_id = ?',
+        index,
+        orderedIds[index],
+        log.routine_id
+      );
+    }
+  });
 }

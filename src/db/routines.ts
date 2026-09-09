@@ -16,14 +16,14 @@ export interface RoutineInput {
   description?: string | null;
 }
 
-/** All routines ordered newest-first, with their exercise count. */
+/** All routines in the user's list order (drag-and-drop reorderable). */
 export async function getRoutines(db: SQLiteDatabase): Promise<RoutineWithCount[]> {
   return db.getAllAsync<RoutineWithCount>(
     `SELECT r.*, COUNT(re.id) AS exercise_count
      FROM routines r
      LEFT JOIN routine_exercises re ON re.routine_id = r.id
      GROUP BY r.id
-     ORDER BY r.created_at DESC, r.id DESC`
+     ORDER BY r.order_index ASC, r.id ASC`
   );
 }
 
@@ -106,18 +106,26 @@ export async function getRoutineExerciseSets(
   );
 }
 
-/** Create a routine. Returns its id. */
+/**
+ * Create a routine and place it at the top of the Routines list (index 0),
+ * shifting existing routines down. Returns its id.
+ */
 export async function createRoutine(db: SQLiteDatabase, input: RoutineInput): Promise<number> {
   const name = input.name.trim();
   if (!name) {
     throw new Error('Routine name is required');
   }
-  const result = await db.runAsync(
-    'INSERT INTO routines (name, description) VALUES (?, ?)',
-    name,
-    input.description?.trim() || null
-  );
-  return result.lastInsertRowId;
+  let routineId = 0;
+  await db.withTransactionAsync(async () => {
+    await db.runAsync('UPDATE routines SET order_index = order_index + 1');
+    const result = await db.runAsync(
+      'INSERT INTO routines (name, description, order_index) VALUES (?, ?, 0)',
+      name,
+      input.description?.trim() || null
+    );
+    routineId = result.lastInsertRowId;
+  });
+  return routineId;
 }
 
 /** Update a routine's name/description. Returns false when the row is missing. */
@@ -318,6 +326,74 @@ export async function moveRoutineExercise(
   return true;
 }
 
+/**
+ * Set the routine's exercise order to exactly match `orderedRoutineExerciseIds`
+ * (used by drag-and-drop, which can move an item several positions at once).
+ * Exercises not listed keep their current relative order at the end. Rows are
+ * renumbered 0..n in one transaction.
+ */
+export async function reorderRoutineExercises(
+  db: SQLiteDatabase,
+  routineId: number,
+  orderedRoutineExerciseIds: number[]
+): Promise<void> {
+  const rows = await db.getAllAsync<{ id: number; order_index: number }>(
+    `SELECT id, order_index FROM routine_exercises
+     WHERE routine_id = ?
+     ORDER BY order_index ASC, id ASC`,
+    routineId
+  );
+
+  const orderedSet = new Set(orderedRoutineExerciseIds);
+  const explicit = orderedRoutineExerciseIds.filter((id) =>
+    rows.some((row) => row.id === id)
+  );
+  const tail = rows.filter((row) => !orderedSet.has(row.id)).map((row) => row.id);
+  const finalOrder = [...explicit, ...tail];
+
+  await db.withTransactionAsync(async () => {
+    for (let index = 0; index < finalOrder.length; index++) {
+      await db.runAsync(
+        'UPDATE routine_exercises SET order_index = ? WHERE id = ?',
+        index,
+        finalOrder[index]
+      );
+    }
+  });
+}
+
 function clampInt(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+/**
+ * Set the Routines list order to exactly match `orderedRoutineIds`.
+ * Routines not listed keep their current relative order at the end. Rows are
+ * renumbered 0..n in one transaction.
+ */
+export async function reorderRoutines(
+  db: SQLiteDatabase,
+  orderedRoutineIds: number[]
+): Promise<void> {
+  const rows = await db.getAllAsync<{ id: number; order_index: number }>(
+    `SELECT id, order_index FROM routines
+     ORDER BY order_index ASC, id ASC`
+  );
+
+  const orderedSet = new Set(orderedRoutineIds);
+  const explicit = orderedRoutineIds.filter((id) =>
+    rows.some((row) => row.id === id)
+  );
+  const tail = rows.filter((row) => !orderedSet.has(row.id)).map((row) => row.id);
+  const finalOrder = [...explicit, ...tail];
+
+  await db.withTransactionAsync(async () => {
+    for (let index = 0; index < finalOrder.length; index++) {
+      await db.runAsync(
+        'UPDATE routines SET order_index = ? WHERE id = ?',
+        index,
+        finalOrder[index]
+      );
+    }
+  });
 }
