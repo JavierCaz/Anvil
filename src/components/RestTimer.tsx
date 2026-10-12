@@ -1,11 +1,11 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer } from 'expo-audio';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
+import { useWorkoutToolsStore } from '@/store/workout-tools';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import {
-  ALARM_DURATION_MS,
   ALARM_SOUND,
   cancelAlarmNotification,
   configureAlarmAudioMode,
@@ -23,12 +23,11 @@ const REST_TIMER_NOTIFICATION_ID = 'anvil-rest-timer';
 /** Android notification channel used by the rest timer alarm. */
 const REST_TIMER_CHANNEL_ID = 'rest-timer';
 
-interface RestTimerProps {
-  /** Countdown duration in seconds. */
-  seconds: number;
-  /** Called once when the countdown reaches zero. */
-  onDone: () => void;
-}
+/**
+ * A deadline callback that runs later than this was frozen in the background —
+ * the notification already sounded, so the in-app chime is skipped.
+ */
+const LATE_FIRE_THRESHOLD_MS = 1500;
 
 function formatCountdown(totalSeconds: number): string {
   const minutes = Math.floor(totalSeconds / 60);
@@ -37,155 +36,113 @@ function formatCountdown(totalSeconds: number): string {
 }
 
 /**
- * Rest countdown between sets. Mount it (with a stable key) to start; it
- * fires `onDone` when it reaches zero and lets the user skip or extend.
+ * Headless alarm for the rest countdown. Mount it once for the whole session
+ * (the session screen stays mounted while exercise screens are pushed on top)
+ * so the rest keeps running — and rings — wherever the user is in the workout.
  *
- * The countdown is driven by an absolute deadline instead of a decrementing
- * timer, so it stays accurate even when the app is backgrounded and JS timers
- * are frozen. A local notification is scheduled for the deadline so the alarm
- * sounds while the screen is locked; on return to the foreground the countdown
- * catches up to where it actually is.
+ * A background notification is scheduled for the deadline so the alarm sounds
+ * while the screen is locked; in the foreground the in-app chime + vibration
+ * play instead. Skipping moves the deadline to now, so it still rings.
  */
-export function RestTimer({ seconds, onDone }: RestTimerProps) {
-  const { colors } = useAppTheme();
+export function RestTimerAlarm() {
   const { t } = useTranslation();
   const player = useAudioPlayer(ALARM_SOUND);
-  const [remaining, setRemaining] = useState(seconds);
-  // True once the alarm chime is playing — the component stays mounted (so the
-  // player isn't released and the sound isn't cut) but hides its UI.
-  const [alarmActive, setAlarmActive] = useState(false);
-
-  /** Absolute end timestamp (ms) — the source of truth for the countdown. */
-  const endTimeRef = useRef(0);
-  const finishedRef = useRef(false);
-  const alarmTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const onDoneRef = useRef(onDone);
-  const appStateRef = useRef(AppState.currentState);
-
-  // Keep the latest `onDone` available to timers/listeners without re-binding.
-  useEffect(() => {
-    onDoneRef.current = onDone;
-  });
+  const endAt = useWorkoutToolsStore((state) => state.rest?.endAt ?? null);
 
   useEffect(() => {
     configureAlarmAudioMode();
   }, []);
 
-  // Schedule (or replace) the background alarm notification for the deadline.
-  // Passing the same identifier replaces any previously scheduled one.
-  const scheduleNotification = useCallback(
-    (delaySeconds: number) =>
-      scheduleAlarmNotification({
+  // (Re)arm the alarm whenever the deadline changes; clearing the rest cancels it.
+  useEffect(() => {
+    if (endAt === null) {
+      cancelAlarmNotification(REST_TIMER_NOTIFICATION_ID);
+      return;
+    }
+
+    const finish = () => {
+      const late = Date.now() - endAt > LATE_FIRE_THRESHOLD_MS;
+      if (AppState.currentState === 'active' && !late) {
+        cancelAlarmNotification(REST_TIMER_NOTIFICATION_ID);
+        playAlarm(player);
+      } else {
+        // Ran out while backgrounded — the notification already sounded.
+        dismissAlarmNotification(REST_TIMER_NOTIFICATION_ID);
+      }
+      useWorkoutToolsStore.getState().clearRest();
+    };
+
+    const msLeft = endAt - Date.now();
+    if (msLeft > 0) {
+      void scheduleAlarmNotification({
         identifier: REST_TIMER_NOTIFICATION_ID,
         channelId: REST_TIMER_CHANNEL_ID,
         channelName: t('workout.rest'),
         title: t('workout.restFinishedTitle'),
         body: t('workout.restFinishedBody'),
-        delaySeconds,
-      }),
-    [t]
-  );
+        delaySeconds: msLeft / 1000,
+      });
+    }
+    const timeout = setTimeout(finish, Math.max(0, msLeft));
 
-  // Schedule the alarm on mount and anchor the deadline. The parent remounts
-  // this component (via `key`) for every rest period, so this runs once per rest.
-  useEffect(() => {
-    endTimeRef.current = Date.now() + seconds * 1000;
-    void scheduleNotification(seconds);
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount-only, see above
-  }, []);
-
-  // Cancel a pending alarm if the timer is skipped or dismissed early.
-  useEffect(() => {
-    return () => {
-      if (alarmTimerRef.current) {
-        clearTimeout(alarmTimerRef.current);
+    // JS timers are frozen in the background — catch up as soon as we return.
+    const subscription = AppState.addEventListener('change', (state) => {
+      if (state === 'active' && Date.now() >= endAt) {
+        clearTimeout(timeout);
+        finish();
       }
-      cancelAlarmNotification(REST_TIMER_NOTIFICATION_ID);
+    });
+
+    return () => {
+      clearTimeout(timeout);
+      subscription.remove();
     };
+  }, [endAt, player, t]);
+
+  // Session over — drop any pending alarm.
+  useEffect(() => {
+    return () => cancelAlarmNotification(REST_TIMER_NOTIFICATION_ID);
   }, []);
 
-  // Drive the displayed countdown from the deadline.
-  useEffect(() => {
-    const update = () => {
-      setRemaining(Math.max(0, Math.ceil((endTimeRef.current - Date.now()) / 1000)));
-    };
+  return null;
+}
+
+/**
+ * Rest countdown banner between sets, with skip / +30s actions. Reads the
+ * session-wide rest from the workout tools store, so it can be rendered on any
+ * workout screen and shows the same countdown; renders nothing when idle.
+ * Ringing is handled by `RestTimerAlarm`.
+ */
+export function RestTimer() {
+  const { colors } = useAppTheme();
+  const { t } = useTranslation();
+  const endAt = useWorkoutToolsStore((state) => state.rest?.endAt ?? null);
+  const [now, setNow] = useState(() => Date.now());
+
+  // Tick from the deadline; the first sync runs before paint so a newly started
+  // (or re-entered) rest never flashes a stale value.
+  useLayoutEffect(() => {
+    if (endAt === null) {
+      return;
+    }
+    const update = () => setNow(Date.now());
     update();
     const interval = setInterval(update, 500);
     return () => clearInterval(interval);
-  }, []);
+  }, [endAt]);
 
-  // When the app returns to the foreground, re-sync from the deadline — JS
-  // timers are frozen in the background, so restore from where the countdown
-  // actually is rather than where it stalled.
-  useEffect(() => {
-    const subscription = AppState.addEventListener('change', (state) => {
-      appStateRef.current = state;
-      if (state !== 'active') {
-        return;
-      }
-      const msLeft = endTimeRef.current - Date.now();
-      if (msLeft <= 0) {
-        // Expired while backgrounded — the notification already sounded.
-        finishedRef.current = true;
-        setRemaining(0);
-        dismissAlarmNotification(REST_TIMER_NOTIFICATION_ID);
-        alarmTimerRef.current = setTimeout(() => onDoneRef.current(), 0);
-        return;
-      }
-      setRemaining(Math.max(0, Math.ceil(msLeft / 1000)));
-    });
-    return () => subscription.remove();
-  }, []);
-
-  // Handle the countdown reaching zero.
-  useEffect(() => {
-    if (remaining > 0 || finishedRef.current) {
-      return;
-    }
-    finishedRef.current = true;
-
-    if (appStateRef.current !== 'active') {
-      // Deadline passed while backgrounded — the notification handled the
-      // alarm; wrap up silently so the chime is not replayed on resume.
-      alarmTimerRef.current = setTimeout(() => onDoneRef.current(), 0);
-      return;
-    }
-
-    // Foreground finish: 3-beep chime + 3 vibration pulses.
-    playAlarm(player);
-    setAlarmActive(true);
-    alarmTimerRef.current = setTimeout(() => onDoneRef.current(), ALARM_DURATION_MS);
-  }, [remaining, player]);
-
-  const handleExtend = () => {
-    if (finishedRef.current) {
-      return;
-    }
-    endTimeRef.current += EXTEND_SECONDS * 1000;
-    const msLeft = endTimeRef.current - Date.now();
-    setRemaining(Math.max(0, Math.ceil(msLeft / 1000)));
-    void scheduleNotification(msLeft / 1000);
-  };
-
-  // Skip ends the rest immediately but still plays the alarm chime so the
-  // user hears the "rest is over" cue. The component stays mounted until the
-  // chime finishes — unmounting would release the player and cut the sound.
-  const handleSkip = () => {
-    if (finishedRef.current) {
-      return;
-    }
-    finishedRef.current = true;
-    setRemaining(0);
-    playAlarm(player);
-    setAlarmActive(true);
-    alarmTimerRef.current = setTimeout(() => onDoneRef.current(), ALARM_DURATION_MS);
-  };
-
-  // Hide the timer the moment the alarm starts — dismissal still happens after
-  // the chime finishes (see the comment in `handleSkip`).
-  if (alarmActive) {
+  if (endAt === null || endAt <= now) {
     return null;
   }
+  const remaining = Math.ceil((endAt - now) / 1000);
+
+  const handleExtend = () => {
+    useWorkoutToolsStore.getState().extendRest(EXTEND_SECONDS);
+  };
+
+  const handleSkip = () => {
+    useWorkoutToolsStore.getState().skipRest();
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>

@@ -1,0 +1,71 @@
+import { Ionicons } from '@expo/vector-icons';
+import dayjs from 'dayjs';
+import { useEffect, useState } from 'react';
+import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, View } from 'react-native';
+import { useAppTheme } from '@/theme/app-theme-provider';
+
+/** `hh:mm:ss` session duration. */
+export function formatElapsed(totalSeconds: number): string {
+  const hours = Math.floor(totalSeconds / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const seconds = totalSeconds % 60;
+  return [hours, minutes, seconds].map((v) => String(v).padStart(2, '0')).join(':');
+}
+
+/**
+ * Live seconds since the session started. Derived from `startedAt` on every
+ * tick, so it stays accurate even if the screen was backgrounded.
+ */
+export function useElapsedSeconds(startedAt: string | null | undefined): number {
+  const [now, setNow] = useState(() => Date.now());
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+  return startedAt ? Math.max(0, dayjs(now).diff(dayjs(startedAt), 'second')) : 0;
+}
+
+interface WorkoutElapsedBarProps {
+  startedAt: string | null | undefined;
+}
+
+/** Compact session-duration readout for screens pushed on top of the session. */
+export function WorkoutElapsedBar({ startedAt }: WorkoutElapsedBarProps) {
+  const { colors } = useAppTheme();
+  const { t } = useTranslation();
+  const elapsedSeconds = useElapsedSeconds(startedAt);
+
+  return (
+    <View style={[styles.bar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <Ionicons name="time-outline" size={18} color={colors.textSecondary} />
+      <Text style={[styles.label, { color: colors.textSecondary }]}>{t('workout.elapsed')}</Text>
+      <Text style={[styles.value, { color: colors.text }]}>{formatElapsed(elapsedSeconds)}</Text>
+    </View>
+  );
+}
+
+const styles = StyleSheet.create({
+  bar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    borderRadius: 14,
+    borderWidth: 1,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    marginBottom: 12,
+  },
+  label: {
+    flex: 1,
+    fontSize: 13,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
+  value: {
+    fontSize: 18,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+});

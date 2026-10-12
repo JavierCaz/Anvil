@@ -87,3 +87,47 @@ describe('workout stopwatch', () => {
     expect(store().stopwatch).toEqual({ startedAt: null, accumulatedMs: 0, laps: [] });
   });
 });
+
+describe('rest countdown', () => {
+  it('starts from the completed set and survives until cleared', () => {
+    store().startRest(7, 2, 90, 1_000);
+    expect(store().rest).toEqual({ exerciseId: 7, setNumber: 2, endAt: 91_000 });
+    store().clearRest();
+    expect(store().rest).toBeNull();
+  });
+
+  it('extends a running rest and ignores an expired one', () => {
+    store().startRest(7, 2, 60, 0);
+    store().extendRest(30, 10_000);
+    expect(store().rest?.endAt).toBe(90_000);
+    store().extendRest(30, 100_000);
+    expect(store().rest?.endAt).toBe(90_000);
+  });
+
+  it('skips by moving the deadline to now', () => {
+    store().startRest(7, 2, 60, 0);
+    store().skipRest(5_000);
+    expect(store().rest?.endAt).toBe(5_000);
+  });
+
+  it('is released only by its own set', () => {
+    store().startRest(7, 3, 60, 0);
+    store().releaseRestSet(8, 3);
+    store().releaseRestSet(7, 2);
+    expect(store().rest?.setNumber).toBe(3);
+    store().releaseRestSet(7, 3);
+    expect(store().rest).toBeNull();
+  });
+
+  it('follows renumbering when an earlier set is deleted', () => {
+    store().startRest(7, 3, 60, 0);
+    store().releaseRestSet(7, 1, true);
+    expect(store().rest?.setNumber).toBe(2);
+  });
+
+  it('is cleared with the session', () => {
+    store().startRest(7, 1, 60, 0);
+    store().resetAll();
+    expect(store().rest).toBeNull();
+  });
+});

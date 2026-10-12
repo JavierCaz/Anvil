@@ -2,7 +2,6 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import type { NativeStackNavigationProp } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import dayjs from 'dayjs';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -12,6 +11,8 @@ import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { RestTimer, RestTimerAlarm } from '@/components/RestTimer';
+import { formatElapsed, useElapsedSeconds } from '@/components/WorkoutElapsed';
 import { WorkoutRecapModal } from '@/components/WorkoutRecap';
 import { WorkoutTimerAlarm, WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
 import { getWorkoutRecap, type WorkoutRecap } from '@/db/gamification';
@@ -37,13 +38,6 @@ import type { ActiveWorkoutExercise } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
-function formatStopwatch(totalSeconds: number): string {
-  const hours = Math.floor(totalSeconds / 3600);
-  const minutes = Math.floor((totalSeconds % 3600) / 60);
-  const seconds = totalSeconds % 60;
-  return [hours, minutes, seconds].map((v) => String(v).padStart(2, '0')).join(':');
-}
-
 export default function WorkoutSessionScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
@@ -58,18 +52,11 @@ export default function WorkoutSessionScreen() {
   // back-prevention guard must let the resulting navigation through.
   const allowLeaveRef = useRef(false);
 
-  const [now, setNow] = useState(() => Date.now());
   const [recap, setRecap] = useState<WorkoutRecap | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
   // The animated scroll container that hosts the sortable grid; passed to
   // Sortable.Grid so dragging auto-scrolls near the screen edges.
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
-  // Live stopwatch tick — elapsed is derived from `started_at`, so it stays
-  // accurate even if the screen was backgrounded.
-  useEffect(() => {
-    const timer = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(timer);
-  }, []);
 
   // The timer/stopwatch tools are scoped to this session — clear them once the
   // session screen goes away (finished, discarded or otherwise left).
@@ -106,7 +93,7 @@ export default function WorkoutSessionScreen() {
     [data]
   );
 
-  const elapsedSeconds = log ? Math.max(0, dayjs(now).diff(dayjs(log.started_at), 'second')) : 0;
+  const elapsedSeconds = useElapsedSeconds(log?.started_at);
   const doneCount = exercises.filter((e) => e.completed_sets >= e.target_sets).length;
 
   const backHref = log?.routine_id ? (`/routine/${log.routine_id}` as const) : ('/routines' as const);
@@ -401,7 +388,7 @@ export default function WorkoutSessionScreen() {
                 {t('workout.elapsed')}
               </Text>
               <Text style={[styles.timerValue, { color: colors.text }]}>
-                {formatStopwatch(elapsedSeconds)}
+                {formatElapsed(elapsedSeconds)}
               </Text>
               <View style={[styles.progressRow, { backgroundColor: colors.background }]}>
                 <View
@@ -440,6 +427,7 @@ export default function WorkoutSessionScreen() {
           </Animated.ScrollView>
 
           <View style={styles.footer}>
+            <RestTimer />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('workout.finishWorkout')}
@@ -473,6 +461,7 @@ export default function WorkoutSessionScreen() {
       <LoadingOverlay visible={!loaded} />
 
       <WorkoutTimerAlarm />
+      <RestTimerAlarm />
       <WorkoutToolsSheet visible={toolsOpen} onClose={() => setToolsOpen(false)} />
 
       {recap && <WorkoutRecapModal recap={recap} onClose={handleRecapClose} />}

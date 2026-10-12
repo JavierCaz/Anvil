@@ -30,6 +30,20 @@ export interface StopwatchState {
   laps: number[];
 }
 
+/**
+ * Rest countdown between sets, started when a set is completed. Lives here
+ * (not in the exercise screen) so it keeps running and stays visible while the
+ * user moves between the session and exercise screens.
+ */
+export interface RestState {
+  /** Exercise whose set started the rest. */
+  exerciseId: number;
+  /** Set that started the rest — undoing/deleting it cancels the rest. */
+  setNumber: number;
+  /** Absolute deadline (ms). */
+  endAt: number;
+}
+
 export type TimerStatus = 'idle' | 'running' | 'paused';
 
 export function getTimerStatus(timer: TimerState): TimerStatus {
@@ -77,6 +91,7 @@ const initialStopwatch: StopwatchState = {
 interface WorkoutToolsState {
   timer: TimerState;
   stopwatch: StopwatchState;
+  rest: RestState | null;
 
   /** Set the idle timer's duration (ignored while running/paused). */
   setTimerDuration: (seconds: number) => void;
@@ -98,17 +113,32 @@ interface WorkoutToolsState {
   resetStopwatch: () => void;
   lapStopwatch: (now?: number) => void;
 
-  /** Clear both tools — called when the workout session ends. */
+  /** Start (or restart) the rest countdown for a just-completed set. */
+  startRest: (exerciseId: number, setNumber: number, seconds: number, now?: number) => void;
+  /** Push a running rest's deadline back. */
+  extendRest: (seconds: number, now?: number) => void;
+  /** End the rest now — the alarm still rings as the "rest is over" cue. */
+  skipRest: (now?: number) => void;
+  /** Drop the rest without ringing (it finished or was cancelled). */
+  clearRest: () => void;
+  /**
+   * A set was undone or deleted: cancel the rest if it belongs to that set.
+   * With `shift`, later sets of the exercise were renumbered down by one.
+   */
+  releaseRestSet: (exerciseId: number, setNumber: number, shift?: boolean) => void;
+
+  /** Clear all tools — called when the workout session ends. */
   resetAll: () => void;
 }
 
 /**
- * Session-scoped timer + stopwatch available during a workout. Shared across
+ * Session-scoped timer, stopwatch and rest countdown available during a workout. Shared across
  * the session and exercise screens; intentionally not persisted.
  */
 export const useWorkoutToolsStore = create<WorkoutToolsState>()((set, get) => ({
   timer: initialTimer,
   stopwatch: initialStopwatch,
+  rest: null,
 
   setTimerDuration: (seconds) => {
     const { timer } = get();
@@ -201,7 +231,43 @@ export const useWorkoutToolsStore = create<WorkoutToolsState>()((set, get) => ({
     set({ stopwatch: { ...stopwatch, laps: [...stopwatch.laps, getStopwatchElapsedMs(stopwatch, now)] } });
   },
 
+  startRest: (exerciseId, setNumber, seconds, now = Date.now()) => {
+    set({ rest: { exerciseId, setNumber, endAt: now + seconds * 1000 } });
+  },
+
+  extendRest: (seconds, now = Date.now()) => {
+    const { rest } = get();
+    if (!rest || rest.endAt <= now) {
+      return;
+    }
+    set({ rest: { ...rest, endAt: rest.endAt + seconds * 1000 } });
+  },
+
+  skipRest: (now = Date.now()) => {
+    const { rest } = get();
+    if (!rest || rest.endAt <= now) {
+      return;
+    }
+    set({ rest: { ...rest, endAt: now } });
+  },
+
+  clearRest: () => {
+    set({ rest: null });
+  },
+
+  releaseRestSet: (exerciseId, setNumber, shift = false) => {
+    const { rest } = get();
+    if (!rest || rest.exerciseId !== exerciseId) {
+      return;
+    }
+    if (rest.setNumber === setNumber) {
+      set({ rest: null });
+    } else if (shift && rest.setNumber > setNumber) {
+      set({ rest: { ...rest, setNumber: rest.setNumber - 1 } });
+    }
+  },
+
   resetAll: () => {
-    set({ timer: initialTimer, stopwatch: initialStopwatch });
+    set({ timer: initialTimer, stopwatch: initialStopwatch, rest: null });
   },
 }));

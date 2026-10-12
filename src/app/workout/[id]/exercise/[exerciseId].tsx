@@ -15,6 +15,7 @@ import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { useToast } from '@/components/ToastProvider';
+import { WorkoutElapsedBar } from '@/components/WorkoutElapsed';
 import { WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
 import { getAchievementByKey } from '@/constants/achievements';
 import type { AchievementDefinition } from '@/constants/achievements';
@@ -23,6 +24,7 @@ import { getExerciseById } from '@/db/exercises';
 import {
   deleteSetAndShift,
   getActiveWorkoutExercise,
+  getWorkoutLog,
   getWorkoutSets,
   markWorkoutSetsEdited,
   upsertSet,
@@ -30,6 +32,7 @@ import {
 import type { Exercise, WorkoutSet } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
+import { useWorkoutToolsStore } from '@/store/workout-tools';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
@@ -38,11 +41,6 @@ const DEFAULT_REST_SECONDS = 90;
 interface SetDraft {
   weight: string;
   reps: string;
-}
-
-interface ActiveRest {
-  setNumber: number;
-  seconds: number;
 }
 
 export default function WorkoutExerciseScreen() {
@@ -59,11 +57,12 @@ export default function WorkoutExerciseScreen() {
 
   const { data, loaded, reload: reloadQuery } = useFocusQuery(
     async (db) => {
-      const [exerciseRow, setRows] = await Promise.all([
+      const [exerciseRow, setRows, logRow] = await Promise.all([
         getActiveWorkoutExercise(db, logId, exerciseIdNum),
         getWorkoutSets(db, logId, exerciseIdNum),
+        getWorkoutLog(db, logId),
       ]);
-      return { exercise: exerciseRow, sets: setRows };
+      return { exercise: exerciseRow, sets: setRows, startedAt: logRow?.started_at ?? null };
     },
     [logId, exerciseIdNum, unit],
     { refetchOnFocus: false }
@@ -75,15 +74,10 @@ export default function WorkoutExerciseScreen() {
   const [restConfig, setRestConfig] = useState<Record<number, number>>({});
   const [setCount, setSetCount] = useState(0);
   const [expandedSet, setExpandedSet] = useState<number | null>(null);
-  const [activeRest, setActiveRest] = useState<ActiveRest | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
   const [achievementIcons, setAchievementIcons] = useState<string[]>([]);
   const [toastAchievement, setToastAchievement] = useState<AchievementDefinition | null>(null);
-
-  const handleRestDone = useCallback(() => {
-    setActiveRest(null);
-  }, []);
 
   const showExerciseInfo = () => {
     if (!exercise) {
@@ -214,7 +208,7 @@ export default function WorkoutExerciseScreen() {
             setExpandedSet(null);
             // Keep the rest timer running unless it's counting down for the
             // set being deleted.
-            setActiveRest((current) => (current && current.setNumber === setNumber ? null : current));
+            useWorkoutToolsStore.getState().releaseRestSet(exerciseIdNum, setNumber, true);
             void deleteSetAndShift(db, logId, exerciseIdNum, setNumber).then(reload);
             void markWorkoutSetsEdited(db, logId);
           },
@@ -246,7 +240,7 @@ export default function WorkoutExerciseScreen() {
       reload();
       void Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
       if (restSeconds > 0) {
-        setActiveRest({ setNumber, seconds: restSeconds });
+        useWorkoutToolsStore.getState().startRest(exerciseIdNum, setNumber, restSeconds);
       }
       // Auto-advance the accordion to the next set when the open one is done.
       setExpandedSet((current) => {
@@ -302,7 +296,7 @@ export default function WorkoutExerciseScreen() {
       completed: 0,
     }).then(() => {
       // Only stop the rest timer when undoing the set it's counting down for.
-      setActiveRest((current) => (current && current.setNumber === setNumber ? null : current));
+      useWorkoutToolsStore.getState().releaseRestSet(exerciseIdNum, setNumber);
       // Undoing a done set reopens it as an editable accordion — make it the open one.
       setExpandedSet(setNumber);
       reload();
@@ -328,6 +322,7 @@ export default function WorkoutExerciseScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
+            <WorkoutElapsedBar startedAt={data?.startedAt} />
             <ExerciseSetEditor
               mode="workout"
               exerciseName={exercise.exercise_name}
@@ -377,9 +372,7 @@ export default function WorkoutExerciseScreen() {
           )}
 
           <View style={styles.footer}>
-            {activeRest && (
-              <RestTimer key={activeRest.setNumber} seconds={activeRest.seconds} onDone={handleRestDone} />
-            )}
+            <RestTimer />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('workout.finishExercise')}
