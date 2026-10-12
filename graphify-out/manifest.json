@@ -18,16 +18,10 @@
     "semantic_hash": "6b9302c1f72c315e90233c7539c48c9f"
   },
   "app.config.js": {
-    "mtime": 1788652999.4572124,
-    "seen": 1789852290.9578865,
-    "ast_hash": "9812bd6b0fdefcf1abab7e58625c4d57",
-    "semantic_hash": "9812bd6b0fdefcf1abab7e58625c4d57"
-  },
-  "assets/expo.icon/icon.json": {
-    "mtime": 1787327064.660333,
-    "seen": 1789852290.9578888,
-    "ast_hash": "35cb915a0bebbebbe69cf7815e174462",
-    "semantic_hash": "35cb915a0bebbebbe69cf7815e174462"
+    "mtime": 1791848178.5890253,
+    "seen": 1791848185.978127,
+    "ast_hash": "04a0f4cc61163322d3ea098175efa6f5",
+    "semantic_hash": ""
   },
   "eas.json": {
     "mtime": 1788154599.8217514,
@@ -42,10 +36,10 @@
     "semantic_hash": "b713dd66aa3ad59ed5098d7b9f8dc202"
   },
   "package.json": {
-    "mtime": 1788975147.55934,
-    "seen": 1789852290.9578948,
-    "ast_hash": "5162ae44b0a6ddd7da372c5e2196d0b8",
-    "semantic_hash": "5162ae44b0a6ddd7da372c5e2196d0b8"
+    "mtime": 1791847855.079757,
+    "seen": 1791848185.9781368,
+    "ast_hash": "0940abc70bfdd750953a56c1523fb99b",
+    "semantic_hash": ""
   },
   "scripts/generate-exercise-frames.mjs": {
     "mtime": 1788042915.7794504,
@@ -479,53 +473,41 @@
     "ast_hash": "21c2bdf1233e96ce47e63269ecba4ab1",
     "semantic_hash": "21c2bdf1233e96ce47e63269ecba4ab1"
   },
-  "assets/expo.icon/Assets/expo-symbol 2.svg": {
-    "mtime": 1787327064.6903331,
-    "seen": 1789852290.9580204,
-    "ast_hash": "6979b664c1ce82c10426a051082412a7",
-    "semantic_hash": "6979b664c1ce82c10426a051082412a7"
-  },
-  "assets/expo.icon/Assets/grid.png": {
-    "mtime": 1787327064.672333,
-    "seen": 1789852290.958022,
-    "ast_hash": "37cdeda9d1af5d7432716d9671b098da",
-    "semantic_hash": "37cdeda9d1af5d7432716d9671b098da"
-  },
   "assets/images/android-icon-background.png": {
-    "mtime": 1787327064.6653328,
-    "seen": 1789852290.9580238,
-    "ast_hash": "2d65569cc0e2afdcea0af9f9902d4173",
-    "semantic_hash": "2d65569cc0e2afdcea0af9f9902d4173"
+    "mtime": 1791848170.6624496,
+    "seen": 1791848185.9783385,
+    "ast_hash": "f81c9a928a18c167b194ab07da3fda6d",
+    "semantic_hash": ""
   },
   "assets/images/android-icon-foreground.png": {
-    "mtime": 1787327064.666333,
-    "seen": 1789852290.9580255,
-    "ast_hash": "72e71a9c846c6aa4ae32476641a00e18",
-    "semantic_hash": "72e71a9c846c6aa4ae32476641a00e18"
+    "mtime": 1791848170.75045,
+    "seen": 1791848185.978341,
+    "ast_hash": "01a47f5c9fe2a4fe011cb14202b2a818",
+    "semantic_hash": ""
   },
   "assets/images/android-icon-monochrome.png": {
-    "mtime": 1787327064.667333,
-    "seen": 1789852290.9580274,
-    "ast_hash": "1e097dab989759fc0b69440092ca22cd",
-    "semantic_hash": "1e097dab989759fc0b69440092ca22cd"
+    "mtime": 1791848171.0834506,
+    "seen": 1791848185.9783432,
+    "ast_hash": "63ae6d3b10fdb438e82c64ca7082ae30",
+    "semantic_hash": ""
   },
   "assets/images/favicon.png": {
-    "mtime": 1787327064.672333,
-    "seen": 1789852290.9580288,
-    "ast_hash": "d9f444efbdfbe7931aa93beada07318a",
-    "semantic_hash": "d9f444efbdfbe7931aa93beada07318a"
+    "mtime": 1791848169.5624473,
+    "seen": 1791848185.978345,
+    "ast_hash": "a3629de4dcbaf125fca79fab153f05f1",
+    "semantic_hash": ""
   },
   "assets/images/icon.png": {
-    "mtime": 1788987287.8088508,
-    "seen": 1789852290.958032,
-    "ast_hash": "8d892ef03dbd43e8d899c1d605ad42df",
-    "semantic_hash": "8d892ef03dbd43e8d899c1d605ad42df"
+    "mtime": 1791848169.482921,
+    "seen": 1791848185.978347,
+    "ast_hash": "b17ea13fe975e21736c0db56bc615bf4",
+    "semantic_hash": ""
   },
   "assets/images/splash-icon.png": {
-    "mtime": 1787327064.6889431,
-    "seen": 1789852290.9580336,
-    "ast_hash": "5ee5db91d59518c45ebcc99a2f5afc57",
-    "semantic_hash": "5ee5db91d59518c45ebcc99a2f5afc57"
+    "mtime": 1791848170.6049545,
+    "seen": 1791848185.978349,
+    "ast_hash": "7596e858f98cdaa4d4e88f8643d15eec",
+    "semantic_hash": ""
   },
   "assets/audio/rest_finished.wav": {
     "mtime": 1788042915.7770653,
@@ -567,6 +549,18 @@
     "mtime": 1791847376.2409055,
     "seen": 1791847410.0505154,
     "ast_hash": "cddc7831426293cb4730cf926297e4e2",
+    "semantic_hash": ""
+  },
+  "scripts/generate-icons.mjs": {
+    "mtime": 1791848165.922265,
+    "seen": 1791848185.9781425,
+    "ast_hash": "373f0dd24693a52a530f993a566f3cb6",
+    "semantic_hash": ""
+  },
+  "assets/icon/source.png": {
+    "mtime": 1791848075.1378593,
+    "seen": 1791848185.978336,
+    "ast_hash": "abbf174835291bc7bf0c9fe08e52ea41",
     "semantic_hash": ""
   }
 }

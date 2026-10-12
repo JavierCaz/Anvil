@@ -18,16 +18,16 @@
     "semantic_hash": "6b9302c1f72c315e90233c7539c48c9f"
   },
   "app.config.js": {
-    "mtime": 1788652999.4572124,
-    "seen": 1789852290.9578865,
-    "ast_hash": "9812bd6b0fdefcf1abab7e58625c4d57",
-    "semantic_hash": "9812bd6b0fdefcf1abab7e58625c4d57"
+    "mtime": 1791847841.1778738,
+    "seen": 1791847848.448164,
+    "ast_hash": "ad4b04b0c0996d89b4dcb63683e8bfc4",
+    "semantic_hash": ""
   },
   "assets/expo.icon/icon.json": {
-    "mtime": 1787327064.660333,
-    "seen": 1789852290.9578888,
-    "ast_hash": "35cb915a0bebbebbe69cf7815e174462",
-    "semantic_hash": "35cb915a0bebbebbe69cf7815e174462"
+    "mtime": 1791847834.263742,
+    "seen": 1791847848.4481676,
+    "ast_hash": "26dd3a51d8c46a8ce348466cfb7bcb1d",
+    "semantic_hash": ""
   },
   "eas.json": {
     "mtime": 1788154599.8217514,
@@ -138,15 +138,15 @@
     "semantic_hash": "cd3579d690dd2e16ef3e0e1f4acb3358"
   },
   "src/app/workout/[id].tsx": {
-    "mtime": 1791847200.384286,
-    "seen": 1791847232.872958,
-    "ast_hash": "212d3a401c447702ef781d75a13ef794",
+    "mtime": 1791847386.8315315,
+    "seen": 1791847410.0504754,
+    "ast_hash": "fce71d4b08bd6c3fe67f51683e2cc434",
     "semantic_hash": ""
   },
   "src/app/workout/[id]/exercise/[exerciseId].tsx": {
-    "mtime": 1791847200.362973,
-    "seen": 1791847232.8729615,
-    "ast_hash": "5967cc3cf693fcc934173950ef6bf077",
+    "mtime": 1791847386.8324964,
+    "seen": 1791847410.050478,
+    "ast_hash": "3f8f67d34af4f65c223772df314f75ff",
     "semantic_hash": ""
   },
   "src/components/AchievementCard.tsx": {
@@ -479,53 +479,41 @@
     "ast_hash": "21c2bdf1233e96ce47e63269ecba4ab1",
     "semantic_hash": "21c2bdf1233e96ce47e63269ecba4ab1"
   },
-  "assets/expo.icon/Assets/expo-symbol 2.svg": {
-    "mtime": 1787327064.6903331,
-    "seen": 1789852290.9580204,
-    "ast_hash": "6979b664c1ce82c10426a051082412a7",
-    "semantic_hash": "6979b664c1ce82c10426a051082412a7"
-  },
-  "assets/expo.icon/Assets/grid.png": {
-    "mtime": 1787327064.672333,
-    "seen": 1789852290.958022,
-    "ast_hash": "37cdeda9d1af5d7432716d9671b098da",
-    "semantic_hash": "37cdeda9d1af5d7432716d9671b098da"
-  },
   "assets/images/android-icon-background.png": {
-    "mtime": 1787327064.6653328,
-    "seen": 1789852290.9580238,
-    "ast_hash": "2d65569cc0e2afdcea0af9f9902d4173",
-    "semantic_hash": "2d65569cc0e2afdcea0af9f9902d4173"
+    "mtime": 1791847830.0667331,
+    "seen": 1791847848.4483979,
+    "ast_hash": "6fe10d76cd71d0c21bbcad0879e48a33",
+    "semantic_hash": ""
   },
   "assets/images/android-icon-foreground.png": {
-    "mtime": 1787327064.666333,
-    "seen": 1789852290.9580255,
-    "ast_hash": "72e71a9c846c6aa4ae32476641a00e18",
-    "semantic_hash": "72e71a9c846c6aa4ae32476641a00e18"
+    "mtime": 1791847830.939735,
+    "seen": 1791847848.4483998,
+    "ast_hash": "6d32278545f108db0d455866038ea7a9",
+    "semantic_hash": ""
   },
   "assets/images/android-icon-monochrome.png": {
-    "mtime": 1787327064.667333,
-    "seen": 1789852290.9580274,
-    "ast_hash": "1e097dab989759fc0b69440092ca22cd",
-    "semantic_hash": "1e097dab989759fc0b69440092ca22cd"
+    "mtime": 1791847831.6067362,
+    "seen": 1791847848.4484022,
+    "ast_hash": "8c788b6ec4155a32deec02339aa01ccd",
+    "semantic_hash": ""
   },
   "assets/images/favicon.png": {
-    "mtime": 1787327064.672333,
-    "seen": 1789852290.9580288,
-    "ast_hash": "d9f444efbdfbe7931aa93beada07318a",
-    "semantic_hash": "d9f444efbdfbe7931aa93beada07318a"
+    "mtime": 1791847829.1427312,
+    "seen": 1791847848.4484046,
+    "ast_hash": "520628da6fc9358ce2c0b66ace89dd0a",
+    "semantic_hash": ""
   },
   "assets/images/icon.png": {
-    "mtime": 1788987287.8088508,
-    "seen": 1789852290.958032,
-    "ast_hash": "8d892ef03dbd43e8d899c1d605ad42df",
-    "semantic_hash": "8d892ef03dbd43e8d899c1d605ad42df"
+    "mtime": 1791847825.1137254,
+    "seen": 1791847848.4484065,
+    "ast_hash": "1f502edce1f15b7d05e4ef3010cce831",
+    "semantic_hash": ""
   },
   "assets/images/splash-icon.png": {
-    "mtime": 1787327064.6889431,
-    "seen": 1789852290.9580336,
-    "ast_hash": "5ee5db91d59518c45ebcc99a2f5afc57",
-    "semantic_hash": "5ee5db91d59518c45ebcc99a2f5afc57"
+    "mtime": 1791847832.5607383,
+    "seen": 1791847848.4484084,
+    "ast_hash": "90c64ce0a0369f3761f052b61c8a2d34",
+    "semantic_hash": ""
   },
   "assets/audio/rest_finished.wav": {
     "mtime": 1788042915.7770653,
@@ -561,6 +549,72 @@
     "mtime": 1791846355.737797,
     "seen": 1791846572.5098395,
     "ast_hash": "d9d1bf9a8baa70a8dd62cb70b1996779",
+    "semantic_hash": ""
+  },
+  "src/components/WorkoutElapsed.tsx": {
+    "mtime": 1791847376.2409055,
+    "seen": 1791847410.0505154,
+    "ast_hash": "cddc7831426293cb4730cf926297e4e2",
+    "semantic_hash": ""
+  },
+  "scripts/generate-icons.mjs": {
+    "mtime": 1791847822.5938323,
+    "seen": 1791847848.4481823,
+    "ast_hash": "29c9719fb33efc58c8c689d9371b401e",
+    "semantic_hash": ""
+  },
+  "assets/expo.icon/Assets/anvil.png": {
+    "mtime": 1791847833.5381446,
+    "seen": 1791847848.4483802,
+    "ast_hash": "821680c602c52b3caff8ca10cbebfdec",
+    "semantic_hash": ""
+  },
+  "assets/expo.icon/Assets/dumbbell.png": {
+    "mtime": 1791847834.2567418,
+    "seen": 1791847848.4483821,
+    "ast_hash": "3e57ee7be892166abbffff4222646b8b",
+    "semantic_hash": ""
+  },
+  "assets/icon/android-foreground.svg": {
+    "mtime": 1791847823.87472,
+    "seen": 1791847848.4483843,
+    "ast_hash": "e15c8593d44ed0013ff4535ca3322b58",
+    "semantic_hash": ""
+  },
+  "assets/icon/android-monochrome.svg": {
+    "mtime": 1791847823.87472,
+    "seen": 1791847848.448386,
+    "ast_hash": "5cf8bc4d1289ca03662f8076ec44205b",
+    "semantic_hash": ""
+  },
+  "assets/icon/background.svg": {
+    "mtime": 1791847823.87472,
+    "seen": 1791847848.4483879,
+    "ast_hash": "820893a11e9b87841b4321a2284d765c",
+    "semantic_hash": ""
+  },
+  "assets/icon/icon.svg": {
+    "mtime": 1791847823.87372,
+    "seen": 1791847848.4483895,
+    "ast_hash": "62c21052520ab83652028ff5c16f0907",
+    "semantic_hash": ""
+  },
+  "assets/icon/ios-anvil.svg": {
+    "mtime": 1791847823.8759341,
+    "seen": 1791847848.4483917,
+    "ast_hash": "420bd71c824b035ccfe19167ae4a3f8c",
+    "semantic_hash": ""
+  },
+  "assets/icon/ios-dumbbell.svg": {
+    "mtime": 1791847823.8759341,
+    "seen": 1791847848.4483936,
+    "ast_hash": "2dadbcb8c89ae26c72a78ba8c3f1724a",
+    "semantic_hash": ""
+  },
+  "assets/icon/mark.svg": {
+    "mtime": 1791847823.87472,
+    "seen": 1791847848.4483953,
+    "ast_hash": "283bb0b0dd0b2f7df0f4729a4742be62",
     "semantic_hash": ""
   }
 }

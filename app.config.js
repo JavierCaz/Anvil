@@ -40,12 +40,11 @@ export default {
     scheme: appVariant.scheme,
     userInterfaceStyle: 'automatic',
     ios: {
-      icon: './assets/expo.icon',
       bundleIdentifier: appVariant.package,
     },
     android: {
       adaptiveIcon: {
-        backgroundColor: '#E6F4FE',
+        backgroundColor: '#0E0F12',
         foregroundImage: './assets/images/android-icon-foreground.png',
         backgroundImage: './assets/images/android-icon-background.png',
         monochromeImage: './assets/images/android-icon-monochrome.png',
@@ -74,9 +73,9 @@ export default {
       [
         'expo-splash-screen',
         {
-          backgroundColor: '#208AEF',
+          backgroundColor: '#0E0F12',
           image: './assets/images/splash-icon.png',
-          imageWidth: 76,
+          imageWidth: 200,
         },
       ],
       '@react-native-community/datetimepicker',
