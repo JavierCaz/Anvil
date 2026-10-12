@@ -15,6 +15,7 @@ import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { useToast } from '@/components/ToastProvider';
+import { WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
 import { getAchievementByKey } from '@/constants/achievements';
 import type { AchievementDefinition } from '@/constants/achievements';
 import { getExerciseAchievements, reconcileExerciseAchievements, unlockWeightComparatives } from '@/db/achievements';
@@ -75,6 +76,7 @@ export default function WorkoutExerciseScreen() {
   const [setCount, setSetCount] = useState(0);
   const [expandedSet, setExpandedSet] = useState<number | null>(null);
   const [activeRest, setActiveRest] = useState<ActiveRest | null>(null);
+  const [toolsOpen, setToolsOpen] = useState(false);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
   const [achievementIcons, setAchievementIcons] = useState<string[]>([]);
   const [toastAchievement, setToastAchievement] = useState<AchievementDefinition | null>(null);
@@ -311,7 +313,13 @@ export default function WorkoutExerciseScreen() {
 
   return (
     <Screen edges={['left', 'right', 'bottom']}>
-      <Stack.Screen options={{ headerShown: true, title: exercise?.exercise_name ?? '' }} />
+      <Stack.Screen
+        options={{
+          headerShown: true,
+          title: exercise?.exercise_name ?? '',
+          headerRight: () => <WorkoutToolsButton onPress={() => setToolsOpen(true)} />,
+        }}
+      />
 
       {loaded && exercise && (
         <>
@@ -392,6 +400,8 @@ export default function WorkoutExerciseScreen() {
       )}
 
       <LoadingOverlay visible={!loaded} />
+
+      <WorkoutToolsSheet visible={toolsOpen} onClose={() => setToolsOpen(false)} />
     </Screen>
   );
 }

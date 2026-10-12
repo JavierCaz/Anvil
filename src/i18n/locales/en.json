@@ -15,7 +15,8 @@
     "edit": "Edit",
     "search": "Search",
     "moveUp": "Move up",
-    "moveDown": "Move down"
+    "moveDown": "Move down",
+    "close": "Close"
   },
   "tabs": {
     "home": "Home",
@@ -383,7 +384,22 @@
     "saveOrderMessage": "You changed the order of the exercises during this workout. Save the new order to your routine?",
     "saveOrderAndChangesMessage": "You changed the exercise order and added or removed sets during this workout. Save these changes to your routine?",
     "saveOrderAndValuesMessage": "You changed the exercise order and the set values during this workout. Save these changes to your routine?",
-    "saveOrderAllMessage": "You changed the exercise order, added or removed sets and changed set values during this workout. Save all these changes to your routine?"
+    "saveOrderAllMessage": "You changed the exercise order, added or removed sets and changed set values during this workout. Save all these changes to your routine?",
+    "tools": {
+      "open": "Timer & stopwatch",
+      "timer": "Timer",
+      "stopwatch": "Stopwatch",
+      "start": "Start",
+      "pause": "Pause",
+      "resume": "Resume",
+      "reset": "Reset",
+      "lap": "Lap",
+      "lapNumber": "Lap {{number}}",
+      "addSeconds": "Add {{seconds}} seconds",
+      "subtractSeconds": "Subtract {{seconds}} seconds",
+      "timerFinished": "Time's up!",
+      "timerFinishedBody": "Your workout timer has finished."
+    }
   },
   "notifications": {
     "comparativeLifted": "You just lifted {{object}}!",

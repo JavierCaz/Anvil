@@ -13,10 +13,12 @@ import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { WorkoutRecapModal } from '@/components/WorkoutRecap';
+import { WorkoutTimerAlarm, WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
 import { getWorkoutRecap, type WorkoutRecap } from '@/db/gamification';
 import { getExercisesAchievements, reconcileExerciseAchievements } from '@/db/achievements';
 import type { AchievementDefinition } from '@/constants/achievements';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
+import { useWorkoutToolsStore } from '@/store/workout-tools';
 import {
   cancelWorkout,
   completeWorkout,
@@ -58,6 +60,7 @@ export default function WorkoutSessionScreen() {
 
   const [now, setNow] = useState(() => Date.now());
   const [recap, setRecap] = useState<WorkoutRecap | null>(null);
+  const [toolsOpen, setToolsOpen] = useState(false);
   // The animated scroll container that hosts the sortable grid; passed to
   // Sortable.Grid so dragging auto-scrolls near the screen edges.
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
@@ -66,6 +69,12 @@ export default function WorkoutSessionScreen() {
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // The timer/stopwatch tools are scoped to this session — clear them once the
+  // session screen goes away (finished, discarded or otherwise left).
+  useEffect(() => {
+    return () => useWorkoutToolsStore.getState().resetAll();
   }, []);
 
   const { data, loaded, setData } = useFocusQuery(
@@ -360,14 +369,17 @@ export default function WorkoutSessionScreen() {
           gestureEnabled: false,
           title: routineName,
           headerRight: () => (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('workout.cancelWorkout')}
-              hitSlop={8}
-              onPress={handleCancel}
-            >
-              <Ionicons name="close" size={24} color={colors.textSecondary} />
-            </Pressable>
+            <View style={styles.headerActions}>
+              <WorkoutToolsButton onPress={() => setToolsOpen(true)} />
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t('workout.cancelWorkout')}
+                hitSlop={8}
+                onPress={handleCancel}
+              >
+                <Ionicons name="close" size={24} color={colors.textSecondary} />
+              </Pressable>
+            </View>
           ),
         }}
       />
@@ -460,6 +472,9 @@ export default function WorkoutSessionScreen() {
 
       <LoadingOverlay visible={!loaded} />
 
+      <WorkoutTimerAlarm />
+      <WorkoutToolsSheet visible={toolsOpen} onClose={() => setToolsOpen(false)} />
+
       {recap && <WorkoutRecapModal recap={recap} onClose={handleRecapClose} />}
     </Screen>
   );
@@ -467,6 +482,11 @@ export default function WorkoutSessionScreen() {
 
 
 const styles = StyleSheet.create({
+  headerActions: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 18,
+  },
   listContent: {
     padding: 20,
     gap: 12,

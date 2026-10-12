@@ -1,15 +1,18 @@
 import { Ionicons } from '@expo/vector-icons';
-import { setAudioModeAsync, useAudioPlayer } from 'expo-audio';
-import * as Notifications from 'expo-notifications';
+import { useAudioPlayer } from 'expo-audio';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { AppState, Platform, Pressable, StyleSheet, Text, Vibration, View } from 'react-native';
+import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme/app-theme-provider';
-
-const REST_FINISHED_SOUND = require('../../assets/audio/rest_finished.wav');
-
-/** 3-beep chime (~2.1s) + a little slack before dismissing the timer. */
-const ALARM_DURATION_MS = 2300;
+import {
+  ALARM_DURATION_MS,
+  ALARM_SOUND,
+  cancelAlarmNotification,
+  configureAlarmAudioMode,
+  dismissAlarmNotification,
+  playAlarm,
+  scheduleAlarmNotification,
+} from '@/utils/alarm';
 
 /** Seconds added when the user taps "+30s". */
 const EXTEND_SECONDS = 30;
@@ -19,32 +22,6 @@ const REST_TIMER_NOTIFICATION_ID = 'anvil-rest-timer';
 
 /** Android notification channel used by the rest timer alarm. */
 const REST_TIMER_CHANNEL_ID = 'rest-timer';
-
-// While the app is in the foreground, the alarm is handled by the in-app audio
-// player (chime + vibration) — suppress the notification so the sound does not
-// play twice. When the app is backgrounded or the screen is locked, the OS
-// delivers the notification with its sound normally.
-if (Platform.OS !== 'web') {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-      shouldShowBanner: false,
-      shouldShowList: false,
-    }),
-  });
-}
-
-/** Three longer vibration pulses, synced to the beeps (pattern is Android-only). */
-function fireAlarmVibration() {
-  if (Platform.OS === 'ios') {
-    Vibration.vibrate(500);
-    setTimeout(() => Vibration.vibrate(500), 750);
-    setTimeout(() => Vibration.vibrate(500), 1500);
-  } else {
-    Vibration.vibrate([0, 500, 250, 500, 250, 500]);
-  }
-}
 
 interface RestTimerProps {
   /** Countdown duration in seconds. */
@@ -72,7 +49,7 @@ function formatCountdown(totalSeconds: number): string {
 export function RestTimer({ seconds, onDone }: RestTimerProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
-  const player = useAudioPlayer(REST_FINISHED_SOUND);
+  const player = useAudioPlayer(ALARM_SOUND);
   const [remaining, setRemaining] = useState(seconds);
   // True once the alarm chime is playing — the component stays mounted (so the
   // player isn't released and the sound isn't cut) but hides its UI.
@@ -90,53 +67,22 @@ export function RestTimer({ seconds, onDone }: RestTimerProps) {
     onDoneRef.current = onDone;
   });
 
-  // Configure the audio session so the alarm mixes with (rather than pauses)
-  // music from other apps: iOS `.mixWithOthers`, Android no audio-focus.
   useEffect(() => {
-    if (Platform.OS === 'web') {
-      return;
-    }
-    void setAudioModeAsync({
-      playsInSilentMode: true,
-      interruptionMode: 'mixWithOthers',
-    }).catch(() => {});
+    configureAlarmAudioMode();
   }, []);
 
   // Schedule (or replace) the background alarm notification for the deadline.
   // Passing the same identifier replaces any previously scheduled one.
   const scheduleNotification = useCallback(
-    async (delaySeconds: number) => {
-      if (Platform.OS === 'web') {
-        return;
-      }
-      try {
-        if (Platform.OS === 'android') {
-          await Notifications.setNotificationChannelAsync(REST_TIMER_CHANNEL_ID, {
-            name: t('workout.rest'),
-            importance: Notifications.AndroidImportance.HIGH,
-            sound: 'rest_finished.wav',
-            vibrationPattern: [0, 400, 200, 400],
-          });
-        }
-        await Notifications.scheduleNotificationAsync({
-          identifier: REST_TIMER_NOTIFICATION_ID,
-          content: {
-            title: t('workout.restFinishedTitle'),
-            body: t('workout.restFinishedBody'),
-            sound: 'rest_finished.wav',
-            data: { type: 'anvil-rest-timer' },
-          },
-          trigger: {
-            type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-            seconds: Math.max(1, Math.round(delaySeconds)),
-            channelId: Platform.OS === 'android' ? REST_TIMER_CHANNEL_ID : undefined,
-          },
-        });
-      } catch {
-        // Notifications unavailable (e.g. permission denied) — the countdown
-        // still catches up to zero when the app returns to the foreground.
-      }
-    },
+    (delaySeconds: number) =>
+      scheduleAlarmNotification({
+        identifier: REST_TIMER_NOTIFICATION_ID,
+        channelId: REST_TIMER_CHANNEL_ID,
+        channelName: t('workout.rest'),
+        title: t('workout.restFinishedTitle'),
+        body: t('workout.restFinishedBody'),
+        delaySeconds,
+      }),
     [t]
   );
 
@@ -154,11 +100,7 @@ export function RestTimer({ seconds, onDone }: RestTimerProps) {
       if (alarmTimerRef.current) {
         clearTimeout(alarmTimerRef.current);
       }
-      if (Platform.OS !== 'web') {
-        void Notifications.cancelScheduledNotificationAsync(
-          REST_TIMER_NOTIFICATION_ID
-        ).catch(() => {});
-      }
+      cancelAlarmNotification(REST_TIMER_NOTIFICATION_ID);
     };
   }, []);
 
@@ -186,9 +128,7 @@ export function RestTimer({ seconds, onDone }: RestTimerProps) {
         // Expired while backgrounded — the notification already sounded.
         finishedRef.current = true;
         setRemaining(0);
-        if (Platform.OS !== 'web') {
-          void Notifications.dismissNotificationAsync(REST_TIMER_NOTIFICATION_ID).catch(() => {});
-        }
+        dismissAlarmNotification(REST_TIMER_NOTIFICATION_ID);
         alarmTimerRef.current = setTimeout(() => onDoneRef.current(), 0);
         return;
       }
@@ -212,9 +152,7 @@ export function RestTimer({ seconds, onDone }: RestTimerProps) {
     }
 
     // Foreground finish: 3-beep chime + 3 vibration pulses.
-    void player.seekTo(0);
-    player.play();
-    fireAlarmVibration();
+    playAlarm(player);
     setAlarmActive(true);
     alarmTimerRef.current = setTimeout(() => onDoneRef.current(), ALARM_DURATION_MS);
   }, [remaining, player]);
@@ -238,9 +176,7 @@ export function RestTimer({ seconds, onDone }: RestTimerProps) {
     }
     finishedRef.current = true;
     setRemaining(0);
-    void player.seekTo(0);
-    player.play();
-    fireAlarmVibration();
+    playAlarm(player);
     setAlarmActive(true);
     alarmTimerRef.current = setTimeout(() => onDoneRef.current(), ALARM_DURATION_MS);
   };

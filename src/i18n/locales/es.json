@@ -15,7 +15,8 @@
     "edit": "Editar",
     "search": "Buscar",
     "moveUp": "Mover arriba",
-    "moveDown": "Mover abajo"
+    "moveDown": "Mover abajo",
+    "close": "Cerrar"
   },
   "tabs": {
     "home": "Inicio",
@@ -383,7 +384,22 @@
     "saveOrderMessage": "Cambiaste el orden de los ejercicios durante este entrenamiento. ¿Guardar el nuevo orden en tu rutina?",
     "saveOrderAndChangesMessage": "Cambiaste el orden de los ejercicios y añadiste o quitaste series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
     "saveOrderAndValuesMessage": "Cambiaste el orden de los ejercicios y los valores de las series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
-    "saveOrderAllMessage": "Cambiaste el orden de los ejercicios, añadiste o quitaste series y cambiaste valores de series durante este entrenamiento. ¿Guardar todos estos cambios en tu rutina?"
+    "saveOrderAllMessage": "Cambiaste el orden de los ejercicios, añadiste o quitaste series y cambiaste valores de series durante este entrenamiento. ¿Guardar todos estos cambios en tu rutina?",
+    "tools": {
+      "open": "Temporizador y cronómetro",
+      "timer": "Temporizador",
+      "stopwatch": "Cronómetro",
+      "start": "Iniciar",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "reset": "Reiniciar",
+      "lap": "Vuelta",
+      "lapNumber": "Vuelta {{number}}",
+      "addSeconds": "Sumar {{seconds}} segundos",
+      "subtractSeconds": "Restar {{seconds}} segundos",
+      "timerFinished": "¡Se acabó el tiempo!",
+      "timerFinishedBody": "Tu temporizador de entrenamiento ha terminado."
+    }
   },
   "notifications": {
     "comparativeLifted": "¡Acabas de levantar {{object}}!",
