@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
@@ -15,7 +15,8 @@ import {
   getRoutineExerciseSets,
   saveRoutineExerciseSets,
 } from '@/db/routines';
-import type { Exercise, RoutineExerciseWithExercise } from '@/db/types';
+import type { Exercise } from '@/db/types';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { displayToKg, kgToDisplay } from '@/utils/weight';
@@ -38,34 +39,36 @@ export default function RoutineSetEditorScreen() {
   const { reId } = useLocalSearchParams<{ reId: string }>();
   const routineExerciseId = Number(reId);
 
-  const [exercise, setExercise] = useState<RoutineExerciseWithExercise | null>(null);
+  const { data, loaded } = useFocusQuery(
+    async (db) => {
+      const [exerciseRow, setRows] = await Promise.all([
+        getRoutineExercise(db, routineExerciseId),
+        getRoutineExerciseSets(db, routineExerciseId),
+      ]);
+      return { exercise: exerciseRow, setRows };
+    },
+    [routineExerciseId, unit],
+    { refetchOnFocus: false }
+  );
+  const exercise = data?.exercise ?? null;
   const [sets, setSets] = useState<SetDraft[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
+  const seededRef = useRef<string | null>(null);
+  const seedKey = `${routineExerciseId}:${unit}`;
 
   useEffect(() => {
-    let active = true;
-    void Promise.all([
-      getRoutineExercise(db, routineExerciseId),
-      getRoutineExerciseSets(db, routineExerciseId),
-    ]).then(([exerciseRow, setRows]) => {
-      if (!active) {
-        return;
-      }
-      setExercise(exerciseRow);
-      setSets(
-        setRows.map((row) => ({
-          weight: row.weight && row.weight > 0 ? String(kgToDisplay(row.weight, unit)) : '',
-          reps: String(row.reps),
-          restSeconds: row.rest_seconds,
-        }))
-      );
-      setLoaded(true);
-    });
-    return () => {
-      active = false;
-    };
-  }, [db, routineExerciseId, unit]);
+    if (!data || seededRef.current === seedKey) {
+      return;
+    }
+    seededRef.current = seedKey;
+    setSets(
+      data.setRows.map((row) => ({
+        weight: row.weight && row.weight > 0 ? String(kgToDisplay(row.weight, unit)) : '',
+        reps: String(row.reps),
+        restSeconds: row.rest_seconds,
+      }))
+    );
+  }, [data, seedKey, unit]);
 
   const setItems: SetEditorItem[] = sets.map((set, index) => ({
     setNumber: index + 1,
@@ -208,7 +211,7 @@ export default function RoutineSetEditorScreen() {
         </>
       )}
 
-      <LoadingOverlay visible={!loaded || !exercise} />
+      <LoadingOverlay visible={!loaded} />
     </Screen>
   );
 }

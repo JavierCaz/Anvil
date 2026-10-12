@@ -1,13 +1,12 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import { ExerciseForm } from '@/components/ExerciseForm';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { deleteExercise, getExerciseById, updateExercise } from '@/db/exercises';
-import type { Exercise } from '@/db/types';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 export default function EditExerciseScreen() {
@@ -19,22 +18,15 @@ export default function EditExerciseScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const exerciseId = Number(id);
 
-  const [exercise, setExercise] = useState<Exercise | null>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void getExerciseById(db, exerciseId).then((row) => {
-      if (active) {
-        // Catalog exercises are read-only — only custom ones can be edited.
-        setExercise(row?.source === 'custom' ? row : null);
-        setLoaded(true);
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [db, exerciseId]);
+  const { data: exercise, loaded } = useFocusQuery(
+    async (db) => {
+      const row = await getExerciseById(db, exerciseId);
+      // Catalog exercises are read-only — only custom ones can be edited.
+      return row?.source === 'custom' ? row : null;
+    },
+    [exerciseId],
+    { refetchOnFocus: false }
+  );
 
   const handleSave = (input: {
     name: string;

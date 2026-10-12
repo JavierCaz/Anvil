@@ -1,8 +1,6 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { useSQLiteContext } from 'expo-sqlite';
-import { useFocusEffect } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { Bar, CartesianChart, Pie, PolarChart } from 'victory-native';
@@ -14,10 +12,8 @@ import {
   getSessionStats,
   getWorkoutDayCounts,
   type BucketGranularity,
-  type MuscleSlice,
-  type SessionStats,
-  type TimeSeriesPoint,
 } from '@/db/stats';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 type RangeKey = 'week' | 'month' | 'year' | 'all';
@@ -75,44 +71,33 @@ function StatCard({ label, value, colors }: StatCardProps) {
 }
 
 export default function StatisticsScreen() {
-  const db = useSQLiteContext();
   const { colors } = useAppTheme();
   const { t, i18n } = useTranslation();
 
   const [range, setRange] = useState<RangeKey>('week');
-  const [stats, setStats] = useState<SessionStats | null>(null);
-  const [muscles, setMuscles] = useState<MuscleSlice[]>([]);
-  const [series, setSeries] = useState<TimeSeriesPoint[]>([]);
 
   const bounds = useMemo(() => getRangeBounds(range), [range]);
   const granularity = GRANULARITY[range];
 
-  // Reload on every focus so stats reflect completed workouts immediately
-  // (tab screens stay mounted and a plain effect would go stale).
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-
-      async function load() {
-        const [sessionStats, muscleSlices, dayCounts] = await Promise.all([
-          getSessionStats(db, bounds.from, bounds.to),
-          getMuscleDistribution(db, bounds.from, bounds.to),
-          getWorkoutDayCounts(db, bounds.from, bounds.to),
-        ]);
-        if (!active) {
-          return;
-        }
-        setStats(sessionStats);
-        setMuscles(muscleSlices);
-        setSeries(buildTimeSeries(dayCounts, granularity, bounds.from, bounds.to));
-      }
-
-      void load();
-      return () => {
-        active = false;
+  const { data, loaded } = useFocusQuery(
+    async (db) => {
+      const [sessionStats, muscleSlices, dayCounts] = await Promise.all([
+        getSessionStats(db, bounds.from, bounds.to),
+        getMuscleDistribution(db, bounds.from, bounds.to),
+        getWorkoutDayCounts(db, bounds.from, bounds.to),
+      ]);
+      return {
+        stats: sessionStats,
+        muscles: muscleSlices,
+        series: buildTimeSeries(dayCounts, granularity, bounds.from, bounds.to),
       };
-    }, [db, bounds, granularity])
+    },
+    [bounds, granularity],
+    { refetchOnFocus: true }
   );
+  const stats = data?.stats ?? null;
+  const muscles = useMemo(() => data?.muscles ?? [], [data]);
+  const series = useMemo(() => data?.series ?? [], [data]);
 
   // Categorical palette built from semantic theme colors (never hardcode hex).
   const chartPalette = useMemo(
@@ -202,9 +187,15 @@ export default function StatisticsScreen() {
         })}
       </View>
 
-      {stats === null ? (
+      {!loaded ? (
         <View style={styles.centered}>
           <ActivityIndicator color={colors.primary} />
+        </View>
+      ) : stats === null ? (
+        <View style={styles.centered}>
+          <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+            {t('statistics.noData')}
+          </Text>
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>

@@ -1,9 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { useSQLiteContext } from 'expo-sqlite';
-import { useFocusEffect, useRouter } from 'expo-router';
-import { useCallback, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AchievementDetailModal } from '@/components/AchievementDetailModal';
@@ -18,6 +17,7 @@ import {
   type AchievementProgressItem,
 } from '@/db/achievements';
 import { getAllExerciseStats, getWorkoutDaysInRange, getWorkoutStats } from '@/db/workouts';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
@@ -35,13 +35,11 @@ function getMonday(locale: string): dayjs.Dayjs {
 }
 
 export default function HomeScreen() {
-  const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t, i18n } = useTranslation();
   const weeklyGoal = useWeeklyGoalStore((state) => state.weeklyWorkouts);
 
-  const [data, setData] = useState<HomeData | null>(null);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementProgressItem | null>(null);
 
   const monday = useMemo(() => getMonday(i18n.language), [i18n.language]);
@@ -60,49 +58,32 @@ export default function HomeScreen() {
     [monday]
   );
 
-  // Reload on every focus so newly unlocked achievements / fresh stats show
-  // immediately when returning from a workout (tab screens stay mounted).
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      async function load() {
-        const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
-          getWorkoutStats(db, { weeklyGoal }),
-          getAchievements(db),
-          getAllExerciseStats(db),
-          getAllExerciseUnlocks(db),
-          getAchievementExerciseMeta(db),
-        ]);
-        const workedOut = await getWorkoutDaysInRange(
-          db,
-          weekDays[0].iso,
-          weekDays[6].iso
-        );
+  const { data } = useFocusQuery<HomeData>(
+    async (db) => {
+      const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
+        getWorkoutStats(db, { weeklyGoal }),
+        getAchievements(db),
+        getAllExerciseStats(db),
+        getAllExerciseUnlocks(db),
+        getAchievementExerciseMeta(db),
+      ]);
+      const workedOut = await getWorkoutDaysInRange(db, weekDays[0].iso, weekDays[6].iso);
 
-        if (!active) {
-          return;
-        }
+      const achievements = buildAchievementItems(rows, stats, {
+        exerciseStats,
+        unlockedExerciseKeys: exerciseUnlocks,
+        exerciseMeta,
+      });
 
-        const achievements = buildAchievementItems(rows, stats, {
-          exerciseStats,
-          unlockedExerciseKeys: exerciseUnlocks,
-          exerciseMeta,
-        });
-
-        setData({
-          weekDays: weekDays.map((day) => ({ ...day, workedOut: workedOut.has(day.iso) })),
-          workoutCountThisWeek: [...workedOut].filter((iso) =>
-            weekDays.some((day) => day.iso === iso)
-          ).length,
-          achievements,
-        });
-      }
-
-      void load();
-      return () => {
-        active = false;
+      return {
+        weekDays: weekDays.map((day) => ({ ...day, workedOut: workedOut.has(day.iso) })),
+        workoutCountThisWeek: [...workedOut].filter((iso) => weekDays.some((day) => day.iso === iso))
+          .length,
+        achievements,
       };
-    }, [db, weekDays, weeklyGoal])
+    },
+    [weekDays, weeklyGoal],
+    { refetchOnFocus: true }
   );
 
   // Summary: most recently unlocked first, then the closest-to-unlocking, capped at 3.

@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as Haptics from 'expo-haptics';
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AchievementDetailModal } from '@/components/AchievementDetailModal';
@@ -26,7 +26,8 @@ import {
   markWorkoutSetsEdited,
   upsertSet,
 } from '@/db/workouts';
-import type { ActiveWorkoutExercise, Exercise, WorkoutSet } from '@/db/types';
+import type { Exercise, WorkoutSet } from '@/db/types';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '@/utils/weight';
@@ -55,13 +56,24 @@ export default function WorkoutExerciseScreen() {
   const logId = Number(id);
   const exerciseIdNum = Number(exerciseId);
 
-  const [exercise, setExercise] = useState<ActiveWorkoutExercise | null>(null);
-  const [sets, setSets] = useState<WorkoutSet[]>([]);
+  const { data, loaded, reload: reloadQuery } = useFocusQuery(
+    async (db) => {
+      const [exerciseRow, setRows] = await Promise.all([
+        getActiveWorkoutExercise(db, logId, exerciseIdNum),
+        getWorkoutSets(db, logId, exerciseIdNum),
+      ]);
+      return { exercise: exerciseRow, sets: setRows };
+    },
+    [logId, exerciseIdNum, unit],
+    { refetchOnFocus: false }
+  );
+  const exercise = data?.exercise ?? null;
+  const sets = data?.sets ?? [];
+
   const [drafts, setDrafts] = useState<Record<number, SetDraft>>({});
   const [restConfig, setRestConfig] = useState<Record<number, number>>({});
   const [setCount, setSetCount] = useState(0);
   const [expandedSet, setExpandedSet] = useState<number | null>(null);
-  const [loaded, setLoaded] = useState(false);
   const [activeRest, setActiveRest] = useState<ActiveRest | null>(null);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
   const [achievementIcons, setAchievementIcons] = useState<string[]>([]);
@@ -82,58 +94,47 @@ export default function WorkoutExerciseScreen() {
     });
   };
 
-  useEffect(() => {
-    let active = true;
-    void Promise.all([
-      getActiveWorkoutExercise(db, logId, exerciseIdNum),
-      getWorkoutSets(db, logId, exerciseIdNum),
-    ]).then(([exerciseRow, setRows]) => {
-      if (!active) {
-        return;
-      }
-      setExercise(exerciseRow);
-      setSets(setRows);
-      setLoaded(true);
-      const count = Math.max(
-        exerciseRow?.target_sets ?? 0,
-        setRows.reduce((max, set) => Math.max(max, set.set_number), 0)
-      );
-      setSetCount(count);
-      setExpandedSet(firstIncompleteSet(count, setRows));
+  const seededRef = useRef<string | null>(null);
+  const seedKey = `${logId}:${exerciseIdNum}:${unit}`;
 
-      // Prefill the inputs from the routine's planned per-set targets so the
-      // user doesn't have to re-enter weight/reps/rest when the session starts.
-      const loggedByNumber = new Map(setRows.map((row) => [row.set_number, row]));
-      const initialDrafts: Record<number, SetDraft> = {};
-      const initialRest: Record<number, number> = {};
-      for (const target of exerciseRow?.set_targets ?? []) {
-        const logged = loggedByNumber.get(target.set_number);
-        if (logged) {
-          initialDrafts[target.set_number] = {
-            weight: logged.weight > 0 ? String(kgToDisplay(logged.weight, unit)) : '',
-            reps: String(logged.reps),
-          };
-          initialRest[target.set_number] = logged.rest_seconds;
-        } else {
-          initialDrafts[target.set_number] = {
-            weight: target.weight && target.weight > 0 ? String(kgToDisplay(target.weight, unit)) : '',
-            reps: String(target.reps),
-          };
-          initialRest[target.set_number] = target.rest_seconds;
-        }
+  useEffect(() => {
+    if (!data || seededRef.current === seedKey) {
+      return;
+    }
+    seededRef.current = seedKey;
+    const exerciseRow = data.exercise;
+    const setRows = data.sets;
+    const count = Math.max(
+      exerciseRow?.target_sets ?? 0,
+      setRows.reduce((max, set) => Math.max(max, set.set_number), 0)
+    );
+    setSetCount(count);
+    setExpandedSet(firstIncompleteSet(count, setRows));
+
+    // Prefill the inputs from the routine's planned per-set targets so the
+    // user doesn't have to re-enter weight/reps/rest when the session starts.
+    const loggedByNumber = new Map(setRows.map((row) => [row.set_number, row]));
+    const initialDrafts: Record<number, SetDraft> = {};
+    const initialRest: Record<number, number> = {};
+    for (const target of exerciseRow?.set_targets ?? []) {
+      const logged = loggedByNumber.get(target.set_number);
+      if (logged) {
+        initialDrafts[target.set_number] = {
+          weight: logged.weight > 0 ? String(kgToDisplay(logged.weight, unit)) : '',
+          reps: String(logged.reps),
+        };
+        initialRest[target.set_number] = logged.rest_seconds;
+      } else {
+        initialDrafts[target.set_number] = {
+          weight: target.weight && target.weight > 0 ? String(kgToDisplay(target.weight, unit)) : '',
+          reps: String(target.reps),
+        };
+        initialRest[target.set_number] = target.rest_seconds;
       }
-      setDrafts(initialDrafts);
-      setRestConfig(initialRest);
-      void getExerciseAchievements(db, exerciseIdNum).then((definitions) => {
-        if (active) {
-          setAchievementIcons(definitions.map((definition) => definition.icon));
-        }
-      });
-    });
-    return () => {
-      active = false;
-    };
-  }, [db, logId, exerciseIdNum, unit]);
+    }
+    setDrafts(initialDrafts);
+    setRestConfig(initialRest);
+  }, [data, seedKey, unit]);
 
   const targetReps = exercise?.target_reps ?? 0;
   const defaultRest = exercise?.target_rest_seconds ?? DEFAULT_REST_SECONDS;
@@ -171,18 +172,20 @@ export default function WorkoutExerciseScreen() {
       [setNumber]: Math.min(300, Math.max(0, seconds)),
     }));
   };
-  const loadAchievementIcons = () => {
+  const loadAchievementIcons = useCallback(() => {
     void getExerciseAchievements(db, exerciseIdNum).then((definitions) => {
       setAchievementIcons(definitions.map((definition) => definition.icon));
     });
-  };
+  }, [db, exerciseIdNum]);
 
-  const reload = () => {
-    void getWorkoutSets(db, logId, exerciseIdNum).then((rows) => {
-      setSets(rows);
-    });
+  useEffect(() => {
     loadAchievementIcons();
-  };
+  }, [loadAchievementIcons]);
+
+  const reload = useCallback(() => {
+    reloadQuery();
+    loadAchievementIcons();
+  }, [reloadQuery, loadAchievementIcons]);
 
   const handleAddSet = () => {
     const next = Math.min(99, setCount + 1);
@@ -388,7 +391,7 @@ export default function WorkoutExerciseScreen() {
         </>
       )}
 
-      <LoadingOverlay visible={!loaded || !exercise} />
+      <LoadingOverlay visible={!loaded} />
     </Screen>
   );
 }

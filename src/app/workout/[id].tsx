@@ -1,9 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useFocusEffect, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import type { NativeStackNavigationProp } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import dayjs from 'dayjs';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -31,7 +31,8 @@ import {
   syncRoutineSetValuesFromWorkout,
   wasWorkoutSetsEdited,
 } from '@/db/workouts';
-import type { ActiveWorkoutExercise, WorkoutLog } from '@/db/types';
+import type { ActiveWorkoutExercise } from '@/db/types';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 function formatStopwatch(totalSeconds: number): string {
@@ -55,13 +56,8 @@ export default function WorkoutSessionScreen() {
   // back-prevention guard must let the resulting navigation through.
   const allowLeaveRef = useRef(false);
 
-  const [log, setLog] = useState<WorkoutLog | null>(null);
-  const [routineName, setRoutineName] = useState('');
-  const [exercises, setExercises] = useState<ActiveWorkoutExercise[]>([]);
-  const [exerciseAchievements, setExerciseAchievements] = useState<Map<number, AchievementDefinition[]>>(new Map());
   const [now, setNow] = useState(() => Date.now());
   const [recap, setRecap] = useState<WorkoutRecap | null>(null);
-  const [loaded, setLoaded] = useState(false);
   // The animated scroll container that hosts the sortable grid; passed to
   // Sortable.Grid so dragging auto-scrolls near the screen edges.
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
@@ -72,35 +68,33 @@ export default function WorkoutSessionScreen() {
     return () => clearInterval(timer);
   }, []);
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      setLoaded(false);
-      void Promise.all([
-        getWorkoutLog(db, logId),
-        getWorkoutRoutineName(db, logId),
-        getActiveWorkoutExercises(db, logId),
-      ]).then(([logRow, name, exerciseRows]) => {
-        if (!active) {
-          return;
-        }
-        setLog(logRow);
-        setRoutineName(name ?? '');
-        setExercises(exerciseRows);
-        setLoaded(true);
-        return getExercisesAchievements(
-          db,
-          exerciseRows.map((exercise) => exercise.exercise_id)
-        ).then((achievements) => {
-          if (active) {
-            setExerciseAchievements(achievements);
-          }
-        });
-      });
-      return () => {
-        active = false;
+  const { data, loaded, setData } = useFocusQuery(
+    async (queryDb) => {
+      const [logRow, name, exerciseRows] = await Promise.all([
+        getWorkoutLog(queryDb, logId),
+        getWorkoutRoutineName(queryDb, logId),
+        getActiveWorkoutExercises(queryDb, logId),
+      ]);
+      const achievements = await getExercisesAchievements(
+        queryDb,
+        exerciseRows.map((exercise) => exercise.exercise_id)
+      );
+      return {
+        log: logRow,
+        routineName: name ?? '',
+        exercises: exerciseRows,
+        exerciseAchievements: achievements,
       };
-    }, [db, logId])
+    },
+    [logId],
+    { refetchOnFocus: true }
+  );
+  const log = data?.log ?? null;
+  const routineName = data?.routineName ?? '';
+  const exercises = data?.exercises ?? [];
+  const exerciseAchievements = useMemo(
+    () => data?.exerciseAchievements ?? new Map<number, AchievementDefinition[]>(),
+    [data]
   );
 
   const elapsedSeconds = log ? Math.max(0, dayjs(now).diff(dayjs(log.started_at), 'second')) : 0;
@@ -141,13 +135,13 @@ export default function WorkoutSessionScreen() {
   // — never to the routine — then mirrors it into local state so the UI
   // follows immediately.
   const applySessionOrder = useCallback((next: ActiveWorkoutExercise[]) => {
-    setExercises(next);
+    setData((current) => (current ? { ...current, exercises: next } : current));
     void setWorkoutExerciseOrder(
       db,
       logId,
       next.map((exercise) => exercise.routine_exercise_id)
     );
-  }, [db, logId]);
+  }, [db, logId, setData]);
 
   const handleDragEnd = useCallback((data: ActiveWorkoutExercise[]) => {
     applySessionOrder(data);

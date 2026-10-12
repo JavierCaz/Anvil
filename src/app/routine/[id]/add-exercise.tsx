@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -20,6 +20,7 @@ import { muscleI18nKey } from '@/constants/exercises';
 import { getExerciseMuscles, getExercises } from '@/db/exercises';
 import { addExerciseToRoutine } from '@/db/routines';
 import type { Exercise } from '@/db/types';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 export default function AddExerciseScreen() {
@@ -32,35 +33,19 @@ export default function AddExerciseScreen() {
 
   const [search, setSearch] = useState('');
   const [muscle, setMuscle] = useState<string | null>(null);
-  const [muscles, setMuscles] = useState<string[]>([]);
-  const [exercises, setExercises] = useState<Exercise[]>([]);
-  const [loading, setLoading] = useState(true);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
-  useEffect(() => {
-    let active = true;
-    void getExerciseMuscles(db).then((rows) => {
-      if (active) {
-        setMuscles(rows);
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [db]);
-
-  useEffect(() => {
-    let active = true;
-    void getExercises(db, { search, muscle }).then((rows) => {
-      if (active) {
-        setExercises(rows);
-        setLoading(false);
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [db, search, muscle]);
+  const musclesQuery = useFocusQuery((db) => getExerciseMuscles(db), [], {
+    refetchOnFocus: false,
+  });
+  const exercisesQuery = useFocusQuery(
+    (db) => getExercises(db, { search, muscle }),
+    [search, muscle],
+    { refetchOnFocus: false }
+  );
+  const muscles = musclesQuery.data ?? [];
+  const exercises = exercisesQuery.data ?? [];
+  const loading = !exercisesQuery.loaded;
 
   const handlePick = (exercise: Exercise) => {
     void addExerciseToRoutine(db, routineId, exercise.id).then(() => {

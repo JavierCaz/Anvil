@@ -1,6 +1,5 @@
-import { Stack, useFocusEffect } from 'expo-router';
-import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
+import { Stack } from 'expo-router';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AchievementCard } from '@/components/AchievementCard';
@@ -18,49 +17,37 @@ import {
   type AchievementProgressItem,
 } from '@/db/achievements';
 import { getAllExerciseStats, getWorkoutStats } from '@/db/workouts';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 /** Full achievements catalog, grouped by category. */
 export default function AchievementsScreen() {
-  const db = useSQLiteContext();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const weeklyGoal = useWeeklyGoalStore((state) => state.weeklyWorkouts);
 
-  const [items, setItems] = useState<AchievementProgressItem[] | null>(null);
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementProgressItem | null>(null);
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-
-      async function load() {
-        const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
-          getWorkoutStats(db, { weeklyGoal }),
-          getAchievements(db),
-          getAllExerciseStats(db),
-          getAllExerciseUnlocks(db),
-          getAchievementExerciseMeta(db),
-        ]);
-        if (!active) {
-          return;
-        }
-        setItems(
-          buildAchievementItems(rows, stats, {
-            exerciseStats,
-            unlockedExerciseKeys: exerciseUnlocks,
-            exerciseMeta,
-          })
-        );
-      }
-
-      void load();
-      return () => {
-        active = false;
-      };
-    }, [db, weeklyGoal])
+  const { data, loaded } = useFocusQuery(
+    async (db) => {
+      const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
+        getWorkoutStats(db, { weeklyGoal }),
+        getAchievements(db),
+        getAllExerciseStats(db),
+        getAllExerciseUnlocks(db),
+        getAchievementExerciseMeta(db),
+      ]);
+      return buildAchievementItems(rows, stats, {
+        exerciseStats,
+        unlockedExerciseKeys: exerciseUnlocks,
+        exerciseMeta,
+      });
+    },
+    [weeklyGoal],
+    { refetchOnFocus: true }
   );
+  const items = data ?? [];
 
   const unlockedCount = items?.filter((item) => item.unlocked).length ?? 0;
 
@@ -68,7 +55,7 @@ export default function AchievementsScreen() {
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ headerShown: true, title: t('achievements.title') }} />
 
-      {items === null ? (
+      {!loaded ? (
         <View style={styles.centered}>
           <ActivityIndicator color={colors.primary} />
         </View>

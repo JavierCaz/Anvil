@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { Stack, useFocusEffect, useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -21,8 +21,9 @@ import {
   removeExerciseFromRoutine,
   reorderRoutineExercises,
 } from '@/db/routines';
-import type { Routine, RoutineExerciseWithExercise } from '@/db/types';
+import type { RoutineExerciseWithExercise } from '@/db/types';
 import { startWorkout } from '@/db/workouts';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 export default function RoutineDetailScreen() {
   const db = useSQLiteContext();
@@ -33,33 +34,21 @@ export default function RoutineDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
 
-  const [routine, setRoutine] = useState<Routine | null>(null);
-  const [exercises, setExercises] = useState<RoutineExerciseWithExercise[]>([]);
-  const [loaded, setLoaded] = useState(false);
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
 
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      setLoaded(false);
-      void Promise.all([getRoutine(db, routineId), getRoutineExercises(db, routineId)]).then(
-        ([routineRow, exerciseRows]) => {
-          if (active) {
-            setRoutine(routineRow);
-            setExercises(exerciseRows);
-            setLoaded(true);
-          }
-        }
-      );
-      return () => {
-        active = false;
-      };
-    }, [db, routineId])
+  const { data, loaded, reload, setData } = useFocusQuery(
+    async (queryDb) => {
+      const [routineRow, exerciseRows] = await Promise.all([
+        getRoutine(queryDb, routineId),
+        getRoutineExercises(queryDb, routineId),
+      ]);
+      return { routine: routineRow, exercises: exerciseRows };
+    },
+    [routineId],
+    { refetchOnFocus: true }
   );
-
-  const reload = useCallback(() => {
-    void getRoutineExercises(db, routineId).then(setExercises);
-  }, [db, routineId]);
+  const routine = data?.routine ?? null;
+  const exercises = data?.exercises ?? [];
 
   const confirmRemoveExercise = useCallback((item: RoutineExerciseWithExercise) => {
     dialog.alert({
@@ -87,14 +76,14 @@ export default function RoutineDetailScreen() {
       if (params.fromIndex === params.toIndex) {
         return;
       }
-      setExercises(params.data);
+      setData((current) => (current ? { ...current, exercises: params.data } : current));
       void reorderRoutineExercises(
         db,
         routineId,
         params.data.map((item) => item.id)
       );
     },
-    [db, routineId]
+    [db, routineId, setData]
   );
 
   const renderItem = useCallback<SortableGridRenderItem<RoutineExerciseWithExercise>>(

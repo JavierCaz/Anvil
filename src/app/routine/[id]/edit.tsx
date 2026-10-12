@@ -1,13 +1,12 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
 import { RoutineForm } from '@/components/RoutineForm';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { deleteRoutine, getRoutine, updateRoutine } from '@/db/routines';
-import type { Routine } from '@/db/types';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 export default function EditRoutineScreen() {
@@ -19,21 +18,11 @@ export default function EditRoutineScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
 
-  const [routine, setRoutine] = useState<Routine | null>(null);
-  const [loaded, setLoaded] = useState(false);
-
-  useEffect(() => {
-    let active = true;
-    void getRoutine(db, routineId).then((row) => {
-      if (active) {
-        setRoutine(row);
-        setLoaded(true);
-      }
-    });
-    return () => {
-      active = false;
-    };
-  }, [db, routineId]);
+  const { data: routine, loaded } = useFocusQuery(
+    (db) => getRoutine(db, routineId),
+    [routineId],
+    { refetchOnFocus: false }
+  );
 
   const handleSave = (name: string, description: string) => {
     void updateRoutine(db, routineId, { name, description }).then(() => {

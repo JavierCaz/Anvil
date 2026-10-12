@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import { useFocusEffect, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
@@ -12,6 +12,7 @@ import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { deleteRoutine, getRoutines, reorderRoutines } from '@/db/routines';
 import type { RoutineWithCount } from '@/db/types';
+import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 export default function RoutinesScreen() {
@@ -22,24 +23,10 @@ export default function RoutinesScreen() {
   const dialog = useDialog();
   const scrollableRef = useAnimatedRef<Animated.ScrollView>();
 
-  const [routines, setRoutines] = useState<RoutineWithCount[]>([]);
-  const [loaded, setLoaded] = useState(false);
-
-  useFocusEffect(
-    useCallback(() => {
-      let active = true;
-      setLoaded(false);
-      void getRoutines(db).then((rows) => {
-        if (active) {
-          setRoutines(rows);
-          setLoaded(true);
-        }
-      });
-      return () => {
-        active = false;
-      };
-    }, [db])
-  );
+  const { data, loaded, setData } = useFocusQuery((queryDb) => getRoutines(queryDb), [], {
+    refetchOnFocus: true,
+  });
+  const routines = data ?? [];
 
   const confirmDelete = useCallback((routine: RoutineWithCount) => {
     dialog.alert({
@@ -54,21 +41,21 @@ export default function RoutinesScreen() {
           style: 'destructive',
           onPress: () => {
             void deleteRoutine(db, routine.id).then(() => {
-              setRoutines((current) => current.filter((item) => item.id !== routine.id));
+              setData((current) => (current ?? []).filter((item) => item.id !== routine.id));
             });
           },
         },
       ],
     });
-  }, [db, dialog, t]);
+  }, [db, dialog, t, setData]);
 
-  const handleDragEnd = useCallback((data: RoutineWithCount[]) => {
-    setRoutines(data);
+  const handleDragEnd = useCallback((next: RoutineWithCount[]) => {
+    setData(next);
     void reorderRoutines(
       db,
-      data.map((routine) => routine.id)
+      next.map((routine) => routine.id)
     );
-  }, [db]);
+  }, [db, setData]);
 
   const renderItem = useCallback<SortableGridRenderItem<RoutineWithCount>>(
     ({ item }) => (
