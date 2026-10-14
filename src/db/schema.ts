@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 11;
+export const DATABASE_VERSION = 13;
 
 /**
  * Migration 1 — initial tables.
@@ -294,6 +294,37 @@ UPDATE routines SET order_index = (
 );
 `;
 
+/**
+ * Migration 12 — cardio & timed sets.
+ *
+ * Exercise types `duration` (holds) and `distance_duration` (cardio) log time
+ * and distance instead of weight × reps. Duration is stored in seconds and
+ * distance in meters (converted at the display boundary, like weight). Rows
+ * for rep-based exercises leave both NULL; timed rows store 0 weight/reps.
+ * `personal_records.type` distinguishes weight/1RM records from the new
+ * distance/duration/pace ones (legacy rows stay NULL = weight-based).
+ */
+export const SCHEMA_V12 = `
+ALTER TABLE sets ADD COLUMN duration_seconds INTEGER;
+ALTER TABLE sets ADD COLUMN distance_m REAL;
+ALTER TABLE routine_exercise_sets ADD COLUMN duration_seconds INTEGER;
+ALTER TABLE routine_exercise_sets ADD COLUMN distance_m REAL;
+ALTER TABLE personal_records ADD COLUMN type TEXT;
+ALTER TABLE personal_records ADD COLUMN duration_seconds INTEGER;
+ALTER TABLE personal_records ADD COLUMN distance_m REAL;
+`;
+
+/**
+ * Migration 13 — treadmill incline.
+ *
+ * Optional incline (percent grade) per set for treadmill-capable cardio
+ * (running, walking, incline walk…). NULL = not recorded / flat.
+ */
+export const SCHEMA_V13 = `
+ALTER TABLE sets ADD COLUMN incline_percent REAL;
+ALTER TABLE routine_exercise_sets ADD COLUMN incline_percent REAL;
+`;
+
 export const MIGRATIONS: readonly string[] = [
   SCHEMA_V1,
   SCHEMA_V2,
@@ -306,4 +337,6 @@ export const MIGRATIONS: readonly string[] = [
   SCHEMA_V9,
   SCHEMA_V10,
   SCHEMA_V11,
+  SCHEMA_V12,
+  SCHEMA_V13,
 ];

@@ -1,5 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import dayjs from 'dayjs';
+import { getExerciseMetrics } from '@/constants/exercise-metrics';
 import { getRoutineExerciseSets, saveRoutineExerciseSets, type SetTargetInput } from './routines';
 import { getWeeklyConsistency } from './stats';
 import type {
@@ -97,7 +98,19 @@ export interface ExerciseStats {
   maxWeightKg: number;
   /** Personal records set on this exercise in the current calendar month. */
   prsThisMonth: number;
+  /** Longest completed single set on this exercise (meters). */
+  maxDistanceM: number;
+  /** Cumulative completed distance on this exercise (meters). */
+  totalDistanceM: number;
 }
+
+const EMPTY_EXERCISE_STATS: ExerciseStats = {
+  totalVolumeKg: 0,
+  maxWeightKg: 0,
+  prsThisMonth: 0,
+  maxDistanceM: 0,
+  totalDistanceM: 0,
+};
 
 /**
  * Per-exercise stats for a single exercise.
@@ -130,7 +143,21 @@ export async function getExerciseStats(
     now.endOf('month').toISOString()
   ))?.c ?? 0;
 
-  return { totalVolumeKg: volume, maxWeightKg: maxWeight, prsThisMonth };
+  const distance = await db.getFirstAsync<{ m: number; t: number }>(`
+    SELECT COALESCE(MAX(s.distance_m), 0) AS m, COALESCE(SUM(s.distance_m), 0) AS t
+    FROM sets s
+    JOIN workout_logs wl ON s.workout_log_id = wl.id
+    WHERE s.exercise_id = ? AND s.completed = 1 AND wl.completed_at IS NOT NULL AND s.distance_m > 0
+  `
+  , exerciseId);
+
+  return {
+    totalVolumeKg: volume,
+    maxWeightKg: maxWeight,
+    prsThisMonth,
+    maxDistanceM: distance?.m ?? 0,
+    totalDistanceM: distance?.t ?? 0,
+  };
 }
 
 /**
@@ -149,7 +176,7 @@ export async function getAllExerciseStats(
   `);
   const byExercise = new Map<number, ExerciseStats>();
   for (const row of rows) {
-    byExercise.set(row.exercise_id, { totalVolumeKg: row.v, maxWeightKg: 0, prsThisMonth: 0 });
+    byExercise.set(row.exercise_id, { ...EMPTY_EXERCISE_STATS, totalVolumeKg: row.v });
   }
 
   const maxRows = await db.getAllAsync<{ exercise_id: number; m: number }>(`
@@ -160,7 +187,7 @@ export async function getAllExerciseStats(
     GROUP BY s.exercise_id
   `);
   for (const row of maxRows) {
-    const entry = byExercise.get(row.exercise_id) ?? { totalVolumeKg: 0, maxWeightKg: 0, prsThisMonth: 0 };
+    const entry = byExercise.get(row.exercise_id) ?? { ...EMPTY_EXERCISE_STATS };
     entry.maxWeightKg = row.m;
     byExercise.set(row.exercise_id, entry);
   }
@@ -172,8 +199,22 @@ export async function getAllExerciseStats(
     now.endOf('month').toISOString()
   );
   for (const row of prsRows) {
-    const entry = byExercise.get(row.exercise_id) ?? { totalVolumeKg: 0, maxWeightKg: 0, prsThisMonth: 0 };
+    const entry = byExercise.get(row.exercise_id) ?? { ...EMPTY_EXERCISE_STATS };
     entry.prsThisMonth = row.c;
+    byExercise.set(row.exercise_id, entry);
+  }
+
+  const distanceRows = await db.getAllAsync<{ exercise_id: number; m: number; t: number }>(`
+    SELECT s.exercise_id, MAX(s.distance_m) AS m, SUM(s.distance_m) AS t
+    FROM sets s
+    JOIN workout_logs wl ON s.workout_log_id = wl.id
+    WHERE s.completed = 1 AND wl.completed_at IS NOT NULL AND s.distance_m > 0
+    GROUP BY s.exercise_id
+  `);
+  for (const row of distanceRows) {
+    const entry = byExercise.get(row.exercise_id) ?? { ...EMPTY_EXERCISE_STATS };
+    entry.maxDistanceM = row.m;
+    entry.totalDistanceM = row.t;
     byExercise.set(row.exercise_id, entry);
   }
 
@@ -278,6 +319,7 @@ export async function getActiveWorkoutExercises(
             e.source AS exercise_source,
             e.primary_muscle AS exercise_primary_muscle,
             e.equipment AS exercise_equipment,
+            e.exercise_type AS exercise_type,
             MAX(re.sets, (SELECT COALESCE(MAX(s.set_number), 0) FROM sets s
               WHERE s.workout_log_id = wl.id AND s.exercise_id = e.id)) AS target_sets,
             re.reps AS target_reps,
@@ -399,6 +441,12 @@ export interface SetLogInput {
   reps: number;
   restSeconds: number;
   completed: 0 | 1;
+  /** Logged duration in seconds (timed exercises), else null. */
+  durationSeconds?: number | null;
+  /** Logged distance in meters (distance exercises), else null. */
+  distanceM?: number | null;
+  /** Logged treadmill incline (percent grade), else null. */
+  inclinePercent?: number | null;
 }
 
 /**
@@ -413,18 +461,24 @@ export async function upsertSet(
   input: SetLogInput
 ): Promise<void> {
   await db.runAsync(
-    `INSERT INTO sets (workout_log_id, exercise_id, set_number, weight, reps, rest_seconds, completed)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
+    `INSERT INTO sets (workout_log_id, exercise_id, set_number, weight, reps, rest_seconds, completed,
+                       duration_seconds, distance_m, incline_percent)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(workout_log_id, exercise_id, set_number)
      DO UPDATE SET weight = excluded.weight, reps = excluded.reps,
-                   rest_seconds = excluded.rest_seconds, completed = excluded.completed`,
+                   rest_seconds = excluded.rest_seconds, completed = excluded.completed,
+                   duration_seconds = excluded.duration_seconds, distance_m = excluded.distance_m,
+                   incline_percent = excluded.incline_percent`,
     logId,
     exerciseId,
     setNumber,
     input.weight,
     input.reps,
     input.restSeconds,
-    input.completed
+    input.completed,
+    input.durationSeconds ?? null,
+    input.distanceM ?? null,
+    input.inclinePercent && input.inclinePercent > 0 ? input.inclinePercent : null
   );
 }
 
@@ -455,8 +509,15 @@ export async function getWorkoutSummary(
   const started = log ? dayjs(log.started_at) : dayjs();
   const finished = log?.completed_at ? dayjs(log.completed_at) : dayjs();
 
-  const row = await db.getFirstAsync<{ volume: number; sets: number }>(
-    `SELECT COALESCE(SUM(weight * reps), 0) AS volume, COUNT(*) AS sets
+  const row = await db.getFirstAsync<{
+    volume: number;
+    sets: number;
+    distance: number;
+    timed: number;
+  }>(
+    `SELECT COALESCE(SUM(weight * reps), 0) AS volume, COUNT(*) AS sets,
+            COALESCE(SUM(distance_m), 0) AS distance,
+            COALESCE(SUM(duration_seconds), 0) AS timed
      FROM sets WHERE workout_log_id = ? AND completed = 1`,
     logId
   );
@@ -464,6 +525,8 @@ export async function getWorkoutSummary(
     durationSeconds: Math.max(0, finished.diff(started, 'second')),
     totalVolumeKg: row?.volume ?? 0,
     setsCompleted: row?.sets ?? 0,
+    totalDistanceM: row?.distance ?? 0,
+    timedSeconds: row?.timed ?? 0,
   };
 }
 
@@ -531,7 +594,14 @@ export async function syncRoutineSetCountFromWorkout(
     }
 
     const current = await getRoutineExerciseSets(db, exercise.routine_exercise_id);
-    const template = current[0] ?? { reps: 10, rest_seconds: 90, weight: null };
+    const template = current[0] ?? {
+      reps: 10,
+      rest_seconds: 90,
+      weight: null,
+      duration_seconds: null,
+      distance_m: null,
+      incline_percent: null,
+    };
     await saveRoutineExerciseSets(
       db,
       exercise.routine_exercise_id,
@@ -543,6 +613,9 @@ export async function syncRoutineSetCountFromWorkout(
           reps: existing?.reps ?? template.reps ?? 10,
           restSeconds: existing?.rest_seconds ?? template.rest_seconds ?? 90,
           weight: existing?.weight ?? template.weight ?? null,
+          durationSeconds: existing?.duration_seconds ?? template.duration_seconds ?? null,
+          distanceM: existing?.distance_m ?? template.distance_m ?? null,
+          inclinePercent: existing?.incline_percent ?? template.incline_percent ?? null,
         };
       })
     );
@@ -551,7 +624,8 @@ export async function syncRoutineSetCountFromWorkout(
 
 /**
  * An exercise whose logged set values differ from the routine's planned
- * per-set defaults (weight / reps / rest).
+ * per-set defaults (weight / reps / duration / distance / rest — whichever
+ * apply to the exercise type).
  */
 export interface RoutineSetValueChange {
   routine_exercise_id: number;
@@ -565,6 +639,59 @@ export interface RoutineSetValueChange {
  * don't count as changes.
  */
 const WEIGHT_EPSILON_KG = 0.01;
+
+/** Same idea for distances (meters): absorbs km/mi round-trip noise. */
+const DISTANCE_EPSILON_M = 1;
+
+/** Incline tolerance (percentage points). */
+const INCLINE_EPSILON = 0.05;
+
+/**
+ * True when a logged set differs from its planned target on any field the
+ * exercise type records (plus rest).
+ */
+export function setDiffersFromTarget(
+  set: Pick<WorkoutSet, 'weight' | 'reps' | 'rest_seconds' | 'duration_seconds' | 'distance_m'> & {
+    incline_percent?: number | null;
+  },
+  target: Pick<
+    RoutineExerciseSet,
+    'weight' | 'reps' | 'rest_seconds' | 'duration_seconds' | 'distance_m'
+  > & { incline_percent?: number | null },
+  exerciseType: string | null
+): boolean {
+  const metrics = getExerciseMetrics(exerciseType);
+  if (set.rest_seconds !== target.rest_seconds) {
+    return true;
+  }
+  // Rep-based weight, or the optional load of a timed exercise (farmer carry).
+  if (
+    (metrics.weight || metrics.load) &&
+    Math.abs(set.weight - (target.weight ?? 0)) > WEIGHT_EPSILON_KG
+  ) {
+    return true;
+  }
+  if (metrics.reps && set.reps !== target.reps) {
+    return true;
+  }
+  if (metrics.duration && (set.duration_seconds ?? 0) !== (target.duration_seconds ?? 0)) {
+    return true;
+  }
+  if (
+    metrics.distance &&
+    Math.abs((set.distance_m ?? 0) - (target.distance_m ?? 0)) > DISTANCE_EPSILON_M
+  ) {
+    return true;
+  }
+  // Incline is only ever recorded on timed cardio; NULL and 0 both mean flat.
+  if (
+    metrics.duration &&
+    Math.abs((set.incline_percent ?? 0) - (target.incline_percent ?? 0)) > INCLINE_EPSILON
+  ) {
+    return true;
+  }
+  return false;
+}
 
 /**
  * Exercises in an active session whose logged (completed) set values differ
@@ -597,8 +724,7 @@ export async function getRoutineSetValueChanges(
       if (!target) {
         continue; // added set — a count change, handled elsewhere
       }
-      const weightDiff = Math.abs(set.weight - (target.weight ?? 0)) > WEIGHT_EPSILON_KG;
-      if (weightDiff || set.reps !== target.reps || set.rest_seconds !== target.rest_seconds) {
+      if (setDiffersFromTarget(set, target, exercise.exercise_type)) {
         changed = true;
         break;
       }
@@ -616,7 +742,7 @@ export async function getRoutineSetValueChanges(
 
 /**
  * Overlay the logged set values back onto a routine exercise's per-set
- * defaults (weight / reps / rest). The planned set count is preserved —
+ * defaults (weight / reps / duration / distance / rest). The planned set count is preserved —
  * only sets the user actually completed get their values updated. Count
  * changes stay the responsibility of `syncRoutineSetCountFromWorkout`.
  */
@@ -640,6 +766,9 @@ export async function syncRoutineSetValuesFromWorkout(
           reps: target.reps,
           restSeconds: target.rest_seconds,
           weight: target.weight,
+          durationSeconds: target.duration_seconds,
+          distanceM: target.distance_m,
+          inclinePercent: target.incline_percent,
         };
       }
       return {
@@ -647,6 +776,9 @@ export async function syncRoutineSetValuesFromWorkout(
         reps: loggedSet.reps,
         restSeconds: loggedSet.rest_seconds,
         weight: loggedSet.weight > 0 ? loggedSet.weight : null,
+        durationSeconds: loggedSet.duration_seconds,
+        distanceM: loggedSet.distance_m,
+        inclinePercent: loggedSet.incline_percent,
       };
     });
     if (targets.length > 0) {

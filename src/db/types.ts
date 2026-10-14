@@ -69,6 +69,16 @@ export interface RoutineExerciseWithExercise extends RoutineExercise {
   first_set_reps: number | null;
   /** Rest of the first planned set, in seconds (for the routine row summary). */
   first_set_rest: number | null;
+  /** Exercise type (drives which set fields apply — see `getExerciseMetrics`). */
+  exercise_type: string | null;
+  /** Planned duration of the first set, in seconds (timed exercises). */
+  first_set_duration: number | null;
+  /** Planned distance of the first set, in meters (distance exercises). */
+  first_set_distance: number | null;
+  /** Planned weight of the first set, in kg (load of timed exercises). */
+  first_set_weight: number | null;
+  /** Planned incline of the first set, percent grade. */
+  first_set_incline: number | null;
 }
 
 /**
@@ -83,6 +93,12 @@ export interface RoutineExerciseSet {
   reps: number;
   rest_seconds: number;
   weight: number | null;
+  /** Planned duration in seconds (timed exercises; null otherwise). */
+  duration_seconds: number | null;
+  /** Planned distance in meters (distance exercises; null otherwise). */
+  distance_m: number | null;
+  /** Planned treadmill incline, percent grade (null = not set). */
+  incline_percent: number | null;
 }
 
 export interface WorkoutLog {
@@ -110,6 +126,12 @@ export interface WorkoutSet {
   /** Rest taken after this set, in seconds. */
   rest_seconds: number;
   completed: 0 | 1;
+  /** Logged duration in seconds (timed exercises; null otherwise). */
+  duration_seconds: number | null;
+  /** Logged distance in meters (distance exercises; null otherwise). */
+  distance_m: number | null;
+  /** Logged treadmill incline, percent grade (null = not recorded). */
+  incline_percent: number | null;
 }
 
 /**
@@ -124,6 +146,8 @@ export interface ActiveWorkoutExercise {
   exercise_source: 'catalog' | 'custom';
   exercise_primary_muscle: string | null;
   exercise_equipment: string | null;
+  /** Exercise type (drives which set fields apply — see `getExerciseMetrics`). */
+  exercise_type: string | null;
   target_sets: number;
   target_reps: number;
   /** Planned rest between sets from the routine (seconds). */
@@ -141,6 +165,10 @@ export interface WorkoutSummary {
   totalVolumeKg: number;
   /** Completed set count. */
   setsCompleted: number;
+  /** Sum of logged distance across completed sets (meters). */
+  totalDistanceM: number;
+  /** Sum of logged set durations across completed sets (seconds). */
+  timedSeconds: number;
 }
 
 export interface PersonalRecord {
@@ -149,6 +177,10 @@ export interface PersonalRecord {
   weight: number;
   reps: number;
   achieved_at: string;
+  /** 'weight' | 'oneRM' | 'distance' | 'duration' | 'pace'; null on legacy rows (weight-based). */
+  type: string | null;
+  duration_seconds: number | null;
+  distance_m: number | null;
 }
 
 export interface Achievement {

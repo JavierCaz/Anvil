@@ -99,6 +99,9 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     reps: 'integer',
     rest_seconds: 'integer',
     weight: 'real',
+    duration_seconds: 'integer',
+    distance_m: 'real',
+    incline_percent: 'real',
   },
   workout_logs: {
     id: 'integer',
@@ -118,6 +121,9 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     reps: 'integer',
     rest_seconds: 'integer',
     completed: 'boolean',
+    duration_seconds: 'integer',
+    distance_m: 'real',
+    incline_percent: 'real',
   },
   personal_records: {
     id: 'integer',
@@ -125,6 +131,9 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     weight: 'real',
     reps: 'integer',
     achieved_at: 'text',
+    type: 'text',
+    duration_seconds: 'integer',
+    distance_m: 'real',
   },
   achievements: {
     id: 'integer',

@@ -6,6 +6,8 @@ import { getAchievementByKey } from '@/constants/achievements';
 import type { DetectedPR, WorkoutRecap as RecapData } from '@/db/gamification';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { distanceUnitLabel, formatDistance, formatDistanceWithUnit, formatPace } from '@/utils/distance';
+import { formatDuration as formatSetDuration } from '@/utils/duration';
 import { formatWeight, formatWeightWithUnit, weightUnitLabel } from '@/utils/weight';
 
 interface WorkoutRecapModalProps {
@@ -36,8 +38,51 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
   const globalUnlocked = achievementsUnlocked.filter((entry) => entry.exerciseId === undefined);
   const exerciseUnlocked = achievementsUnlocked.filter((entry) => entry.exerciseId !== undefined);
 
+  const hasCardio = summary.totalDistanceM > 0 || summary.timedSeconds > 0;
+  // A pure cardio session has no lifting volume — hide that tile.
+  const showVolume = summary.totalVolumeKg > 0 || !hasCardio;
+
+  const prLabel = (pr: DetectedPR) => {
+    switch (pr.type) {
+      case 'weight':
+        return t('recap.newWeightPr');
+      case 'oneRM':
+        return t('recap.newOneRmPr');
+      case 'distance':
+        return t('recap.newDistancePr');
+      case 'duration':
+        return t('recap.newDurationPr');
+      case 'pace':
+        return t('recap.newPacePr');
+    }
+  };
+
+  const prDetail = (pr: DetectedPR) => {
+    if (pr.type === 'weight' || pr.type === 'oneRM') {
+      // Loaded carries/holds log 0 reps — show just the load.
+      return pr.reps > 0
+        ? `${formatWeightWithUnit(pr.weight, unit)} × ${pr.reps}`
+        : formatWeightWithUnit(pr.weight, unit);
+    }
+    const parts: string[] = [];
+    if (pr.distanceM) {
+      // Sub-kilometre efforts (carries, laps) read better in m / yd.
+      parts.push(formatDistanceWithUnit(pr.distanceM, unit, pr.distanceM < 1000 ? 'short' : 'long'));
+    }
+    if (pr.durationSeconds) {
+      parts.push(formatSetDuration(pr.durationSeconds));
+    }
+    if (pr.type === 'pace' && pr.durationSeconds && pr.distanceM) {
+      const pace = formatPace(pr.durationSeconds, pr.distanceM, unit);
+      if (pace) {
+        parts.push(pace);
+      }
+    }
+    return parts.join(' · ');
+  };
+
   const renderPR = (pr: DetectedPR) => {
-    const label = pr.type === 'weight' ? t('recap.newWeightPr') : t('recap.newOneRmPr');
+    const label = prLabel(pr);
     return (
       <View key={`${pr.exerciseId}-${pr.type}`} style={styles.prRow}>
         <Ionicons name="trophy" size={16} color={colors.primary} />
@@ -46,7 +91,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {pr.exerciseName}
           </Text>
           <Text style={[styles.prDetail, { color: colors.textSecondary }]}>
-            {formatWeightWithUnit(pr.weight, unit)} × {pr.reps}
+            {prDetail(pr)}
           </Text>
         </View>
         <View style={[styles.prBadge, { backgroundColor: colors.primary }]}>
@@ -87,15 +132,17 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                 <Text style={[styles.statValue, { color: colors.text }]}>{summary.setsCompleted}</Text>
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('recap.sets', { count: summary.setsCompleted })}</Text>
               </View>
-              <View style={[styles.statCell, { backgroundColor: colors.background }]}>
-                <Text style={[styles.statValue, { color: colors.text }]}>
-                  {formatWeight(summary.totalVolumeKg, unit)}
-                </Text>
-                <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
-                  {t('recap.volume', { unit: weightUnitLabel(unit) })}
-                </Text>
-              </View>
-              {recap.volumeDeltaPct !== null && (
+              {showVolume && (
+                <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+                  <Text style={[styles.statValue, { color: colors.text }]}>
+                    {formatWeight(summary.totalVolumeKg, unit)}
+                  </Text>
+                  <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+                    {t('recap.volume', { unit: weightUnitLabel(unit) })}
+                  </Text>
+                </View>
+              )}
+              {showVolume && recap.volumeDeltaPct !== null && (
                 <View style={[styles.statCell, { backgroundColor: colors.background }]}>
                   <Text style={[styles.statValue, { color: recap.volumeDeltaPct >= 0 ? colors.success : colors.textSecondary }]}>
                     {recap.volumeDeltaPct >= 0 ? '+' : ''}
@@ -105,6 +152,32 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                 </View>
               )}
             </View>
+
+            {/* Cardio */}
+            {hasCardio && (
+              <View style={styles.statsRow}>
+                {summary.totalDistanceM > 0 && (
+                  <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+                    <Text style={[styles.statValue, { color: colors.text }]}>
+                      {formatDistance(summary.totalDistanceM, unit)}
+                    </Text>
+                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+                      {t('recap.distance', { unit: distanceUnitLabel(unit) })}
+                    </Text>
+                  </View>
+                )}
+                {summary.timedSeconds > 0 && (
+                  <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+                    <Text style={[styles.statValue, { color: colors.text }]}>
+                      {formatSetDuration(summary.timedSeconds)}
+                    </Text>
+                    <Text style={[styles.statLabel, { color: colors.textSecondary }]}>
+                      {t('recap.timedTime')}
+                    </Text>
+                  </View>
+                )}
+              </View>
+            )}
 
             {/* PRs */}
             {prs.length > 0 && (

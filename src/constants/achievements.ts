@@ -1,4 +1,9 @@
 import type { WorkoutStats } from '@/db/workouts';
+import {
+  DISTANCE_ACHIEVEMENTS,
+  getDistanceAchievementByKey,
+  type DistanceAchievementDefinition,
+} from './distance-achievements';
 import { getWeightComparativeByKey } from './weight-comparatives';
 
 /**
@@ -7,16 +12,31 @@ import { getWeightComparativeByKey } from './weight-comparatives';
  * The rows live in the `achievements` table (seeded via `ACHIEVEMENT_SEED` in
  * src/db/achievements.ts); `key` links a row to its definition here.
  *
- * Achievements are grouped into categories (strength / volume / consistency /
- * experience / special) and optionally tiered (bronze / silver / gold /
+ * Achievements are grouped into categories (strength / volume / endurance /
+ * consistency / experience / special) and optionally tiered (bronze / silver / gold /
  * diamond). Progress is computed data-driven: each definition carries a
  * `metric` (read from `WorkoutStats` via `METRIC_READERS`) and a `target`.
  * Event-based "special" achievements have no `metric`/`target` — they are
  * binary and unlocked at workout completion, not from aggregate stats.
  */
-export type AchievementCategory = 'strength' | 'volume' | 'consistency' | 'experience' | 'special';
+export type AchievementCategory =
+  | 'strength'
+  | 'volume'
+  | 'endurance'
+  | 'consistency'
+  | 'experience'
+  | 'special';
 export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'diamond';
-export type AchievementMetric = 'totalWorkouts' | 'totalVolume' | 'maxWeight' | 'consistencyStreak' | 'prsThisMonth';
+export type AchievementMetric =
+  | 'totalWorkouts'
+  | 'totalVolume'
+  | 'maxWeight'
+  | 'consistencyStreak'
+  | 'prsThisMonth'
+  /** Longest single set, in meters (distance milestones — exercise-scoped). */
+  | 'maxDistance'
+  /** Cumulative distance, in meters (distance landmarks — exercise-scoped). */
+  | 'totalDistance';
 /**
  * Whether the achievement is earned globally (any exercise counts toward a
  * single unlock) or per-exercise (each exercise tracks its own unlock).
@@ -42,6 +62,7 @@ export interface AchievementDefinition {
 export const ACHIEVEMENT_CATEGORY_ORDER: readonly AchievementCategory[] = [
   'strength',
   'volume',
+  'endurance',
   'consistency',
   'experience',
   'special',
@@ -231,6 +252,9 @@ export const METRIC_READERS: Record<AchievementMetric, (stats: WorkoutStats) => 
   maxWeight: (stats) => stats.maxWeightKg,
   consistencyStreak: (stats) => stats.consistencyStreakWeeks,
   prsThisMonth: (stats) => stats.prsThisMonth,
+  // Distance achievements are exercise-scoped only — never read globally.
+  maxDistance: () => 0,
+  totalDistance: () => 0,
 };
 
 /**
@@ -243,6 +267,10 @@ export interface ExerciseAchievementStats {
   maxWeightKg: number;
   /** Personal records set on this exercise in the current month. */
   prsThisMonth: number;
+  /** Longest completed single set on this exercise (meters). */
+  maxDistanceM: number;
+  /** Cumulative completed distance on this exercise (meters). */
+  totalDistanceM: number;
 }
 
 /**
@@ -254,7 +282,34 @@ export const EXERCISE_METRIC_READERS: Partial<
   totalVolume: (stats) => stats.totalVolumeKg,
   maxWeight: (stats) => stats.maxWeightKg,
   prsThisMonth: (stats) => stats.prsThisMonth,
+  maxDistance: (stats) => stats.maxDistanceM,
+  totalDistance: (stats) => stats.totalDistanceM,
 };
+
+/** A distance achievement in the shared `AchievementDefinition` shape. */
+function normalizeDistanceAchievement(entry: DistanceAchievementDefinition): AchievementDefinition {
+  return {
+    key: entry.key,
+    nameKey: entry.nameKey,
+    descriptionKey: entry.descriptionKey,
+    icon: entry.icon,
+    category: 'endurance',
+    tier: entry.tier,
+    scope: 'exercise',
+    metric: entry.kind === 'effort' ? 'maxDistance' : 'totalDistance',
+    target: entry.thresholdM,
+  };
+}
+
+/**
+ * Every exercise-scoped achievement unlocked from per-exercise stats: the
+ * catalog's exercise-scoped entries plus the distance achievements. Weight
+ * comparatives are excluded — they unlock per set via `unlockWeightComparatives`.
+ */
+export const EXERCISE_STAT_ACHIEVEMENTS: readonly AchievementDefinition[] = [
+  ...ACHIEVEMENTS.filter((entry) => entry.scope === 'exercise'),
+  ...DISTANCE_ACHIEVEMENTS.map(normalizeDistanceAchievement),
+];
 
 /**
  * Progress of an exercise-scoped achievement against one exercise's stats.
@@ -281,6 +336,11 @@ export function getAchievementByKey(key: string): AchievementDefinition | undefi
   const achievement = ACHIEVEMENTS.find((entry) => entry.key === key);
   if (achievement) {
     return achievement;
+  }
+  // Distance milestones/landmarks: target = the meter threshold.
+  const distance = getDistanceAchievementByKey(key);
+  if (distance) {
+    return normalizeDistanceAchievement(distance);
   }
   // Weight milestones live in their own catalog; normalize them into the shared
   // `AchievementDefinition` shape (target = the milestone's kg threshold).

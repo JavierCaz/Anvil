@@ -18,13 +18,20 @@ import {
 import type { Exercise } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
+import { clampIncline, distanceScale, getExerciseMetrics } from '@/constants/exercise-metrics';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { displayToMeters, formatDistance } from '@/utils/distance';
 import { displayToKg, kgToDisplay } from '@/utils/weight';
 
 interface SetDraft {
   weight: string;
   reps: string;
   restSeconds: number;
+  durationSeconds: number;
+  /** Display unit (km / mi). */
+  distance: string;
+  /** Treadmill incline, percent ('' = flat). */
+  incline: string;
 }
 
 const MAX_SETS = 99;
@@ -66,6 +73,20 @@ export default function RoutineSetEditorScreen() {
         weight: row.weight && row.weight > 0 ? String(kgToDisplay(row.weight, unit)) : '',
         reps: String(row.reps),
         restSeconds: row.rest_seconds,
+        incline: row.incline_percent && row.incline_percent > 0 ? String(row.incline_percent) : '',
+        durationSeconds: row.duration_seconds ?? 0,
+        distance:
+          row.distance_m && row.distance_m > 0
+            ? formatDistance(
+                row.distance_m,
+                unit,
+                distanceScale(
+                  data.exercise?.exercise_type,
+                  data.exercise?.exercise_slug,
+                  data.exercise?.exercise_equipment
+                )
+              )
+            : '',
       }))
     );
   }, [data, seedKey, unit]);
@@ -75,7 +96,16 @@ export default function RoutineSetEditorScreen() {
     weight: set.weight,
     reps: set.reps,
     restSeconds: set.restSeconds,
+    durationSeconds: set.durationSeconds,
+    distance: set.distance,
+    incline: set.incline,
   }));
+  const metrics = getExerciseMetrics(exercise?.exercise_type ?? null);
+  const scale = distanceScale(
+    exercise?.exercise_type,
+    exercise?.exercise_slug,
+    exercise?.exercise_equipment
+  );
 
   const updateSet = (index: number, patch: Partial<SetDraft>) => {
     setSets((current) => current.map((set, i) => (i === index ? { ...set, ...patch } : set)));
@@ -86,7 +116,14 @@ export default function RoutineSetEditorScreen() {
       if (current.length >= MAX_SETS) {
         return current;
       }
-      const template = current[0] ?? { weight: '', reps: '10', restSeconds: 90 };
+      const template = current[0] ?? {
+        weight: '',
+        reps: '10',
+        restSeconds: 90,
+        durationSeconds: 0,
+        distance: '',
+        incline: '',
+      };
       return [...current, { ...template }];
     });
   };
@@ -129,12 +166,28 @@ export default function RoutineSetEditorScreen() {
     void saveRoutineExerciseSets(
       db,
       routineExerciseId,
-      sets.map((set, index) => ({
-        setNumber: index + 1,
-        reps: Math.max(1, Math.round(parseNumber(set.reps) || 1)),
-        restSeconds: set.restSeconds,
-        weight: parseNumber(set.weight) ? displayToKg(parseNumber(set.weight), unit) : null,
-      }))
+      sets.map((set, index) =>
+        metrics.duration
+          ? {
+              setNumber: index + 1,
+              reps: 0,
+              restSeconds: set.restSeconds,
+              // Optional load (farmer carry, weighted plank…).
+              weight: parseNumber(set.weight) ? displayToKg(parseNumber(set.weight), unit) : null,
+              durationSeconds: set.durationSeconds,
+              distanceM:
+                metrics.distance && parseNumber(set.distance)
+                  ? displayToMeters(parseNumber(set.distance), unit, scale)
+                  : null,
+              inclinePercent: clampIncline(parseNumber(set.incline)) || null,
+            }
+          : {
+              setNumber: index + 1,
+              reps: Math.max(1, Math.round(parseNumber(set.reps) || 1)),
+              restSeconds: set.restSeconds,
+              weight: parseNumber(set.weight) ? displayToKg(parseNumber(set.weight), unit) : null,
+            }
+      )
     ).then(() => {
       router.back();
     });
@@ -163,12 +216,17 @@ export default function RoutineSetEditorScreen() {
               mode="routine"
               exerciseName={exercise.exercise_name}
               slug={exercise.exercise_slug}
+              exerciseType={exercise.exercise_type}
+              exerciseEquipment={exercise.exercise_equipment}
               sets={setItems}
               fallbackReps={10}
               onHeaderPress={showExerciseInfo}
               onWeightChange={(number, value) => updateSet(number - 1, { weight: value })}
               onRepsChange={(number, value) => updateSet(number - 1, { reps: value })}
               onRestChange={(number, seconds) => updateSet(number - 1, { restSeconds: seconds })}
+              onDurationChange={(number, seconds) => updateSet(number - 1, { durationSeconds: seconds })}
+              onDistanceChange={(number, value) => updateSet(number - 1, { distance: value })}
+              onInclineChange={(number, value) => updateSet(number - 1, { incline: value })}
               onAddSet={handleAddSet}
               onRemoveSet={confirmRemoveSet}
               onApplyToAll={handleApplyToAll}

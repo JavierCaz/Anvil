@@ -11,6 +11,7 @@ import {
 } from '@/constants/achievements';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { distanceUnitLabel, formatDistanceWithUnit } from '@/utils/distance';
 import { formatWeightGrouped, formatWeightWithUnit, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
 interface AchievementDetailModalProps {
@@ -40,6 +41,9 @@ function metricUnit(metric: AchievementMetric, t: (key: string) => string, unit:
       return t('achievements.metrics.weeks');
     case 'prsThisMonth':
       return t('achievements.metrics.prs');
+    case 'maxDistance':
+    case 'totalDistance':
+      return distanceUnitLabel(unit);
   }
 }
 
@@ -63,10 +67,19 @@ export function AchievementDetailModal({
   // Weight milestones (e.g. 🍉 Watermelon at 5 kg) carry the object's weight in
   // `target` (the kg threshold) with `metric: 'maxWeight'` — surface it so the
   // user sees how heavy the object actually is, in their unit system.
+  // Distance milestones/landmarks likewise carry their meter threshold —
+  // short ones (a running-track lap) read better in m / yd.
   const milestoneWeight =
     definition.metric === 'maxWeight' && definition.target !== undefined
       ? formatWeightWithUnit(definition.target, unit)
-      : null;
+      : (definition.metric === 'maxDistance' || definition.metric === 'totalDistance') &&
+          definition.target !== undefined
+        ? formatDistanceWithUnit(
+            definition.target,
+            unit,
+            definition.target < 1000 ? 'short' : 'long'
+          )
+        : null;
   // Exercise-scoped achievements are earned per exercise (the card lists the
   // earning exercises), so an aggregate progress bar is meaningless for them.
   const hasProgress = definition.metric !== undefined

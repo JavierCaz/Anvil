@@ -3,6 +3,7 @@ import {
   applyWorkoutExerciseOrder,
   getRoutineSetValueChanges,
   getWorkoutOrderDiffersFromRoutine,
+  setDiffersFromTarget,
   setWorkoutExerciseOrder,
   syncRoutineOrderFromWorkout,
   syncRoutineSetValuesFromWorkout,
@@ -229,10 +230,10 @@ describe('syncRoutineSetValuesFromWorkout', () => {
     // DELETE + 3 INSERTs + 1 aggregate UPDATE = 5 runAsync calls.
     const calls = runAsync.mock.calls as unknown[][];
     expect(calls.length).toBe(5);
-    // INSERT params: (routine_exercise_id, set_number, reps, rest_seconds, weight)
-    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 8, 90, 102.5]);
-    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 100]);
-    expect(calls[3]).toEqual([expect.stringContaining('INSERT'), 10, 3, 10, 90, 100]);
+    // INSERT params: (routine_exercise_id, set_number, reps, rest_seconds, weight, duration_seconds, distance_m, incline_percent)
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 8, 90, 102.5, null, null, null]);
+    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 100, null, null, null]);
+    expect(calls[3]).toEqual([expect.stringContaining('INSERT'), 10, 3, 10, 90, 100, null, null, null]);
   });
 
   it('stores a logged weight of 0 as NULL in the routine defaults', async () => {
@@ -248,8 +249,8 @@ describe('syncRoutineSetValuesFromWorkout', () => {
     await syncRoutineSetValuesFromWorkout(db, 1);
 
     const calls = runAsync.mock.calls as unknown[][];
-    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 10, 90, null]);
-    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 60]);
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 10, 90, null, null, null, null]);
+    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 60, null, null, null]);
   });
 
   it('does nothing when no set values changed', async () => {
@@ -381,5 +382,109 @@ describe('syncRoutineOrderFromWorkout', () => {
     getFirstQueue.push(logRow()); // exercise_order null
     await syncRoutineOrderFromWorkout(db, 1);
     expect(runAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('cardio / timed sets', () => {
+  const running = { exercise_type: 'distance_duration' };
+  const runTarget = (setNumber: number, overrides: Record<string, unknown> = {}) =>
+    targetRow(setNumber, {
+      reps: 0,
+      rest_seconds: 0,
+      weight: null,
+      duration_seconds: 1800,
+      distance_m: 5000,
+      ...overrides,
+    });
+  const runSet = (setNumber: number, overrides: Record<string, unknown> = {}) =>
+    setRow(setNumber, {
+      reps: 0,
+      rest_seconds: 0,
+      weight: 0,
+      duration_seconds: 1800,
+      distance_m: 5000,
+      ...overrides,
+    });
+
+  it('compares only the fields the exercise type records', () => {
+    const target = { weight: null, reps: 0, rest_seconds: 0, duration_seconds: 1800, distance_m: 5000 };
+    const set = { weight: 0, reps: 0, rest_seconds: 0, duration_seconds: 1800, distance_m: 5000 };
+    expect(setDiffersFromTarget(set, target, 'distance_duration')).toBe(false);
+    // Reps are irrelevant for cardio.
+    expect(setDiffersFromTarget({ ...set, reps: 12 }, target, 'distance_duration')).toBe(false);
+    expect(setDiffersFromTarget({ ...set, duration_seconds: 1750 }, target, 'distance_duration')).toBe(true);
+    expect(setDiffersFromTarget({ ...set, distance_m: 5200 }, target, 'distance_duration')).toBe(true);
+    // Sub-meter float noise from km/mi round-trips is ignored.
+    expect(setDiffersFromTarget({ ...set, distance_m: 5000.4 }, target, 'distance_duration')).toBe(false);
+    // Holds ignore distance.
+    expect(setDiffersFromTarget({ ...set, distance_m: 9999 }, target, 'duration')).toBe(false);
+    // A loaded carry flags a changed load.
+    expect(
+      setDiffersFromTarget(
+        { ...set, weight: 36 },
+        { ...target, weight: 32 },
+        'distance_duration'
+      )
+    ).toBe(true);
+    // A changed treadmill incline is flagged; NULL and 0 both mean flat.
+    expect(
+      setDiffersFromTarget({ ...set, incline_percent: 6 }, { ...target, incline_percent: 4 }, 'distance_duration')
+    ).toBe(true);
+    expect(
+      setDiffersFromTarget({ ...set, incline_percent: 0 }, { ...target, incline_percent: null }, 'distance_duration')
+    ).toBe(false);
+    // An unloaded hold treats logged 0 kg and a NULL planned load as equal.
+    expect(setDiffersFromTarget({ ...set, weight: 0 }, { ...target, weight: null }, 'duration')).toBe(false);
+    // Rep-based exercises ignore duration.
+    expect(
+      setDiffersFromTarget(
+        { weight: 100, reps: 10, rest_seconds: 90, duration_seconds: 30, distance_m: null },
+        { weight: 100, reps: 10, rest_seconds: 90, duration_seconds: null, distance_m: null },
+        'weight_reps'
+      )
+    ).toBe(false);
+  });
+
+  it('flags a cardio exercise whose logged duration differs from the plan', async () => {
+    const { db, getAllQueue, getFirstQueue } = makeDb();
+    getFirstQueue.push(logRow());
+    getAllQueue.push([exerciseRow({ ...running, exercise_name: 'Running', target_sets: 1, completed_sets: 1 })]);
+    getAllQueue.push([runTarget(1)]);
+    getAllQueue.push([runSet(1, { duration_seconds: 1700 })]);
+
+    await expect(getRoutineSetValueChanges(db, 1)).resolves.toEqual([
+      { routine_exercise_id: 10, exercise_id: 1, exercise_name: 'Running' },
+    ]);
+  });
+
+  it('writes logged duration and distance back to the routine', async () => {
+    const { db, getAllQueue, getFirstQueue, runAsync } = makeDb();
+    getFirstQueue.push(logRow());
+    getAllQueue.push([exerciseRow({ ...running, target_sets: 1, completed_sets: 1 })]);
+    getAllQueue.push([runTarget(1)]);
+    getAllQueue.push([runSet(1, { duration_seconds: 1650, distance_m: 5500 })]);
+    getAllQueue.push([runTarget(1)]);
+    getAllQueue.push([runSet(1, { duration_seconds: 1650, distance_m: 5500 })]);
+
+    await syncRoutineSetValuesFromWorkout(db, 1);
+
+    const calls = runAsync.mock.calls as unknown[][];
+    // Timed targets keep 0 planned reps (not clamped up to 1) and no weight.
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1650, 5500, null]);
+  });
+
+  it('writes a logged treadmill incline back to the routine', async () => {
+    const { db, getAllQueue, getFirstQueue, runAsync } = makeDb();
+    getFirstQueue.push(logRow());
+    getAllQueue.push([exerciseRow({ ...running, target_sets: 1, completed_sets: 1 })]);
+    getAllQueue.push([runTarget(1, { incline_percent: null })]);
+    getAllQueue.push([runSet(1, { incline_percent: 4.5 })]);
+    getAllQueue.push([runTarget(1, { incline_percent: null })]);
+    getAllQueue.push([runSet(1, { incline_percent: 4.5 })]);
+
+    await syncRoutineSetValuesFromWorkout(db, 1);
+
+    const calls = runAsync.mock.calls as unknown[][];
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1800, 5000, 4.5]);
   });
 });

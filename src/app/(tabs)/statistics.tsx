@@ -8,13 +8,18 @@ import { Screen } from '@/components/Screen';
 import { muscleI18nKey } from '@/constants/exercises';
 import {
   buildTimeSeries,
+  getCardioDayDistances,
+  getCardioStats,
   getMuscleDistribution,
   getSessionStats,
   getWorkoutDayCounts,
   type BucketGranularity,
 } from '@/db/stats';
 import { useFocusQuery } from '@/hooks/use-focus-query';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { distanceUnitLabel, formatDistance, formatPace, metersToDisplay } from '@/utils/distance';
+import { formatDuration } from '@/utils/duration';
 
 type RangeKey = 'week' | 'month' | 'year' | 'all';
 
@@ -73,6 +78,7 @@ function StatCard({ label, value, colors }: StatCardProps) {
 export default function StatisticsScreen() {
   const { colors } = useAppTheme();
   const { t, i18n } = useTranslation();
+  const unit = useUnitsStore((state) => state.unitSystem);
 
   const [range, setRange] = useState<RangeKey>('week');
 
@@ -81,15 +87,25 @@ export default function StatisticsScreen() {
 
   const { data, loaded } = useFocusQuery(
     async (db) => {
-      const [sessionStats, muscleSlices, dayCounts] = await Promise.all([
+      const [sessionStats, muscleSlices, dayCounts, cardioStats, cardioDays] = await Promise.all([
         getSessionStats(db, bounds.from, bounds.to),
         getMuscleDistribution(db, bounds.from, bounds.to),
         getWorkoutDayCounts(db, bounds.from, bounds.to),
+        getCardioStats(db, bounds.from, bounds.to),
+        getCardioDayDistances(db, bounds.from, bounds.to),
       ]);
       return {
         stats: sessionStats,
         muscles: muscleSlices,
         series: buildTimeSeries(dayCounts, granularity, bounds.from, bounds.to),
+        cardio: cardioStats,
+        // Same bucket span as the sessions chart so both read on one timeline.
+        distanceSeries: buildTimeSeries(
+          cardioDays,
+          granularity,
+          bounds.from ?? dayCounts[0]?.day ?? null,
+          bounds.to
+        ),
       };
     },
     [bounds, granularity],
@@ -98,6 +114,9 @@ export default function StatisticsScreen() {
   const stats = data?.stats ?? null;
   const muscles = useMemo(() => data?.muscles ?? [], [data]);
   const series = useMemo(() => data?.series ?? [], [data]);
+  const cardio = data?.cardio ?? null;
+  const distanceSeries = useMemo(() => data?.distanceSeries ?? [], [data]);
+  const hasCardio = cardio !== null && cardio.sets > 0;
 
   // Categorical palette built from semantic theme colors (never hardcode hex).
   const chartPalette = useMemo(
@@ -143,6 +162,25 @@ export default function StatisticsScreen() {
     }
     return series.length > 12 ? d.format('MMM YY') : d.format('MMM');
   };
+
+  const distanceBarData = useMemo(
+    () =>
+      distanceSeries.map((point) => ({
+        x: point.start,
+        y: metersToDisplay(point.count, unit),
+      })),
+    [distanceSeries, unit]
+  );
+  const hasDistance = (cardio?.totalDistanceM ?? 0) > 0;
+
+  const distanceChartTitle =
+    granularity === 'day'
+      ? t('statistics.distancePerDay', { unit: distanceUnitLabel(unit) })
+      : granularity === 'week'
+        ? t('statistics.distancePerWeek', { unit: distanceUnitLabel(unit) })
+        : t('statistics.distancePerMonth', { unit: distanceUnitLabel(unit) });
+
+  const avgPace = cardio ? formatPace(cardio.pacedSeconds, cardio.pacedDistanceM, unit) : null;
 
   const barChartTitle =
     granularity === 'day'
@@ -288,6 +326,60 @@ export default function StatisticsScreen() {
               </>
             )}
           </View>
+
+          {hasCardio && cardio && (
+            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('statistics.cardioTitle')}</Text>
+              <View style={styles.statsGrid}>
+                {hasDistance && (
+                  <StatCard
+                    label={t('statistics.totalDistance')}
+                    value={`${formatDistance(cardio.totalDistanceM, unit)} ${distanceUnitLabel(unit)}`}
+                    colors={colors}
+                  />
+                )}
+                <StatCard
+                  label={t('statistics.cardioTime')}
+                  value={formatDuration(cardio.totalDurationSeconds)}
+                  colors={colors}
+                />
+                {avgPace && (
+                  <StatCard label={t('statistics.avgPace')} value={avgPace} colors={colors} />
+                )}
+              </View>
+
+              {hasDistance && distanceBarData.length > 0 && (
+                <>
+                  <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
+                    {distanceChartTitle}
+                  </Text>
+                  <View style={styles.chartBox}>
+                    <CartesianChart data={distanceBarData} xKey="x" yKeys={['y']}>
+                      {({ points, chartBounds }) => (
+                        <Bar
+                          points={points.y}
+                          chartBounds={chartBounds}
+                          color={colors.success}
+                          roundedCorners={{ topLeft: 6, topRight: 6 }}
+                        />
+                      )}
+                    </CartesianChart>
+                  </View>
+                  <View style={styles.axisRow}>
+                    {distanceSeries.map((point) => (
+                      <Text
+                        key={point.start}
+                        numberOfLines={1}
+                        style={[styles.axisLabel, { color: colors.textSecondary }]}
+                      >
+                        {bucketLabel(point.start)}
+                      </Text>
+                    ))}
+                  </View>
+                </>
+              )}
+            </View>
+          )}
         </ScrollView>
       )}
     </Screen>
@@ -363,6 +455,10 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 17,
     fontWeight: '700',
+  },
+  cardSubtitle: {
+    fontSize: 14,
+    fontWeight: '600',
   },
   emptyText: {
     fontSize: 14,

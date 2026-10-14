@@ -85,7 +85,14 @@
     "workoutsPerWeek": "Workouts per week",
     "workoutsPerMonth": "Workouts per month",
     "noData": "No workouts in this period",
-    "other": "Other"
+    "other": "Other",
+    "cardioTitle": "Cardio & timed",
+    "totalDistance": "Total distance",
+    "cardioTime": "Time logged",
+    "avgPace": "Average pace",
+    "distancePerDay": "Distance per day ({{unit}})",
+    "distancePerWeek": "Distance per week ({{unit}})",
+    "distancePerMonth": "Distance per month ({{unit}})"
   },
   "home": {
     "tagline": "Forge your strength. Track your progress.",
@@ -113,6 +120,7 @@
     "categories": {
       "strength": "Strength",
       "volume": "Volume",
+      "endurance": "Endurance",
       "consistency": "Consistency",
       "experience": "Experience",
       "special": "Special"
@@ -224,6 +232,56 @@
         "name": "Compact Car",
         "description": "Lift the weight of a compact car in a single set"
       }
+    },
+    "distance": {
+      "fiveK": {
+        "name": "5K",
+        "description": "Cover 5 km in a single set"
+      },
+      "tenK": {
+        "name": "10K",
+        "description": "Cover 10 km in a single set"
+      },
+      "halfMarathon": {
+        "name": "Half Marathon",
+        "description": "Cover a half-marathon distance (21.1 km) in a single set"
+      },
+      "marathon": {
+        "name": "Marathon",
+        "description": "Cover a full marathon distance (42.2 km) in a single set"
+      },
+      "track": {
+        "name": "Running Track",
+        "description": "Cover a full lap of a running track on one exercise"
+      },
+      "goldenGate": {
+        "name": "Golden Gate Bridge",
+        "description": "Cover the length of the Golden Gate Bridge on one exercise"
+      },
+      "centralPark": {
+        "name": "Central Park Loop",
+        "description": "Cover the full Central Park loop on one exercise"
+      },
+      "englishChannel": {
+        "name": "English Channel",
+        "description": "Cover the width of the English Channel on one exercise"
+      },
+      "panamaCanal": {
+        "name": "Panama Canal",
+        "description": "Cover the length of the Panama Canal on one exercise"
+      },
+      "grandCanyon": {
+        "name": "Grand Canyon",
+        "description": "Cover the length of the Grand Canyon on one exercise"
+      },
+      "route66": {
+        "name": "Route 66",
+        "description": "Cover the full length of Route 66 on one exercise"
+      },
+      "greatWall": {
+        "name": "Great Wall of China",
+        "description": "Cover the length of the Great Wall of China on one exercise"
+      }
     }
   },
   "routines": {
@@ -252,7 +310,11 @@
       "removeExercise": "Remove from routine",
       "customBadge": "Custom",
       "removeExerciseConfirmTitle": "Remove exercise?",
-      "removeExerciseConfirmMessage": "This will remove \"{{name}}\" from the routine."
+      "removeExerciseConfirmMessage": "This will remove \"{{name}}\" from the routine.",
+      "targetDuration": "Time",
+      "targetDistance": "Distance",
+      "targetLoad": "Load",
+      "targetIncline": "Incline"
     },
     "setsEditor": {
       "setCount_one": "{{count}} set",
@@ -336,7 +398,12 @@
     "perfectWeek": "Perfect week",
     "weekStreak_one": "{{count}}-week consistency streak",
     "weekStreak_other": "{{count}}-week consistency streak",
-    "achievementsUnlocked": "Achievements unlocked"
+    "achievementsUnlocked": "Achievements unlocked",
+    "newDistancePr": "Longest distance",
+    "newDurationPr": "Longest time",
+    "newPacePr": "Best pace",
+    "distance": "{{unit}} covered",
+    "timedTime": "Time logged"
   },
   "workout": {
     "startWorkout": "Start Workout",
@@ -399,7 +466,24 @@
       "subtractSeconds": "Subtract {{seconds}} seconds",
       "timerFinished": "Time's up!",
       "timerFinishedBody": "Your workout timer has finished."
-    }
+    },
+    "duration": "Time (min:sec)",
+    "distance": "Distance ({{unit}})",
+    "minutes": "Minutes",
+    "seconds": "Seconds",
+    "startSetTimer": "Start timer",
+    "stopSetTimer": "Stop",
+    "decreaseDistance": "Decrease distance",
+    "increaseDistance": "Increase distance",
+    "decreaseDuration": "Decrease time",
+    "increaseDuration": "Increase time",
+    "load": "Load ({{unit}})",
+    "addLoad": "Add load",
+    "incline": "Incline (%)",
+    "inclineShort": "incline",
+    "addIncline": "Add incline",
+    "decreaseIncline": "Decrease incline",
+    "increaseIncline": "Increase incline"
   },
   "notifications": {
     "comparativeLifted": "You just lifted {{object}}!",
@@ -410,6 +494,10 @@
     "enable": "Enable notifications",
     "exactAlarmTitle": "Allow exact alarms?",
     "exactAlarmMessage": "Android can delay notifications while the screen is off, so your rest-timer alarm may ring late. To make it ring exactly on time, allow Anvil to set exact alarms. Everything stays on your device — no accounts, no tracking.",
-    "allowExactAlarms": "Allow exact alarms"
+    "allowExactAlarms": "Allow exact alarms",
+    "distanceEffort": "{{name}} complete!",
+    "distanceDetail": "{{distance}} · {{exercise}}",
+    "landmarkReached": "Distance unlocked: {{object}}",
+    "landmarkDetail": "{{distance}} total · {{exercise}}"
   }
 }

@@ -1,10 +1,21 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { computeAchievementProgress, getAchievementByKey } from '@/constants/achievements';
+import {
+  computeAchievementProgress,
+  computeExerciseAchievementProgress,
+  EXERCISE_STAT_ACHIEVEMENTS,
+  getAchievementByKey,
+} from '@/constants/achievements';
+import { getEarnedDistanceAchievements } from '@/constants/distance-achievements';
 import {
   getWeightComparativeByKey,
   getWeightComparativesAtOrBelow,
 } from '@/constants/weight-comparatives';
-import { reconcileExerciseAchievements, unlockWeightComparatives } from '@/db/achievements';
+import {
+  ACHIEVEMENT_SEED,
+  reconcileExerciseAchievements,
+  unlockDistanceAchievements,
+  unlockWeightComparatives,
+} from '@/db/achievements';
 import type { WorkoutStats } from '@/db/workouts';
 
 const STATS: WorkoutStats = {
@@ -144,9 +155,13 @@ describe('unlockWeightComparatives', () => {
 });
 
 describe('reconcileExerciseAchievements', () => {
-  function mockDb(maxWeight: number) {
+  /** First query: max weight; second: live distance (best set + total, meters). */
+  function mockDb(maxWeight: number, distance = { m: 0, t: 0 }) {
     return {
-      getFirstAsync: jest.fn(async () => ({ m: maxWeight })),
+      getFirstAsync: jest
+        .fn()
+        .mockResolvedValueOnce({ m: maxWeight })
+        .mockResolvedValueOnce(distance),
       runAsync: jest.fn(async () => ({ changes: 1 })),
     } as unknown as SQLiteDatabase;
   }
@@ -158,10 +173,11 @@ describe('reconcileExerciseAchievements', () => {
     // supported = watermelon (5), bicycle (20); adult (70) is NOT reached at 50.
     const deleteCall = (db.runAsync as jest.Mock).mock.calls[0];
     const sql = deleteCall[0] as string;
-    expect(sql).toContain("key LIKE 'comparative_%'");
+    expect(sql).toContain('key LIKE ?');
     expect(sql).toContain('NOT IN');
     const params = deleteCall.slice(1);
     expect(params[0]).toBe(7);
+    expect(params[1]).toBe('comparative_%');
     expect(params).toContain('comparative_watermelon');
     expect(params).toContain('comparative_bicycle');
     expect(params).not.toContain('comparative_adult');
@@ -173,9 +189,10 @@ describe('reconcileExerciseAchievements', () => {
 
     const deleteCall = (db.runAsync as jest.Mock).mock.calls[0];
     const sql = deleteCall[0] as string;
-    expect(sql).toContain("key LIKE 'comparative_%'");
+    expect(sql).toContain('key LIKE ?');
     expect(sql).not.toContain('NOT IN');
     expect(deleteCall[1]).toBe(7);
+    expect(deleteCall[2]).toBe('comparative_%');
   });
 
   it('computes max weight from completed sets of any workout (incl. in-progress)', async () => {
@@ -187,5 +204,121 @@ describe('reconcileExerciseAchievements', () => {
     expect(query).toContain('s.completed = 1');
     // Must not restrict to finished workouts: an active session's done sets count.
     expect(query).not.toContain('completed_at IS NOT NULL');
+  });
+
+  it('revokes distance milestones and landmarks no longer backed by completed sets', async () => {
+    // Best set 6 km (5K only), 12 km cumulative (track → Central Park loop).
+    const db = mockDb(0, { m: 6000, t: 12000 });
+    await reconcileExerciseAchievements(db, 7);
+
+    const calls = (db.runAsync as jest.Mock).mock.calls as unknown[][];
+    const efforts = calls.find((call) => call[2] === 'distance_%');
+    const landmarks = calls.find((call) => call[2] === 'landmark_%');
+    expect(efforts?.slice(3)).toEqual(['distance_5k']);
+    expect(landmarks?.slice(3)).toEqual([
+      'landmark_track',
+      'landmark_golden_gate',
+      'landmark_central_park',
+    ]);
+  });
+
+  it('revokes every distance unlock once no distance set remains', async () => {
+    const db = mockDb(0);
+    await reconcileExerciseAchievements(db, 7);
+
+    const calls = (db.runAsync as jest.Mock).mock.calls as unknown[][];
+    const prefixes = calls.map((call) => call[2]);
+    expect(prefixes).toEqual(['comparative_%', 'distance_%', 'landmark_%']);
+    expect(calls.every((call) => !String(call[0]).includes('NOT IN'))).toBe(true);
+  });
+});
+
+describe('distance achievements', () => {
+  it('earns efforts from the best single set and landmarks from the total', () => {
+    const keys = getEarnedDistanceAchievements(10000, 40000).map((entry) => entry.key);
+    expect(keys).toEqual([
+      'distance_5k',
+      'distance_10k',
+      'landmark_track',
+      'landmark_golden_gate',
+      'landmark_central_park',
+      'landmark_english_channel',
+    ]);
+    // Lots of short sets add up to landmarks, but never to a single-set effort.
+    expect(
+      getEarnedDistanceAchievements(4000, 50000).some((entry) => entry.kind === 'effort')
+    ).toBe(false);
+  });
+
+  it('normalizes into exercise-scoped endurance definitions', () => {
+    expect(getAchievementByKey('distance_marathon')).toMatchObject({
+      category: 'endurance',
+      scope: 'exercise',
+      tier: 'diamond',
+      metric: 'maxDistance',
+      target: 42195,
+    });
+    expect(getAchievementByKey('landmark_golden_gate')).toMatchObject({
+      category: 'endurance',
+      scope: 'exercise',
+      metric: 'totalDistance',
+      target: 2737,
+    });
+  });
+
+  it('computes per-exercise progress from distance stats', () => {
+    const stats = {
+      totalVolumeKg: 0,
+      maxWeightKg: 0,
+      prsThisMonth: 0,
+      maxDistanceM: 21097.5,
+      totalDistanceM: 1368.5,
+    };
+    expect(computeExerciseAchievementProgress('distance_half_marathon', stats).progress).toBe(1);
+    expect(computeExerciseAchievementProgress('distance_marathon', stats).progress).toBeCloseTo(0.5);
+    expect(computeExerciseAchievementProgress('landmark_golden_gate', stats).progress).toBeCloseTo(0.5);
+  });
+
+  it('is unlocked from per-exercise stats and seeded into the catalog', () => {
+    const statKeys = EXERCISE_STAT_ACHIEVEMENTS.map((entry) => entry.key);
+    const seedKeys = ACHIEVEMENT_SEED.map((entry) => entry.key as string);
+    for (const key of ['distance_5k', 'distance_marathon', 'landmark_track', 'landmark_great_wall']) {
+      expect(statKeys).toContain(key);
+      expect(seedKeys).toContain(key);
+    }
+    // Weight comparatives stay on their own per-set path.
+    expect(statKeys.some((key) => key.startsWith('comparative_'))).toBe(false);
+  });
+});
+
+describe('unlockDistanceAchievements', () => {
+  it('unlocks newly reached milestones/landmarks, skipping ones already earned', async () => {
+    const db = {
+      // Live distance: best set 10.5 km, 10.5 km total.
+      getFirstAsync: jest.fn(async () => ({ m: 10500, t: 10500 })),
+      getAllAsync: jest.fn(async () => [{ key: 'distance_5k' }, { key: 'landmark_track' }]),
+      runAsync: jest.fn(async () => ({ changes: 1 })),
+    } as unknown as SQLiteDatabase;
+
+    const unlocked = await unlockDistanceAchievements(db, 3);
+
+    expect(unlocked.map((entry) => entry.definition.key)).toEqual([
+      'distance_10k',
+      'landmark_golden_gate',
+      'landmark_central_park',
+    ]);
+    expect(unlocked[0].distanceM).toBe(10500);
+    expect(db.runAsync).toHaveBeenCalledTimes(3);
+  });
+
+  it('does nothing without any distance logged', async () => {
+    const db = {
+      getFirstAsync: jest.fn(async () => ({ m: 0, t: 0 })),
+      getAllAsync: jest.fn(async () => []),
+      runAsync: jest.fn(async () => ({ changes: 1 })),
+    } as unknown as SQLiteDatabase;
+
+    await expect(unlockDistanceAchievements(db, 3)).resolves.toEqual([]);
+    expect(db.getAllAsync).not.toHaveBeenCalled();
   });
 });

@@ -2,6 +2,7 @@ import type { SQLiteDatabase } from 'expo-sqlite';
 import {
   computeAchievementProgress,
   computeExerciseAchievementProgress,
+  EXERCISE_STAT_ACHIEVEMENTS,
   getAchievementByKey,
   type AchievementCategory,
   type AchievementDefinition,
@@ -9,7 +10,14 @@ import {
 } from '@/constants/achievements';
 import type { WorkoutStats } from './workouts';
 import { getAllExerciseStats } from './workouts';
-import { ACHIEVEMENTS } from '@/constants/achievements';
+import {
+  DISTANCE_EFFORT_KEY_PREFIX,
+  DISTANCE_EFFORTS,
+  DISTANCE_LANDMARK_KEY_PREFIX,
+  DISTANCE_LANDMARKS,
+  getEarnedDistanceAchievements,
+  type DistanceAchievementDefinition,
+} from '@/constants/distance-achievements';
 import {
   getWeightComparativesAtOrBelow,
   type WeightComparativeDefinition,
@@ -200,6 +208,20 @@ export const ACHIEVEMENT_SEED = [
   { key: 'comparative_piano', name: 'Grand Piano', description: 'Lift the weight of a grand piano in a single set', icon: '🎹' },
   { key: 'comparative_polar_bear', name: 'Polar Bear', description: 'Lift the weight of a polar bear in a single set', icon: '🐻❄️' },
   { key: 'comparative_car', name: 'Compact Car', description: 'Lift the weight of a compact car in a single set', icon: '🚗' },
+  // Distance milestones (single set) and landmarks (cumulative), per
+  // exercise. `name`/`description` are fallbacks; the UI renders via i18n.
+  { key: 'distance_5k', name: '5K', description: 'Cover 5 km in a single set', icon: '👟' },
+  { key: 'distance_10k', name: '10K', description: 'Cover 10 km in a single set', icon: '🏃' },
+  { key: 'distance_half_marathon', name: 'Half Marathon', description: 'Cover 21.1 km in a single set', icon: '🎽' },
+  { key: 'distance_marathon', name: 'Marathon', description: 'Cover 42.2 km in a single set', icon: '🏆' },
+  { key: 'landmark_track', name: 'Running Track', description: 'Cover a running-track lap on one exercise', icon: '🏟️' },
+  { key: 'landmark_golden_gate', name: 'Golden Gate Bridge', description: 'Cover the length of the Golden Gate Bridge on one exercise', icon: '🌉' },
+  { key: 'landmark_central_park', name: 'Central Park Loop', description: 'Cover the Central Park loop on one exercise', icon: '🌳' },
+  { key: 'landmark_english_channel', name: 'English Channel', description: 'Cover the width of the English Channel on one exercise', icon: '🌊' },
+  { key: 'landmark_panama_canal', name: 'Panama Canal', description: 'Cover the length of the Panama Canal on one exercise', icon: '🚢' },
+  { key: 'landmark_grand_canyon', name: 'Grand Canyon', description: 'Cover the length of the Grand Canyon on one exercise', icon: '🏜️' },
+  { key: 'landmark_route_66', name: 'Route 66', description: 'Cover the length of Route 66 on one exercise', icon: '🛣️' },
+  { key: 'landmark_great_wall', name: 'Great Wall of China', description: 'Cover the length of the Great Wall on one exercise', icon: '🧱' },
 ] as const;
 
 /** Seed achievement definitions that aren't present yet (keyed by `key`). Idempotent. */
@@ -356,6 +378,71 @@ export async function unlockWeightComparatives(
   return newly;
 }
 
+/** Best single set + cumulative distance on an exercise (meters). */
+interface ExerciseDistance {
+  maxDistanceM: number;
+  totalDistanceM: number;
+}
+
+/**
+ * Distance from an exercise's completed sets in any workout — including the
+ * active session, so a set unlocks immediately (like weight comparatives).
+ */
+async function getLiveExerciseDistance(
+  db: SQLiteDatabase,
+  exerciseId: number
+): Promise<ExerciseDistance> {
+  const row = await db.getFirstAsync<{ m: number; t: number }>(
+    `SELECT COALESCE(MAX(distance_m), 0) AS m, COALESCE(SUM(distance_m), 0) AS t
+     FROM sets
+     WHERE exercise_id = ? AND completed = 1 AND distance_m > 0`,
+    exerciseId
+  );
+  return { maxDistanceM: row?.m ?? 0, totalDistanceM: row?.t ?? 0 };
+}
+
+/** A distance achievement newly unlocked by a set, with the distance that earned it. */
+export interface DistanceUnlock {
+  definition: DistanceAchievementDefinition;
+  /** Best single set (efforts) or cumulative distance (landmarks), in meters. */
+  distanceM: number;
+}
+
+/**
+ * Unlock the distance milestones (best single set) and landmarks (cumulative
+ * distance) an exercise has reached (idempotent). Returns the newly unlocked
+ * ones in catalog order — efforts first, then landmarks, each ascending — so
+ * the caller can toast the most notable.
+ */
+export async function unlockDistanceAchievements(
+  db: SQLiteDatabase,
+  exerciseId: number
+): Promise<DistanceUnlock[]> {
+  const distance = await getLiveExerciseDistance(db, exerciseId);
+  const eligible = getEarnedDistanceAchievements(distance.maxDistanceM, distance.totalDistanceM);
+  if (eligible.length === 0) {
+    return [];
+  }
+
+  const placeholders = eligible.map(() => '?').join(', ');
+  const already = await db.getAllAsync<{ key: string }>(
+    `SELECT key FROM exercise_achievements WHERE exercise_id = ? AND key IN (${placeholders})`,
+    exerciseId,
+    ...eligible.map((entry) => entry.key)
+  );
+  const alreadyKeys = new Set(already.map((row) => row.key));
+  const newly = eligible.filter((entry) => !alreadyKeys.has(entry.key));
+
+  const unlockedAt = new Date().toISOString();
+  for (const definition of newly) {
+    await unlockExerciseAchievement(db, exerciseId, definition.key, unlockedAt);
+  }
+  return newly.map((definition) => ({
+    definition,
+    distanceM: definition.kind === 'effort' ? distance.maxDistanceM : distance.totalDistanceM,
+  }));
+}
+
 /**
  * Backfill exercise-scoped achievement unlocks from historical workout data.
  *
@@ -363,7 +450,8 @@ export async function unlockWeightComparatives(
  * unlock flags, existing users would lose comparatives/volume tiers they had
  * already earned. This re-derives them from completed sets / PR history: for
  * every exercise with data it unlocks the weight comparatives at or below its
- * best weight, the volume tiers at or below its cumulative volume, and
+ * best weight, the volume tiers at or below its cumulative volume, the
+ * distance milestones/landmarks reached by its best set / total distance, and
  * progressive overload when the exercise set 5+ PRs this month. Idempotent —
  * safe to run on every launch.
  */
@@ -382,8 +470,8 @@ export async function backfillPerExerciseAchievements(
       }
     }
 
-    for (const definition of ACHIEVEMENTS) {
-      if (definition.scope !== 'exercise' || definition.metric === undefined || definition.target === undefined) {
+    for (const definition of EXERCISE_STAT_ACHIEVEMENTS) {
+      if (definition.metric === undefined || definition.target === undefined) {
         continue;
       }
       const { progress } = computeExerciseAchievementProgress(definition.key, stats);
@@ -408,11 +496,12 @@ export async function backfillPerExerciseAchievements(
 }
 
 /**
- * Re-derive an exercise's weight-comparative unlocks from its current
- * completed sets, revoking any that no longer have a qualifying set. Called
- * after undoing a set or discarding a workout so orphaned unlocks don't
- * persist. Counts completed sets from any workout (including the active
- * session) — a live unlock stays only while a completed set justifies it.
+ * Re-derive an exercise's set-driven unlocks (weight comparatives, distance
+ * milestones and landmarks) from its current completed sets, revoking any
+ * that no longer have qualifying data. Called after undoing a set or
+ * discarding a workout so orphaned unlocks don't persist. Counts completed
+ * sets from any workout (including the active session) — a live unlock stays
+ * only while a completed set justifies it.
  */
 export async function reconcileExerciseAchievements(
   db: SQLiteDatabase,
@@ -425,23 +514,53 @@ export async function reconcileExerciseAchievements(
       WHERE s.exercise_id = ? AND s.completed = 1
     `
     , exerciseId))?.m ?? 0;
+  const distance = await getLiveExerciseDistance(db, exerciseId);
 
-  const supported = new Set(
+  await revokeUnsupported(
+    db,
+    exerciseId,
+    'comparative_',
     getWeightComparativesAtOrBelow(maxWeight).map((comparative) => comparative.key)
   );
-  if (supported.size === 0) {
+  const earnedDistance = getEarnedDistanceAchievements(
+    distance.maxDistanceM,
+    distance.totalDistanceM
+  );
+  await revokeUnsupported(
+    db,
+    exerciseId,
+    DISTANCE_EFFORT_KEY_PREFIX,
+    earnedDistance.filter((entry) => DISTANCE_EFFORTS.includes(entry)).map((entry) => entry.key)
+  );
+  await revokeUnsupported(
+    db,
+    exerciseId,
+    DISTANCE_LANDMARK_KEY_PREFIX,
+    earnedDistance.filter((entry) => DISTANCE_LANDMARKS.includes(entry)).map((entry) => entry.key)
+  );
+}
+
+/** Delete an exercise's unlocks with `prefix` whose key isn't in `supportedKeys`. */
+async function revokeUnsupported(
+  db: SQLiteDatabase,
+  exerciseId: number,
+  prefix: string,
+  supportedKeys: string[]
+): Promise<void> {
+  if (supportedKeys.length === 0) {
     await db.runAsync(
-      `DELETE FROM exercise_achievements WHERE exercise_id = ? AND key LIKE 'comparative_%'`,
-      exerciseId
+      `DELETE FROM exercise_achievements WHERE exercise_id = ? AND key LIKE ?`,
+      exerciseId,
+      `${prefix}%`
     );
     return;
   }
-  const placeholders = [...supported].map(() => '?').join(', ');
+  const placeholders = supportedKeys.map(() => '?').join(', ');
   await db.runAsync(
     `DELETE FROM exercise_achievements
-     WHERE exercise_id = ? AND key LIKE 'comparative_%' AND key NOT IN (${placeholders})`
-    ,
+     WHERE exercise_id = ? AND key LIKE ? AND key NOT IN (${placeholders})`,
     exerciseId,
-    ...supported,
+    `${prefix}%`,
+    ...supportedKeys
   );
 }

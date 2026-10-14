@@ -18,8 +18,14 @@ import { useToast } from '@/components/ToastProvider';
 import { WorkoutElapsedBar } from '@/components/WorkoutElapsed';
 import { WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
 import { getAchievementByKey } from '@/constants/achievements';
+import { clampIncline, distanceScale, getExerciseMetrics } from '@/constants/exercise-metrics';
 import type { AchievementDefinition } from '@/constants/achievements';
-import { getExerciseAchievements, reconcileExerciseAchievements, unlockWeightComparatives } from '@/db/achievements';
+import {
+  getExerciseAchievements,
+  reconcileExerciseAchievements,
+  unlockDistanceAchievements,
+  unlockWeightComparatives,
+} from '@/db/achievements';
 import { getExerciseById } from '@/db/exercises';
 import {
   deleteSetAndShift,
@@ -34,6 +40,7 @@ import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { useWorkoutToolsStore } from '@/store/workout-tools';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { displayToMeters, formatDistance, formatDistanceWithUnit } from '@/utils/distance';
 import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
 const DEFAULT_REST_SECONDS = 90;
@@ -41,6 +48,11 @@ const DEFAULT_REST_SECONDS = 90;
 interface SetDraft {
   weight: string;
   reps: string;
+  durationSeconds: number;
+  /** Display unit (km / mi). */
+  distance: string;
+  /** Treadmill incline, percent ('' = flat). */
+  incline: string;
 }
 
 export default function WorkoutExerciseScreen() {
@@ -90,6 +102,20 @@ export default function WorkoutExerciseScreen() {
     });
   };
 
+  const scale = distanceScale(
+    exercise?.exercise_type,
+    exercise?.exercise_slug,
+    exercise?.exercise_equipment
+  );
+
+  /** Planned/logged meters → distance input text in the display unit. */
+  const distanceDraft = (meters: number | null | undefined) =>
+    meters && meters > 0 ? formatDistance(meters, unit, scale) : '';
+
+  /** Planned/logged incline → input text ('' = flat). */
+  const inclineDraft = (percent: number | null | undefined) =>
+    percent && percent > 0 ? String(percent) : '';
+
   const seededRef = useRef<string | null>(null);
   const seedKey = `${logId}:${exerciseIdNum}:${unit}`;
 
@@ -118,22 +144,42 @@ export default function WorkoutExerciseScreen() {
         initialDrafts[target.set_number] = {
           weight: logged.weight > 0 ? String(kgToDisplay(logged.weight, unit)) : '',
           reps: String(logged.reps),
+          durationSeconds: logged.duration_seconds ?? target.duration_seconds ?? 0,
+          distance: distanceDraft(logged.distance_m ?? target.distance_m),
+          incline: inclineDraft(logged.incline_percent ?? target.incline_percent),
         };
         initialRest[target.set_number] = logged.rest_seconds;
       } else {
         initialDrafts[target.set_number] = {
           weight: target.weight && target.weight > 0 ? String(kgToDisplay(target.weight, unit)) : '',
           reps: String(target.reps),
+          durationSeconds: target.duration_seconds ?? 0,
+          distance: distanceDraft(target.distance_m),
+          incline: inclineDraft(target.incline_percent),
         };
         initialRest[target.set_number] = target.rest_seconds;
       }
     }
     setDrafts(initialDrafts);
     setRestConfig(initialRest);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- distanceDraft only depends on `unit`
   }, [data, seedKey, unit]);
 
   const targetReps = exercise?.target_reps ?? 0;
   const defaultRest = exercise?.target_rest_seconds ?? DEFAULT_REST_SECONDS;
+  const metrics = getExerciseMetrics(exercise?.exercise_type ?? null);
+  const targetsByNumber = new Map(
+    (exercise?.set_targets ?? []).map((target) => [target.set_number, target])
+  );
+  // Sets added during the session copy the first planned set's duration/distance.
+  const firstTarget = exercise?.set_targets[0];
+  const emptyDraft = (): SetDraft => ({
+    weight: '',
+    reps: String(targetReps),
+    durationSeconds: firstTarget?.duration_seconds ?? 0,
+    distance: distanceDraft(firstTarget?.distance_m),
+    incline: inclineDraft(firstTarget?.incline_percent),
+  });
 
   const setNumbers = Array.from({ length: setCount }, (_, i) => i + 1);
 
@@ -145,12 +191,17 @@ export default function WorkoutExerciseScreen() {
 
   const setItems: SetEditorItem[] = setNumbers.map((number) => {
     const set = setByNumber.get(number);
-    const draft = drafts[number] ?? { weight: '', reps: String(targetReps) };
+    const draft = drafts[number] ?? emptyDraft();
     return {
       setNumber: number,
       weight: draft.weight,
       reps: draft.reps,
       restSeconds: restConfig[number] ?? defaultRest,
+      durationSeconds: draft.durationSeconds,
+      distance: draft.distance,
+      incline: draft.incline,
+      targetDurationSeconds:
+        targetsByNumber.get(number)?.duration_seconds ?? firstTarget?.duration_seconds ?? 0,
       done: set?.completed === 1,
     };
   });
@@ -158,7 +209,7 @@ export default function WorkoutExerciseScreen() {
   const updateDraft = (setNumber: number, patch: Partial<SetDraft>) => {
     setDrafts((current) => ({
       ...current,
-      [setNumber]: { ...(current[setNumber] ?? { weight: '', reps: String(targetReps) }), ...patch },
+      [setNumber]: { ...(current[setNumber] ?? emptyDraft()), ...patch },
     }));
   };
 
@@ -209,6 +260,7 @@ export default function WorkoutExerciseScreen() {
             // Keep the rest timer running unless it's counting down for the
             // set being deleted.
             useWorkoutToolsStore.getState().releaseRestSet(exerciseIdNum, setNumber, true);
+            useWorkoutToolsStore.getState().releaseSetTimer(exerciseIdNum, setNumber, true);
             void deleteSetAndShift(db, logId, exerciseIdNum, setNumber).then(reload);
             void markWorkoutSetsEdited(db, logId);
           },
@@ -227,13 +279,42 @@ export default function WorkoutExerciseScreen() {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
   };
 
-  const handleComplete = (setNumber: number) => {
-    const draft = drafts[setNumber] ?? { weight: '', reps: String(targetReps) };
-    const restSeconds = restConfig[setNumber] ?? defaultRest;
-    const weightKg = displayToKg(parseNumber(draft.weight), unit);
-    void upsertSet(db, logId, exerciseIdNum, setNumber, {
-      weight: weightKg,
+  /** Draft → the values persisted for a set, per exercise type. */
+  const setLogValues = (draft: SetDraft) => {
+    if (metrics.duration) {
+      const distance = parseNumber(draft.distance);
+      return {
+        // Optional load (farmer carry, weighted plank…). Reps stay 0, so it
+        // never adds to lifting volume — but it counts for weight PRs/milestones.
+        weight: displayToKg(parseNumber(draft.weight), unit),
+        reps: 0,
+        durationSeconds: draft.durationSeconds,
+        distanceM: metrics.distance && distance > 0 ? displayToMeters(distance, unit, scale) : null,
+        inclinePercent: clampIncline(parseNumber(draft.incline)) || null,
+      };
+    }
+    return {
+      weight: displayToKg(parseNumber(draft.weight), unit),
       reps: Math.round(parseNumber(draft.reps)),
+      durationSeconds: null,
+      distanceM: null,
+      inclinePercent: null,
+    };
+  };
+
+  const handleComplete = (setNumber: number) => {
+    let draft = drafts[setNumber] ?? emptyDraft();
+    // A set timer still running for this set is stopped and its time logged.
+    const timed = useWorkoutToolsStore.getState().stopSetTimer(exerciseIdNum, setNumber);
+    if (timed !== null && metrics.duration) {
+      draft = { ...draft, durationSeconds: timed };
+      updateDraft(setNumber, { durationSeconds: timed });
+    }
+    const restSeconds = restConfig[setNumber] ?? defaultRest;
+    const values = setLogValues(draft);
+    const weightKg = values.weight;
+    void upsertSet(db, logId, exerciseIdNum, setNumber, {
+      ...values,
       restSeconds,
       completed: 1,
     }).then(() => {
@@ -250,9 +331,58 @@ export default function WorkoutExerciseScreen() {
         return setNumber + 1 <= setCount ? setNumber + 1 : null;
       });
 
+      // Distance milestones (best single set) and landmarks (cumulative
+      // distance): unlock per exercise and toast the most notable — the
+      // longest effort if any, otherwise the furthest landmark.
+      if ((values.distanceM ?? 0) > 0) {
+        void unlockDistanceAchievements(db, exerciseIdNum).then((unlocked) => {
+          if (unlocked.length > 0) {
+            const efforts = unlocked.filter((entry) => entry.definition.kind === 'effort');
+            const pool = efforts.length > 0 ? efforts : unlocked;
+            const top = pool[pool.length - 1];
+            const extras = unlocked.length - 1;
+            const distance = formatDistanceWithUnit(
+              top.distanceM,
+              unit,
+              top.distanceM < 1000 ? 'short' : 'long'
+            );
+            const detail = t(
+              top.definition.kind === 'effort'
+                ? 'notifications.distanceDetail'
+                : 'notifications.landmarkDetail',
+              { distance, exercise: exercise?.exercise_name ?? '' }
+            );
+            toast.show({
+              icon: top.definition.icon,
+              title:
+                top.definition.kind === 'effort'
+                  ? t('notifications.distanceEffort', { name: t(top.definition.nameKey) })
+                  : t('notifications.landmarkReached', { object: t(top.definition.nameKey) }),
+              description:
+                extras > 0
+                  ? `${detail} · ${t('notifications.comparativeMore', { count: extras })}`
+                  : detail,
+              onPress: () => {
+                // Deferred for the same reason as the weight toast below.
+                setTimeout(() => {
+                  const definition = getAchievementByKey(top.definition.key);
+                  if (definition) {
+                    setToastAchievement(definition);
+                  }
+                }, 0);
+              },
+            });
+          }
+          loadAchievementIcons();
+        });
+      }
+
       // Weight comparatives: unlock every object reached by this set for this
       // exercise and toast the highest newly-unlocked one; the rest count as
-      // extras. Unlocks are per-exercise.
+      // extras. Unlocks are per-exercise. Unloaded timed sets lift no weight.
+      if (weightKg <= 0) {
+        return;
+      }
       void unlockWeightComparatives(db, exerciseIdNum, weightKg).then((unlocked) => {
         if (unlocked.length > 0) {
           const top = unlocked[unlocked.length - 1];
@@ -290,8 +420,7 @@ export default function WorkoutExerciseScreen() {
 
   const handleUndo = (setNumber: number) => {
     void upsertSet(db, logId, exerciseIdNum, setNumber, {
-      weight: displayToKg(parseNumber(drafts[setNumber]?.weight ?? ''), unit),
-      reps: Math.round(parseNumber(drafts[setNumber]?.reps ?? String(targetReps))),
+      ...setLogValues(drafts[setNumber] ?? emptyDraft()),
       restSeconds: restConfig[setNumber] ?? defaultRest,
       completed: 0,
     }).then(() => {
@@ -327,6 +456,9 @@ export default function WorkoutExerciseScreen() {
               mode="workout"
               exerciseName={exercise.exercise_name}
               slug={exercise.exercise_slug}
+              exerciseType={exercise.exercise_type}
+              exerciseEquipment={exercise.exercise_equipment}
+              timerExerciseId={exerciseIdNum}
               onHeaderPress={showExerciseInfo}
               sets={setItems}
               fallbackReps={targetReps}
@@ -337,6 +469,9 @@ export default function WorkoutExerciseScreen() {
               onWeightChange={(number, value) => updateDraft(number, { weight: value })}
               onRepsChange={(number, value) => updateDraft(number, { reps: value })}
               onRestChange={setRestFor}
+              onDurationChange={(number, seconds) => updateDraft(number, { durationSeconds: seconds })}
+              onDistanceChange={(number, value) => updateDraft(number, { distance: value })}
+              onInclineChange={(number, value) => updateDraft(number, { incline: value })}
               onAddSet={handleAddSet}
               onRemoveSet={handleRemoveSet}
               onCompleteSet={handleComplete}

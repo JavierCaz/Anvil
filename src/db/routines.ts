@@ -1,4 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
+import { getDefaultSetTarget } from '@/constants/exercise-metrics';
 import type {
   Routine,
   RoutineExerciseSet,
@@ -49,12 +50,25 @@ export async function getRoutineExercises(
             e.equipment AS exercise_equipment,
             e.icon AS exercise_icon,
             e.is_stretch AS exercise_is_stretch,
+            e.exercise_type AS exercise_type,
             (SELECT res.reps FROM routine_exercise_sets res
               WHERE res.routine_exercise_id = re.id
               ORDER BY res.set_number ASC LIMIT 1) AS first_set_reps,
             (SELECT res.rest_seconds FROM routine_exercise_sets res
               WHERE res.routine_exercise_id = re.id
-              ORDER BY res.set_number ASC LIMIT 1) AS first_set_rest
+              ORDER BY res.set_number ASC LIMIT 1) AS first_set_rest,
+            (SELECT res.duration_seconds FROM routine_exercise_sets res
+              WHERE res.routine_exercise_id = re.id
+              ORDER BY res.set_number ASC LIMIT 1) AS first_set_duration,
+            (SELECT res.distance_m FROM routine_exercise_sets res
+              WHERE res.routine_exercise_id = re.id
+              ORDER BY res.set_number ASC LIMIT 1) AS first_set_distance,
+            (SELECT res.weight FROM routine_exercise_sets res
+              WHERE res.routine_exercise_id = re.id
+              ORDER BY res.set_number ASC LIMIT 1) AS first_set_weight,
+            (SELECT res.incline_percent FROM routine_exercise_sets res
+              WHERE res.routine_exercise_id = re.id
+              ORDER BY res.set_number ASC LIMIT 1) AS first_set_incline
      FROM routine_exercises re
      JOIN exercises e ON e.id = re.exercise_id
      WHERE re.routine_id = ?
@@ -79,12 +93,25 @@ export async function getRoutineExercise(
               e.equipment AS exercise_equipment,
               e.icon AS exercise_icon,
               e.is_stretch AS exercise_is_stretch,
+              e.exercise_type AS exercise_type,
               (SELECT res.reps FROM routine_exercise_sets res
                 WHERE res.routine_exercise_id = re.id
                 ORDER BY res.set_number ASC LIMIT 1) AS first_set_reps,
               (SELECT res.rest_seconds FROM routine_exercise_sets res
                 WHERE res.routine_exercise_id = re.id
-                ORDER BY res.set_number ASC LIMIT 1) AS first_set_rest
+                ORDER BY res.set_number ASC LIMIT 1) AS first_set_rest,
+              (SELECT res.duration_seconds FROM routine_exercise_sets res
+                WHERE res.routine_exercise_id = re.id
+                ORDER BY res.set_number ASC LIMIT 1) AS first_set_duration,
+              (SELECT res.distance_m FROM routine_exercise_sets res
+                WHERE res.routine_exercise_id = re.id
+                ORDER BY res.set_number ASC LIMIT 1) AS first_set_distance,
+              (SELECT res.weight FROM routine_exercise_sets res
+                WHERE res.routine_exercise_id = re.id
+                ORDER BY res.set_number ASC LIMIT 1) AS first_set_weight,
+              (SELECT res.incline_percent FROM routine_exercise_sets res
+                WHERE res.routine_exercise_id = re.id
+                ORDER BY res.set_number ASC LIMIT 1) AS first_set_incline
        FROM routine_exercises re
        JOIN exercises e ON e.id = re.exercise_id
        WHERE re.id = ?`,
@@ -164,25 +191,40 @@ export interface TargetVolume {
   restSeconds?: number;
   /** Optional planned weight (kg) applied to every set. */
   weight?: number | null;
+  /** Planned duration (seconds) applied to every set — timed exercises. */
+  durationSeconds?: number | null;
+  /** Planned distance (meters) applied to every set — distance exercises. */
+  distanceM?: number | null;
 }
 
 /**
  * Append an exercise to a routine, creating one per-set target row per set.
- * Returns the new `routine_exercises` id.
+ * Without an explicit `target`, defaults follow the exercise type (3 × 10
+ * for rep-based, 1 × 30:00 for cardio, 3 × 0:30 for holds). Returns the new
+ * `routine_exercises` id.
  */
 export async function addExerciseToRoutine(
   db: SQLiteDatabase,
   routineId: number,
   exerciseId: number,
-  target: TargetVolume = {
-    sets: DEFAULT_TARGET_SETS,
-    reps: DEFAULT_TARGET_REPS,
-    restSeconds: DEFAULT_REST_SECONDS,
-  }
+  target?: TargetVolume
 ): Promise<number> {
-  const setsCount = clampInt(target.sets, 1, 99);
-  const reps = clampInt(target.reps, 1, 999);
-  const restSeconds = clampInt(target.restSeconds ?? DEFAULT_REST_SECONDS, 0, 600);
+  let resolved: TargetVolume;
+  if (target) {
+    resolved = target;
+  } else {
+    const typeRow = await db.getFirstAsync<{ exercise_type: string | null }>(
+      'SELECT exercise_type FROM exercises WHERE id = ?',
+      exerciseId
+    );
+    resolved = getDefaultSetTarget(typeRow?.exercise_type ?? null);
+  }
+  const timed = isTimedTarget(resolved.durationSeconds, resolved.distanceM);
+  const setsCount = clampInt(resolved.sets, 1, 99);
+  const reps = clampInt(resolved.reps, timed ? 0 : 1, 999);
+  const restSeconds = clampInt(resolved.restSeconds ?? DEFAULT_REST_SECONDS, 0, 600);
+  const durationSeconds = positiveIntOrNull(resolved.durationSeconds);
+  const distanceM = positiveOrNull(resolved.distanceM);
 
   let routineExerciseId = 0;
   await db.withTransactionAsync(async () => {
@@ -207,13 +249,15 @@ export async function addExerciseToRoutine(
     for (let setNumber = 1; setNumber <= setsCount; setNumber++) {
       await db.runAsync(
         `INSERT INTO routine_exercise_sets
-           (routine_exercise_id, set_number, reps, rest_seconds, weight)
-         VALUES (?, ?, ?, ?, ?)`,
+           (routine_exercise_id, set_number, reps, rest_seconds, weight, duration_seconds, distance_m)
+         VALUES (?, ?, ?, ?, ?, ?, ?)`,
         routineExerciseId,
         setNumber,
         reps,
         restSeconds,
-        target.weight ?? null
+        resolved.weight ?? null,
+        durationSeconds,
+        distanceM
       );
     }
   });
@@ -225,11 +269,18 @@ export interface SetTargetInput {
   reps: number;
   restSeconds: number;
   weight: number | null;
+  /** Planned duration in seconds (timed exercises), else null. */
+  durationSeconds?: number | null;
+  /** Planned distance in meters (distance exercises), else null. */
+  distanceM?: number | null;
+  /** Planned treadmill incline (percent grade), else null. */
+  inclinePercent?: number | null;
 }
 
 /**
  * Replace a routine exercise's per-set targets (transactional) and keep the
- * aggregate `sets` count + legacy reps/rest columns in sync.
+ * aggregate `sets` count + legacy reps/rest columns in sync. Timed targets
+ * (with a duration or distance) may plan 0 reps.
  */
 export async function saveRoutineExerciseSets(
   db: SQLiteDatabase,
@@ -239,6 +290,8 @@ export async function saveRoutineExerciseSets(
   if (targets.length === 0) {
     throw new Error('A routine exercise needs at least one set');
   }
+  const repsFor = (target: SetTargetInput) =>
+    clampInt(target.reps, isTimedTarget(target.durationSeconds, target.distanceM) ? 0 : 1, 999);
   await db.withTransactionAsync(async () => {
     await db.runAsync(
       'DELETE FROM routine_exercise_sets WHERE routine_exercise_id = ?',
@@ -247,13 +300,17 @@ export async function saveRoutineExerciseSets(
     for (const target of targets) {
       await db.runAsync(
         `INSERT INTO routine_exercise_sets
-           (routine_exercise_id, set_number, reps, rest_seconds, weight)
-         VALUES (?, ?, ?, ?, ?)`,
+           (routine_exercise_id, set_number, reps, rest_seconds, weight, duration_seconds,
+            distance_m, incline_percent)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
         routineExerciseId,
         target.setNumber,
-        clampInt(target.reps, 1, 999),
+        repsFor(target),
         clampInt(target.restSeconds, 0, 600),
-        target.weight && target.weight > 0 ? target.weight : null
+        target.weight && target.weight > 0 ? target.weight : null,
+        positiveIntOrNull(target.durationSeconds),
+        positiveOrNull(target.distanceM),
+        positiveOrNull(target.inclinePercent)
       );
     }
     const first = targets[0];
@@ -262,7 +319,7 @@ export async function saveRoutineExerciseSets(
        SET sets = ?, reps = ?, rest_seconds = ?
        WHERE id = ?`,
       targets.length,
-      clampInt(first.reps, 1, 999),
+      repsFor(first),
       clampInt(first.restSeconds, 0, 600),
       routineExerciseId
     );
@@ -364,6 +421,22 @@ export async function reorderRoutineExercises(
 
 function clampInt(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, Math.round(value)));
+}
+
+/** A target that plans a duration or distance (timed set; reps may be 0). */
+function isTimedTarget(
+  durationSeconds: number | null | undefined,
+  distanceM: number | null | undefined
+): boolean {
+  return durationSeconds != null || distanceM != null;
+}
+
+function positiveIntOrNull(value: number | null | undefined): number | null {
+  return value != null && value > 0 ? Math.round(value) : null;
+}
+
+function positiveOrNull(value: number | null | undefined): number | null {
+  return value != null && value > 0 ? value : null;
 }
 
 /**

@@ -85,7 +85,14 @@
     "workoutsPerWeek": "Entrenamientos por semana",
     "workoutsPerMonth": "Entrenamientos por mes",
     "noData": "Sin entrenamientos en este período",
-    "other": "Otro"
+    "other": "Otro",
+    "cardioTitle": "Cardio y tiempo",
+    "totalDistance": "Distancia total",
+    "cardioTime": "Tiempo registrado",
+    "avgPace": "Ritmo medio",
+    "distancePerDay": "Distancia por día ({{unit}})",
+    "distancePerWeek": "Distancia por semana ({{unit}})",
+    "distancePerMonth": "Distancia por mes ({{unit}})"
   },
   "home": {
     "tagline": "Forja tu fuerza. Sigue tu progreso.",
@@ -113,6 +120,7 @@
     "categories": {
       "strength": "Fuerza",
       "volume": "Volumen",
+      "endurance": "Resistencia",
       "consistency": "Constancia",
       "experience": "Experiencia",
       "special": "Especiales"
@@ -224,6 +232,56 @@
         "name": "Auto compacto",
         "description": "Levanta el peso de un auto compacto en una sola serie"
       }
+    },
+    "distance": {
+      "fiveK": {
+        "name": "5K",
+        "description": "Recorre 5 km en una sola serie"
+      },
+      "tenK": {
+        "name": "10K",
+        "description": "Recorre 10 km en una sola serie"
+      },
+      "halfMarathon": {
+        "name": "Media maratón",
+        "description": "Recorre la distancia de una media maratón (21,1 km) en una sola serie"
+      },
+      "marathon": {
+        "name": "Maratón",
+        "description": "Recorre la distancia de una maratón completa (42,2 km) en una sola serie"
+      },
+      "track": {
+        "name": "Pista de atletismo",
+        "description": "Recorre una vuelta completa a una pista de atletismo en un ejercicio"
+      },
+      "goldenGate": {
+        "name": "Puente Golden Gate",
+        "description": "Recorre la longitud del puente Golden Gate en un ejercicio"
+      },
+      "centralPark": {
+        "name": "Circuito de Central Park",
+        "description": "Recorre el circuito completo de Central Park en un ejercicio"
+      },
+      "englishChannel": {
+        "name": "Canal de la Mancha",
+        "description": "Recorre el ancho del Canal de la Mancha en un ejercicio"
+      },
+      "panamaCanal": {
+        "name": "Canal de Panamá",
+        "description": "Recorre la longitud del Canal de Panamá en un ejercicio"
+      },
+      "grandCanyon": {
+        "name": "Gran Cañón",
+        "description": "Recorre la longitud del Gran Cañón en un ejercicio"
+      },
+      "route66": {
+        "name": "Ruta 66",
+        "description": "Recorre la Ruta 66 completa en un ejercicio"
+      },
+      "greatWall": {
+        "name": "Gran Muralla China",
+        "description": "Recorre la longitud de la Gran Muralla China en un ejercicio"
+      }
     }
   },
   "routines": {
@@ -252,7 +310,11 @@
       "removeExercise": "Quitar de la rutina",
       "customBadge": "Personalizado",
       "removeExerciseConfirmTitle": "¿Quitar ejercicio?",
-      "removeExerciseConfirmMessage": "Se quitará \"{{name}}\" de la rutina."
+      "removeExerciseConfirmMessage": "Se quitará \"{{name}}\" de la rutina.",
+      "targetDuration": "Tiempo",
+      "targetDistance": "Distancia",
+      "targetLoad": "Carga",
+      "targetIncline": "Inclinación"
     },
     "setsEditor": {
       "setCount_one": "{{count}} serie",
@@ -336,7 +398,12 @@
     "perfectWeek": "Semana perfecta",
     "weekStreak_one": "{{count}} semana de constancia",
     "weekStreak_other": "{{count}} semanas de constancia",
-    "achievementsUnlocked": "Logros desbloqueados"
+    "achievementsUnlocked": "Logros desbloqueados",
+    "newDistancePr": "Mayor distancia",
+    "newDurationPr": "Mayor tiempo",
+    "newPacePr": "Mejor ritmo",
+    "distance": "{{unit}} recorridos",
+    "timedTime": "Tiempo registrado"
   },
   "workout": {
     "startWorkout": "Iniciar Entrenamiento",
@@ -399,7 +466,24 @@
       "subtractSeconds": "Restar {{seconds}} segundos",
       "timerFinished": "¡Se acabó el tiempo!",
       "timerFinishedBody": "Tu temporizador de entrenamiento ha terminado."
-    }
+    },
+    "duration": "Tiempo (min:seg)",
+    "distance": "Distancia ({{unit}})",
+    "minutes": "Minutos",
+    "seconds": "Segundos",
+    "startSetTimer": "Iniciar cronómetro",
+    "stopSetTimer": "Detener",
+    "decreaseDistance": "Reducir distancia",
+    "increaseDistance": "Aumentar distancia",
+    "decreaseDuration": "Reducir tiempo",
+    "increaseDuration": "Aumentar tiempo",
+    "load": "Carga ({{unit}})",
+    "addLoad": "Añadir carga",
+    "incline": "Inclinación (%)",
+    "inclineShort": "inclinación",
+    "addIncline": "Añadir inclinación",
+    "decreaseIncline": "Reducir inclinación",
+    "increaseIncline": "Aumentar inclinación"
   },
   "notifications": {
     "comparativeLifted": "¡Acabas de levantar {{object}}!",
@@ -410,6 +494,10 @@
     "enable": "Activar notificaciones",
     "exactAlarmTitle": "¿Permitir alarmas exactas?",
     "exactAlarmMessage": "Android puede retrasar las notificaciones con la pantalla apagada, así que la alarma de descanso puede sonar tarde. Para que suene a tiempo, permite que Anvil programe alarmas exactas. Todo permanece en tu dispositivo: sin cuentas ni rastreo.",
-    "allowExactAlarms": "Permitir alarmas exactas"
+    "allowExactAlarms": "Permitir alarmas exactas",
+    "distanceEffort": "¡{{name}} completado!",
+    "distanceDetail": "{{distance}} · {{exercise}}",
+    "landmarkReached": "Distancia desbloqueada: {{object}}",
+    "landmarkDetail": "{{distance}} en total · {{exercise}}"
   }
 }

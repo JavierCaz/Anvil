@@ -14,6 +14,7 @@ import { Screen } from '@/components/Screen';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { distanceScale, getExerciseMetrics } from '@/constants/exercise-metrics';
 import { muscleI18nKey } from '@/constants/exercises';
 import {
   getRoutine,
@@ -24,13 +25,18 @@ import {
 import type { RoutineExerciseWithExercise } from '@/db/types';
 import { startWorkout } from '@/db/workouts';
 import { useFocusQuery } from '@/hooks/use-focus-query';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { formatDistanceWithUnit } from '@/utils/distance';
+import { formatDuration } from '@/utils/duration';
+import { formatWeightWithUnit } from '@/utils/weight';
 export default function RoutineDetailScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const dialog = useDialog();
+  const unit = useUnitsStore((state) => state.unitSystem);
   const { id } = useLocalSearchParams<{ id: string }>();
   const routineId = Number(id);
 
@@ -91,6 +97,8 @@ export default function RoutineDetailScreen() {
       const muscleKey = muscleI18nKey(item.exercise_primary_muscle);
       const firstReps = item.first_set_reps ?? item.reps;
       const firstRest = item.first_set_rest ?? item.rest_seconds;
+      const metrics = getExerciseMetrics(item.exercise_type);
+      const scale = distanceScale(item.exercise_type, item.exercise_slug, item.exercise_equipment);
       // The whole row is the drag surface: sortables activates a drag after a
       // ~200 ms hold and self-cancels on any quick movement, while the
       // SwipeToDelete pan (wrapped outside) only claims fast horizontal
@@ -126,7 +134,32 @@ export default function RoutineDetailScreen() {
               </Text>
               <Text style={[styles.rowMeta, { color: colors.primary }]}>
                 {t('routines.detail.targetSets')}: {item.sets} ·{' '}
-                {t('routines.detail.targetReps')}: {firstReps} ·{' '}
+                {metrics.duration ? (
+                  <>
+                    {metrics.load && item.first_set_weight ? (
+                      <>
+                        {t('routines.detail.targetLoad')}:{' '}
+                        {formatWeightWithUnit(item.first_set_weight, unit)} ·{' '}
+                      </>
+                    ) : null}
+                    {t('routines.detail.targetDuration')}: {formatDuration(item.first_set_duration ?? 0)} ·{' '}
+                    {metrics.distance && item.first_set_distance ? (
+                      <>
+                        {t('routines.detail.targetDistance')}:{' '}
+                        {formatDistanceWithUnit(item.first_set_distance, unit, scale)} ·{' '}
+                      </>
+                    ) : null}
+                    {item.first_set_incline ? (
+                      <>
+                        {t('routines.detail.targetIncline')}: {item.first_set_incline}% ·{' '}
+                      </>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    {t('routines.detail.targetReps')}: {firstReps} ·{' '}
+                  </>
+                )}
                 {t('routines.detail.targetRest')}: {firstRest}s
               </Text>
             </View>
@@ -134,7 +167,7 @@ export default function RoutineDetailScreen() {
         </SwipeToDelete>
       );
     },
-    [colors, confirmRemoveExercise, router, routineId, t]
+    [colors, confirmRemoveExercise, router, routineId, t, unit]
   );
 
   const addExerciseButton = (

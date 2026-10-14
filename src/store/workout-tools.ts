@@ -44,6 +44,21 @@ export interface RestState {
   endAt: number;
 }
 
+/**
+ * Live timer for a timed set (plank hold, a run…). Counts up from `startedAt`;
+ * stopping it fills that set's duration. Only one set timer runs at a time.
+ */
+export interface SetTimerState {
+  exerciseId: number;
+  setNumber: number;
+  /** Absolute start (ms). */
+  startedAt: number;
+}
+
+export function getSetTimerElapsedSeconds(setTimer: SetTimerState, now: number): number {
+  return Math.max(0, Math.floor((now - setTimer.startedAt) / 1000));
+}
+
 export type TimerStatus = 'idle' | 'running' | 'paused';
 
 export function getTimerStatus(timer: TimerState): TimerStatus {
@@ -92,6 +107,7 @@ interface WorkoutToolsState {
   timer: TimerState;
   stopwatch: StopwatchState;
   rest: RestState | null;
+  setTimer: SetTimerState | null;
 
   /** Set the idle timer's duration (ignored while running/paused). */
   setTimerDuration: (seconds: number) => void;
@@ -127,6 +143,19 @@ interface WorkoutToolsState {
    */
   releaseRestSet: (exerciseId: number, setNumber: number, shift?: boolean) => void;
 
+  /** Start timing a set — replaces any other running set timer. */
+  startSetTimer: (exerciseId: number, setNumber: number, now?: number) => void;
+  /**
+   * Stop the set timer and return the elapsed whole seconds, or null when no
+   * timer is running for that set.
+   */
+  stopSetTimer: (exerciseId: number, setNumber: number, now?: number) => number | null;
+  /**
+   * A set was completed, undone or deleted: drop its timer. With `shift`, later
+   * sets of the exercise were renumbered down by one.
+   */
+  releaseSetTimer: (exerciseId: number, setNumber: number, shift?: boolean) => void;
+
   /** Clear all tools — called when the workout session ends. */
   resetAll: () => void;
 }
@@ -139,6 +168,7 @@ export const useWorkoutToolsStore = create<WorkoutToolsState>()((set, get) => ({
   timer: initialTimer,
   stopwatch: initialStopwatch,
   rest: null,
+  setTimer: null,
 
   setTimerDuration: (seconds) => {
     const { timer } = get();
@@ -267,7 +297,32 @@ export const useWorkoutToolsStore = create<WorkoutToolsState>()((set, get) => ({
     }
   },
 
+  startSetTimer: (exerciseId, setNumber, now = Date.now()) => {
+    set({ setTimer: { exerciseId, setNumber, startedAt: now } });
+  },
+
+  stopSetTimer: (exerciseId, setNumber, now = Date.now()) => {
+    const { setTimer } = get();
+    if (!setTimer || setTimer.exerciseId !== exerciseId || setTimer.setNumber !== setNumber) {
+      return null;
+    }
+    set({ setTimer: null });
+    return getSetTimerElapsedSeconds(setTimer, now);
+  },
+
+  releaseSetTimer: (exerciseId, setNumber, shift = false) => {
+    const { setTimer } = get();
+    if (!setTimer || setTimer.exerciseId !== exerciseId) {
+      return;
+    }
+    if (setTimer.setNumber === setNumber) {
+      set({ setTimer: null });
+    } else if (shift && setTimer.setNumber > setNumber) {
+      set({ setTimer: { ...setTimer, setNumber: setTimer.setNumber - 1 } });
+    }
+  },
+
   resetAll: () => {
-    set({ timer: initialTimer, stopwatch: initialStopwatch, rest: null });
+    set({ timer: initialTimer, stopwatch: initialStopwatch, rest: null, setTimer: null });
   },
 }));

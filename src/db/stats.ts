@@ -31,7 +31,7 @@ export interface MuscleSlice {
 export interface DayCount {
   /** Local-time day, `YYYY-MM-DD`. */
   day: string;
-  /** Completed sessions that day. */
+  /** Per-day value: completed sessions, or meters for the cardio distance series. */
   count: number;
 }
 
@@ -136,6 +136,88 @@ export async function getWorkoutDayCounts(
   );
 }
 
+export interface CardioStats {
+  /** Sum of logged distance in range (meters). */
+  totalDistanceM: number;
+  /** Sum of logged durations for distance cardio in range (seconds). */
+  totalDurationSeconds: number;
+  /** Duration of the sets that also logged a distance (seconds) — for average pace. */
+  pacedSeconds: number;
+  /** Distance of the sets that also logged a duration (meters) — for average pace. */
+  pacedDistanceM: number;
+  /** Completed cardio/timed sets in range. */
+  sets: number;
+}
+
+/**
+ * Cardio totals (distance + time) for the given range. Counts completed sets
+ * of `duration` / `distance_duration` exercises that logged a duration or
+ * distance. `pacedSeconds` / `pacedDistanceM` cover only sets with both, so
+ * average pace isn't skewed by timed-only sets.
+ */
+export async function getCardioStats(
+  db: SQLiteDatabase,
+  fromISO?: string | null,
+  toISO?: string | null
+): Promise<CardioStats> {
+  const { clause, params } = rangeParams(fromISO, toISO);
+
+  const row = await db.getFirstAsync<{
+    distance: number;
+    duration: number;
+    paced_seconds: number;
+    paced_distance: number;
+    sets: number;
+  }>(
+    `SELECT COALESCE(SUM(s.distance_m), 0) AS distance,
+            COALESCE(SUM(s.duration_seconds), 0) AS duration,
+            COALESCE(SUM(CASE WHEN s.distance_m > 0 AND s.duration_seconds > 0
+                              THEN s.duration_seconds ELSE 0 END), 0) AS paced_seconds,
+            COALESCE(SUM(CASE WHEN s.distance_m > 0 AND s.duration_seconds > 0
+                              THEN s.distance_m ELSE 0 END), 0) AS paced_distance,
+            COUNT(*) AS sets
+     FROM sets s
+     JOIN workout_logs wl ON wl.id = s.workout_log_id
+     JOIN exercises e ON e.id = s.exercise_id
+     WHERE s.completed = 1 AND wl.completed_at IS NOT NULL
+       AND e.exercise_type IN ('duration', 'distance_duration')
+       AND (s.duration_seconds > 0 OR s.distance_m > 0) ${clause}`,
+    ...params
+  );
+
+  return {
+    totalDistanceM: row?.distance ?? 0,
+    totalDurationSeconds: row?.duration ?? 0,
+    pacedSeconds: row?.paced_seconds ?? 0,
+    pacedDistanceM: row?.paced_distance ?? 0,
+    sets: row?.sets ?? 0,
+  };
+}
+
+/**
+ * Logged distance (meters) per local-time day, ascending — shaped as
+ * `DayCount` so it buckets through `buildTimeSeries` like session counts.
+ */
+export async function getCardioDayDistances(
+  db: SQLiteDatabase,
+  fromISO?: string | null,
+  toISO?: string | null
+): Promise<DayCount[]> {
+  const { clause, params } = rangeParams(fromISO, toISO);
+
+  return db.getAllAsync<DayCount>(
+    `SELECT date(datetime(wl.started_at, 'localtime')) AS day,
+            COALESCE(SUM(s.distance_m), 0) AS count
+     FROM sets s
+     JOIN workout_logs wl ON wl.id = s.workout_log_id
+     WHERE s.completed = 1 AND wl.completed_at IS NOT NULL
+       AND s.distance_m > 0 ${clause}
+     GROUP BY date(datetime(wl.started_at, 'localtime'))
+     ORDER BY day ASC`,
+    ...params
+  );
+}
+
 // ---------------------------------------------------------------------------
 // Weekly consistency (sustainable training: weeks, not daily streaks)
 // ---------------------------------------------------------------------------
@@ -202,7 +284,7 @@ export type BucketGranularity = 'day' | 'week' | 'month';
 export interface TimeSeriesPoint {
   /** Start of the bucket as a local-time day, `YYYY-MM-DD`. */
   start: string;
-  /** Sessions in the bucket (zero-filled). */
+  /** Summed `DayCount.count` in the bucket (sessions or meters; zero-filled). */
   count: number;
 }
 
@@ -236,7 +318,8 @@ function addBucket(start: string, granularity: BucketGranularity): string {
 }
 
 /**
- * Aggregates per-day session counts into a continuous, zero-filled time series.
+ * Aggregates per-day values (session counts, cardio meters…) into a
+ * continuous, zero-filled time series.
  *
  * With a `[fromISO, toISO)` range the series spans `[from, to)` — bucket starts
  * are generated while they are `< to` — so a week filter yields exactly 7 daily

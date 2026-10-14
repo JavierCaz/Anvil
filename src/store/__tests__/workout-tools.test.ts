@@ -1,4 +1,5 @@
 import {
+  getSetTimerElapsedSeconds,
   getStopwatchElapsedMs,
   getTimerRemainingMs,
   getTimerStatus,
@@ -129,5 +130,44 @@ describe('rest countdown', () => {
     store().startRest(7, 1, 60, 0);
     store().resetAll();
     expect(store().rest).toBeNull();
+  });
+});
+
+describe('set timer', () => {
+  it('starts, reports elapsed seconds, and stops with the elapsed time', () => {
+    store().startSetTimer(3, 2, 1_000);
+    const timer = store().setTimer;
+    expect(timer).toEqual({ exerciseId: 3, setNumber: 2, startedAt: 1_000 });
+    expect(getSetTimerElapsedSeconds(timer!, 46_900)).toBe(45);
+
+    expect(store().stopSetTimer(3, 2, 46_900)).toBe(45);
+    expect(store().setTimer).toBeNull();
+  });
+
+  it('ignores a stop for a different set', () => {
+    store().startSetTimer(3, 2, 0);
+    expect(store().stopSetTimer(3, 1, 10_000)).toBeNull();
+    expect(store().stopSetTimer(4, 2, 10_000)).toBeNull();
+    expect(store().setTimer).not.toBeNull();
+  });
+
+  it('replaces the running timer when another set starts', () => {
+    store().startSetTimer(3, 1, 0);
+    store().startSetTimer(3, 2, 5_000);
+    expect(store().setTimer).toEqual({ exerciseId: 3, setNumber: 2, startedAt: 5_000 });
+  });
+
+  it('drops or renumbers the timer when sets are removed', () => {
+    store().startSetTimer(3, 3, 0);
+    store().releaseSetTimer(3, 1, true);
+    expect(store().setTimer?.setNumber).toBe(2);
+    store().releaseSetTimer(3, 2);
+    expect(store().setTimer).toBeNull();
+  });
+
+  it('is cleared with the rest of the tools', () => {
+    store().startSetTimer(3, 1, 0);
+    store().resetAll();
+    expect(store().setTimer).toBeNull();
   });
 });

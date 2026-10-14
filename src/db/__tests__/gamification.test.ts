@@ -1,7 +1,9 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import {
+  computeCardioPRs,
   detectAndRecordPRs,
   epley1RM,
+  type CardioSetRow,
   getWorkoutRecap,
 } from '@/db/gamification';
 import { getWeeklyConsistency } from '@/db/stats';
@@ -171,12 +173,145 @@ describe('getWorkoutRecap', () => {
 
     const recap = await getWorkoutRecap(db, 7, 3);
 
-    expect(recap.summary).toEqual({ durationSeconds: 0, totalVolumeKg: 0, setsCompleted: 0 });
+    expect(recap.summary).toEqual({
+      durationSeconds: 0,
+      totalVolumeKg: 0,
+      setsCompleted: 0,
+      totalDistanceM: 0,
+      timedSeconds: 0,
+    });
     expect(recap.volumeDeltaPct).toBeNull();
     expect(recap.prs).toEqual([]);
     expect(recap.milestonesUnlocked).toEqual([]);
     expect(recap.consistency.weeklyGoal).toBe(3);
     expect(recap.achievementsUnlocked).toEqual([]);
     expect(recap.nextMilestone?.key).toBe('comparative_watermelon');
+  });
+});
+
+describe('computeCardioPRs', () => {
+  const run = (overrides: Partial<CardioSetRow>): CardioSetRow => ({
+    exercise_id: 9,
+    exercise_name: 'Running',
+    exercise_type: 'distance_duration',
+    duration_seconds: 1800,
+    distance_m: 5000,
+    ...overrides,
+  });
+  const plank = (seconds: number): CardioSetRow => ({
+    exercise_id: 4,
+    exercise_name: 'Plank',
+    exercise_type: 'duration',
+    duration_seconds: seconds,
+    distance_m: null,
+  });
+
+  it('detects a longest-distance and a best-pace PR for cardio', () => {
+    const prs = computeCardioPRs(
+      [run({ distance_m: 6000, duration_seconds: 1800 })], // 5:00 /km
+      [run({ distance_m: 5000, duration_seconds: 1800 })] // 6:00 /km
+    );
+    expect(prs.map((pr) => pr.type).sort()).toEqual(['distance', 'pace']);
+    const distancePR = prs.find((pr) => pr.type === 'distance');
+    expect(distancePR).toMatchObject({
+      exerciseId: 9,
+      weight: 0,
+      reps: 0,
+      distanceM: 6000,
+      durationSeconds: 1800,
+    });
+  });
+
+  it('detects a pace PR without a distance PR', () => {
+    const prs = computeCardioPRs(
+      [run({ distance_m: 5000, duration_seconds: 1500 })],
+      [run({ distance_m: 10000, duration_seconds: 3600 })]
+    );
+    expect(prs.map((pr) => pr.type)).toEqual(['pace']);
+  });
+
+  it('ignores pace for sets under 1 km', () => {
+    const prs = computeCardioPRs(
+      [run({ distance_m: 400, duration_seconds: 60 })], // blazing 2:30 /km sprint
+      [run({ distance_m: 5000, duration_seconds: 1800 })]
+    );
+    expect(prs).toEqual([]);
+  });
+
+  it('detects a longest-duration PR for holds', () => {
+    const prs = computeCardioPRs([plank(30), plank(75)], [plank(60)]);
+    expect(prs).toHaveLength(1);
+    expect(prs[0]).toMatchObject({ type: 'duration', exerciseName: 'Plank', durationSeconds: 75 });
+  });
+
+  it('never counts the first session for an exercise as a PR', () => {
+    expect(computeCardioPRs([run({}), plank(90)], [])).toEqual([]);
+  });
+});
+
+describe('detectAndRecordPRs (cardio)', () => {
+  it('records cardio PRs with their type, duration and distance', async () => {
+    const runAsync = jest.fn(async () => ({ changes: 1 }));
+    const db = {
+      getAllAsync: jest.fn(async () => []),
+      getFirstAsync: jest.fn(async () => null),
+      runAsync,
+    } as unknown as SQLiteDatabase;
+    (db.getFirstAsync as jest.Mock).mockResolvedValueOnce({
+      id: 1,
+      started_at: '2026-08-01T10:00:00Z',
+      completed_at: '2026-08-01T10:40:00Z',
+    });
+    (db.getAllAsync as jest.Mock)
+      .mockResolvedValueOnce([]) // weight session sets — none
+      .mockResolvedValueOnce([
+        { exercise_id: 9, exercise_name: 'Running', exercise_type: 'distance_duration', duration_seconds: 2400, distance_m: 8000 },
+      ])
+      .mockResolvedValueOnce([
+        { exercise_id: 9, exercise_name: 'Running', exercise_type: 'distance_duration', duration_seconds: 1800, distance_m: 5000 },
+      ]);
+
+    const prs = await detectAndRecordPRs(db, 1);
+
+    // 8 km beats 5 km; 5:00 /km beats 6:00 /km.
+    expect(prs.map((pr) => pr.type).sort()).toEqual(['distance', 'pace']);
+    expect(runAsync).toHaveBeenCalledTimes(2);
+    expect(runAsync).toHaveBeenCalledWith(
+      expect.stringContaining('INSERT INTO personal_records'),
+      9,
+      0,
+      0,
+      '2026-08-01T10:40:00Z',
+      'distance',
+      2400,
+      8000
+    );
+  });
+});
+
+describe('detectAndRecordPRs (loaded carry)', () => {
+  it('counts a heavier carry as a weight PR without a 1RM PR', async () => {
+    const runAsync = jest.fn(async () => ({ changes: 1 }));
+    const db = {
+      getAllAsync: jest.fn(async () => []),
+      getFirstAsync: jest.fn(async () => null),
+      runAsync,
+    } as unknown as SQLiteDatabase;
+    (db.getFirstAsync as jest.Mock).mockResolvedValueOnce({
+      id: 1,
+      started_at: '2026-08-01T10:00:00Z',
+      completed_at: '2026-08-01T10:40:00Z',
+    });
+    (db.getAllAsync as jest.Mock)
+      // weight session sets: Farmer Carry 40 kg, 0 reps
+      .mockResolvedValueOnce([{ exercise_id: 5, exercise_name: 'Farmer Carry', weight: 40, reps: 0 }])
+      // weight history: 32 kg
+      .mockResolvedValueOnce([{ exercise_id: 5, exercise_name: 'Farmer Carry', weight: 32, reps: 0 }]);
+    // Cardio queries fall through to [] (no cardio PRs).
+
+    const prs = await detectAndRecordPRs(db, 1);
+
+    expect(prs).toHaveLength(1);
+    expect(prs[0]).toMatchObject({ type: 'weight', weight: 40, reps: 0, oneRM: null });
   });
 });
