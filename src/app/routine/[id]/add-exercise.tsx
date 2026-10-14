@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
-import { useState } from 'react';
+import { useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   ActivityIndicator,
@@ -16,8 +16,8 @@ import {
 import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { Screen } from '@/components/Screen';
-import { muscleI18nKey } from '@/constants/exercises';
-import { getExerciseMuscles, getExercises } from '@/db/exercises';
+import { equipmentI18nKey, muscleI18nKey } from '@/constants/exercises';
+import { getExerciseEquipment, getExerciseMuscles, getExercises } from '@/db/exercises';
 import { addExerciseToRoutine } from '@/db/routines';
 import type { Exercise } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
@@ -33,17 +33,22 @@ export default function AddExerciseScreen() {
 
   const [search, setSearch] = useState('');
   const [muscle, setMuscle] = useState<string | null>(null);
+  const [equipment, setEquipment] = useState<string | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<Exercise | null>(null);
 
   const musclesQuery = useFocusQuery((db) => getExerciseMuscles(db), [], {
     refetchOnFocus: false,
   });
+  const equipmentQuery = useFocusQuery((db) => getExerciseEquipment(db), [], {
+    refetchOnFocus: false,
+  });
   const exercisesQuery = useFocusQuery(
-    (db) => getExercises(db, { search, muscle }),
-    [search, muscle],
+    (db) => getExercises(db, { search, muscle, equipment }),
+    [search, muscle, equipment],
     { refetchOnFocus: false }
   );
   const muscles = musclesQuery.data ?? [];
+  const equipmentOptions = equipmentQuery.data ?? [];
   const exercises = exercisesQuery.data ?? [];
   const loading = !exercisesQuery.loaded;
 
@@ -79,30 +84,43 @@ export default function AddExerciseScreen() {
         </View>
       </View>
 
-      <View>
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          contentContainerStyle={styles.chips}
-        >
-          <FilterChip
-            label={t('routines.addExercise.allMuscles')}
-            selected={muscle === null}
-            onPress={() => setMuscle(null)}
-          />
-          {muscles.map((item) => {
-            const key = muscleI18nKey(item);
-            return (
-              <FilterChip
-                key={item}
-                label={key ? t(key) : item}
-                selected={muscle === item}
-                onPress={() => setMuscle(item)}
-              />
-            );
-          })}
-        </ScrollView>
-      </View>
+      <FilterSection label={t('routines.addExercise.muscleGroup')}>
+        <FilterChip
+          label={t('routines.addExercise.allMuscles')}
+          selected={muscle === null}
+          onPress={() => setMuscle(null)}
+        />
+        {muscles.map((item) => {
+          const key = muscleI18nKey(item);
+          return (
+            <FilterChip
+              key={item}
+              label={key ? t(key) : item}
+              selected={muscle === item}
+              onPress={() => setMuscle(item)}
+            />
+          );
+        })}
+      </FilterSection>
+
+      <FilterSection label={t('routines.addExercise.equipment')}>
+        <FilterChip
+          label={t('routines.addExercise.allMuscles')}
+          selected={equipment === null}
+          onPress={() => setEquipment(null)}
+        />
+        {equipmentOptions.map((item) => {
+          const key = equipmentI18nKey(item);
+          return (
+            <FilterChip
+              key={item}
+              label={key ? t(key) : item}
+              selected={equipment === item}
+              onPress={() => setEquipment(item)}
+            />
+          );
+        })}
+      </FilterSection>
 
       {loading ? (
         <View style={styles.center}>
@@ -150,6 +168,7 @@ export default function AddExerciseScreen() {
           }
           renderItem={({ item }) => {
             const muscleKey = muscleI18nKey(item.primary_muscle);
+            const equipmentKey = equipmentI18nKey(item.equipment);
             return (
               <Pressable
                 accessibilityRole="button"
@@ -175,7 +194,7 @@ export default function AddExerciseScreen() {
                   </View>
                   <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
                     {muscleKey ? t(muscleKey) : ''}
-                    {item.equipment ? ` · ${item.equipment}` : ''}
+                    {item.equipment ? ` · ${equipmentKey ? t(equipmentKey) : item.equipment}` : ''}
                   </Text>
                 </View>
                 {item.source === 'custom' && (
@@ -209,6 +228,22 @@ export default function AddExerciseScreen() {
         />
       )}
     </Screen>
+  );
+}
+
+function FilterSection({ label, children }: { label: string; children: ReactNode }) {
+  const { colors } = useAppTheme();
+  return (
+    <View style={styles.filterSection}>
+      <Text style={[styles.filterLabel, { color: colors.textSecondary }]}>{label}</Text>
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.chips}
+      >
+        {children}
+      </ScrollView>
+    </View>
   );
 }
 
@@ -261,9 +296,19 @@ const styles = StyleSheet.create({
     fontSize: 15,
     paddingVertical: 10,
   },
+  filterSection: {
+    paddingTop: 10,
+    gap: 6,
+  },
+  filterLabel: {
+    paddingHorizontal: 20,
+    fontSize: 11,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.5,
+  },
   chips: {
     paddingHorizontal: 20,
-    paddingVertical: 10,
     gap: 8,
   },
   chip: {
@@ -283,6 +328,7 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 20,
+    paddingTop: 12,
     paddingBottom: 24,
     gap: 10,
   },

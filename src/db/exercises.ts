@@ -17,6 +17,8 @@ export interface ExerciseFilters {
   search?: string;
   /** Filter by exact primary muscle (English name from the catalog). */
   muscle?: string | null;
+  /** Filter by equipment (case-insensitive — custom exercises use free text). */
+  equipment?: string | null;
 }
 
 /** Seed catalog rows that aren't present yet (keyed by unique slug). Idempotent. */
@@ -61,16 +63,20 @@ export async function getExercises(
 ): Promise<Exercise[]> {
   const search = filters.search?.trim() ?? '';
   const muscle = filters.muscle?.trim() || null;
+  const equipment = filters.equipment?.trim() || null;
 
   return db.getAllAsync<Exercise>(
     `SELECT * FROM exercises
      WHERE (? = '' OR name LIKE '%' || ? || '%')
        AND (? IS NULL OR primary_muscle = ?)
+       AND (? IS NULL OR TRIM(equipment) = ? COLLATE NOCASE)
      ORDER BY CASE WHEN source = 'custom' THEN 0 ELSE 1 END, name COLLATE NOCASE ASC`,
     search,
     search,
     muscle,
-    muscle
+    muscle,
+    equipment,
+    equipment
   );
 }
 
@@ -80,6 +86,17 @@ export async function getExerciseMuscles(db: SQLiteDatabase): Promise<string[]> 
     'SELECT DISTINCT primary_muscle AS m FROM exercises WHERE primary_muscle IS NOT NULL ORDER BY m'
   );
   return rows.map((row) => row.m);
+}
+
+/** Distinct equipment values (case-insensitive, for filter chips). */
+export async function getExerciseEquipment(db: SQLiteDatabase): Promise<string[]> {
+  const rows = await db.getAllAsync<{ e: string }>(
+    `SELECT MIN(TRIM(equipment)) AS e FROM exercises
+     WHERE equipment IS NOT NULL AND TRIM(equipment) <> ''
+     GROUP BY TRIM(equipment) COLLATE NOCASE
+     ORDER BY e COLLATE NOCASE`
+  );
+  return rows.map((row) => row.e);
 }
 
 export async function getExerciseById(db: SQLiteDatabase, id: number): Promise<Exercise | null> {

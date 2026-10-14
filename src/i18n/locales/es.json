@@ -328,6 +328,8 @@
       "title": "Añadir ejercicio",
       "searchPlaceholder": "Buscar ejercicios…",
       "allMuscles": "Todos",
+      "muscleGroup": "Grupo muscular",
+      "equipment": "Equipamiento",
       "createCustom": "Crear “{{name}}”",
       "emptyTitle": "Sin resultados",
       "emptyHint": "Nada coincide con tu búsqueda. Crea un ejercicio personalizado.",
@@ -380,6 +382,25 @@
       "shoulders": "Hombros",
       "triceps": "Tríceps",
       "upperBack": "Espalda alta"
+    },
+    "equipment": {
+      "barbell": "Barra",
+      "bench": "Banco",
+      "bodyweight": "Peso corporal",
+      "box": "Cajón",
+      "cable": "Polea",
+      "cardio": "Cardio",
+      "chair": "Silla",
+      "doorway": "Marco de puerta",
+      "dumbbell": "Mancuerna",
+      "kettlebell": "Pesa rusa",
+      "machine": "Máquina",
+      "plate": "Disco",
+      "pullUpBar": "Barra de dominadas",
+      "resistanceBand": "Banda elástica",
+      "stabilityBall": "Fitball",
+      "towel": "Toalla",
+      "wall": "Pared"
     }
   },
   "recap": {

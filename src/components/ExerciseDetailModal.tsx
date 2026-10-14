@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { DetailModal } from '@/components/DetailModal';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
-import { exerciseTypeI18nKey, muscleI18nKey } from '@/constants/exercises';
+import { equipmentI18nKey, exerciseTypeI18nKey, muscleI18nKey } from '@/constants/exercises';
 import type { Exercise } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
@@ -25,6 +25,7 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
   const primaryMuscle = muscleLabel(exercise.primary_muscle ?? exercise.muscle_group, t);
   const typeKey = exerciseTypeI18nKey(exercise.exercise_type);
   const typeLabel = typeKey ? t(typeKey) : exercise.exercise_type;
+  const equipmentKey = equipmentI18nKey(exercise.equipment);
 
   let secondaryMuscles: string[] = [];
   if (exercise.secondary_muscles) {
@@ -80,7 +81,9 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
               {t('exercises.detail.equipment')}
             </Text>
-            <Text style={[styles.detailValue, { color: colors.text }]}>{exercise.equipment}</Text>
+            <Text style={[styles.detailValue, { color: colors.text }]}>
+              {equipmentKey ? t(equipmentKey) : exercise.equipment}
+            </Text>
           </View>
         ) : null}
         {secondaryLabel && (

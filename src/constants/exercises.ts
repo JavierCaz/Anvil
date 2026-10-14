@@ -32,6 +32,27 @@ export const MUSCLE_I18N_KEYS: Record<string, string> = {
   'Upper Back': 'exercises.muscles.upperBack',
 };
 
+/** Equipment (English catalog value, lower-cased) → i18n key. */
+export const EQUIPMENT_I18N_KEYS: Record<string, string> = {
+  barbell: 'exercises.equipment.barbell',
+  bench: 'exercises.equipment.bench',
+  bodyweight: 'exercises.equipment.bodyweight',
+  box: 'exercises.equipment.box',
+  cable: 'exercises.equipment.cable',
+  cardio: 'exercises.equipment.cardio',
+  chair: 'exercises.equipment.chair',
+  doorway: 'exercises.equipment.doorway',
+  dumbbell: 'exercises.equipment.dumbbell',
+  kettlebell: 'exercises.equipment.kettlebell',
+  machine: 'exercises.equipment.machine',
+  plate: 'exercises.equipment.plate',
+  'pull-up bar': 'exercises.equipment.pullUpBar',
+  'resistance band': 'exercises.equipment.resistanceBand',
+  'stability ball': 'exercises.equipment.stabilityBall',
+  towel: 'exercises.equipment.towel',
+  wall: 'exercises.equipment.wall',
+};
+
 /** @bryllim/workout-guide exercise type → i18n key. */
 export const EXERCISE_TYPE_I18N_KEYS: Record<string, string> = {
   weight_reps: 'exercises.types.weightReps',
@@ -44,6 +65,11 @@ export const EXERCISE_TYPE_I18N_KEYS: Record<string, string> = {
 /** i18n key for a muscle value, falling back to the raw value when unknown. */
 export function muscleI18nKey(muscle: string | null): string | null {
   return muscle ? (MUSCLE_I18N_KEYS[muscle] ?? null) : null;
+}
+
+/** i18n key for an equipment value (case-insensitive), or null when unknown. */
+export function equipmentI18nKey(equipment: string | null): string | null {
+  return equipment ? (EQUIPMENT_I18N_KEYS[equipment.trim().toLowerCase()] ?? null) : null;
 }
 
 /** i18n key for an exercise type, falling back to the raw value when unknown. */

@@ -102,9 +102,9 @@
     "semantic_hash": ""
   },
   "src/app/routine/[id]/add-exercise.tsx": {
-    "mtime": 1790005347.3336172,
-    "seen": 1790005504.4384081,
-    "ast_hash": "54aa0a0f55597d8ffcc0c281b7c85d27",
+    "mtime": 1791936999.3323236,
+    "seen": 1791937021.9546487,
+    "ast_hash": "1c0041103ff65976c5f1cc97c2c7975f",
     "semantic_hash": ""
   },
   "src/app/routine/[id]/edit.tsx": {
@@ -174,10 +174,10 @@
     "semantic_hash": "2ff1547f1933a9bebc946dcd2cff163d"
   },
   "src/components/ExerciseDetailModal.tsx": {
-    "mtime": 1788149545.0867438,
-    "seen": 1789852290.957935,
-    "ast_hash": "54384f9ba9e00a479e05a2b303d07f5a",
-    "semantic_hash": "54384f9ba9e00a479e05a2b303d07f5a"
+    "mtime": 1791936999.3329437,
+    "seen": 1791937021.9546778,
+    "ast_hash": "1f22e6bd3653a3feed239ffd72edaeaf",
+    "semantic_hash": ""
   },
   "src/components/ExerciseForm.tsx": {
     "mtime": 1788042915.7812176,
@@ -270,10 +270,10 @@
     "semantic_hash": "10df538084bffb68f53e151899cc8c83"
   },
   "src/constants/exercises.ts": {
-    "mtime": 1788042915.7820466,
-    "seen": 1789852290.9579628,
-    "ast_hash": "9308073ef9f8f8d4a9776a112411dce4",
-    "semantic_hash": "9308073ef9f8f8d4a9776a112411dce4"
+    "mtime": 1791936979.0481856,
+    "seen": 1791937021.9547253,
+    "ast_hash": "a6fca2282254e0ac5068bf9f8b5b7e28",
+    "semantic_hash": ""
   },
   "src/constants/weight-comparatives.ts": {
     "mtime": 1788121830.820646,
@@ -342,10 +342,10 @@
     "semantic_hash": ""
   },
   "src/db/exercises.ts": {
-    "mtime": 1788042915.7823424,
-    "seen": 1789852290.9579828,
-    "ast_hash": "d467db46ba4c467d0ee12f5ff80da7c1",
-    "semantic_hash": "d467db46ba4c467d0ee12f5ff80da7c1"
+    "mtime": 1791936979.047702,
+    "seen": 1791937021.9547517,
+    "ast_hash": "ea602daa1f61bbc92d964fa1544b0430",
+    "semantic_hash": ""
   },
   "src/db/gamification.ts": {
     "mtime": 1791927993.67176,
@@ -396,15 +396,15 @@
     "semantic_hash": "8f6d6d5070a32407a48defe6d7867dee"
   },
   "src/i18n/locales/en.json": {
-    "mtime": 1791930516.9741666,
-    "seen": 1791930573.8475492,
-    "ast_hash": "c23e2b668d5b01055eb409a10bf03e76",
+    "mtime": 1791936979.0490131,
+    "seen": 1791937021.9547732,
+    "ast_hash": "17ce52070cbe2f4905c7afa3f988ae98",
     "semantic_hash": ""
   },
   "src/i18n/locales/es.json": {
-    "mtime": 1791930516.974829,
-    "seen": 1791930573.8475513,
-    "ast_hash": "db084cb8a0d861bc5dff64f510b82706",
+    "mtime": 1791936979.0499551,
+    "seen": 1791937021.954775,
+    "ast_hash": "b1eeff8d52d643d8b412e1ef5b5d4ef4",
     "semantic_hash": ""
   },
   "src/store/units.ts": {

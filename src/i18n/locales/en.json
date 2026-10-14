@@ -328,6 +328,8 @@
       "title": "Add exercise",
       "searchPlaceholder": "Search exercises…",
       "allMuscles": "All",
+      "muscleGroup": "Muscle group",
+      "equipment": "Equipment",
       "createCustom": "Create “{{name}}”",
       "emptyTitle": "No matches",
       "emptyHint": "Nothing matches your search. Create a custom exercise instead.",
@@ -380,6 +382,25 @@
       "shoulders": "Shoulders",
       "triceps": "Triceps",
       "upperBack": "Upper back"
+    },
+    "equipment": {
+      "barbell": "Barbell",
+      "bench": "Bench",
+      "bodyweight": "Bodyweight",
+      "box": "Box",
+      "cable": "Cable",
+      "cardio": "Cardio",
+      "chair": "Chair",
+      "doorway": "Doorway",
+      "dumbbell": "Dumbbell",
+      "kettlebell": "Kettlebell",
+      "machine": "Machine",
+      "plate": "Plate",
+      "pullUpBar": "Pull-up bar",
+      "resistanceBand": "Resistance band",
+      "stabilityBall": "Stability ball",
+      "towel": "Towel",
+      "wall": "Wall"
     }
   },
   "recap": {

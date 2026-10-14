@@ -64,17 +64,17 @@
   },
   "nodes": [
     {
-      "id": "src_db_routines_routineinput",
-      "label": "RoutineInput",
+      "id": "src_components_workoutelapsed_workoutelapsedbarprops",
+      "label": "WorkoutElapsedBarProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 1,
       "community_name": "workout/[id].tsx",
       "file_type": "code",
-      "norm_label": "routineinput",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L15"
+      "norm_label": "workoutelapsedbarprops",
+      "source_file": "src/components/WorkoutElapsed.tsx",
+      "source_location": "L29"
     },
     {
       "id": "src_db_routines_settargetinput",
@@ -88,19 +88,6 @@
       "norm_label": "settargetinput",
       "source_file": "src/db/routines.ts",
       "source_location": "L267"
-    },
-    {
-      "id": "src_db_routines_targetvolume",
-      "label": "TargetVolume",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "targetvolume",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L187"
     },
     {
       "id": "src_db_types_achievement",
@@ -142,19 +129,6 @@
       "source_location": "L174"
     },
     {
-      "id": "src_db_types_routine",
-      "label": "Routine",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "routine",
-      "source_file": "src/db/types.ts",
-      "source_location": "L8"
-    },
-    {
       "id": "src_db_types_routineexercise",
       "label": "RoutineExercise",
       "_callable": true,
@@ -194,19 +168,6 @@
       "source_location": "L59"
     },
     {
-      "id": "src_db_types_routinewithcount",
-      "label": "RoutineWithCount",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "routinewithcount",
-      "source_file": "src/db/types.ts",
-      "source_location": "L18"
-    },
-    {
       "id": "src_db_types_workoutlog",
       "label": "WorkoutLog",
       "_callable": true,
@@ -231,19 +192,6 @@
       "norm_label": "workoutset",
       "source_file": "src/db/types.ts",
       "source_location": "L119"
-    },
-    {
-      "id": "src_db_types_workoutsummary",
-      "label": "WorkoutSummary",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "workoutsummary",
-      "source_file": "src/db/types.ts",
-      "source_location": "L161"
     },
     {
       "id": "src_db_workouts_exercisestats",
@@ -467,32 +415,6 @@
       "source_location": "L61"
     },
     {
-      "id": "src_components_workoutrecap_workoutrecapmodalprops",
-      "label": "WorkoutRecapModalProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "gamification.ts",
-      "file_type": "code",
-      "norm_label": "workoutrecapmodalprops",
-      "source_file": "src/components/WorkoutRecap.tsx",
-      "source_location": "L13"
-    },
-    {
-      "id": "src_constants_weight_comparatives_weightcomparativedefinition",
-      "label": "WeightComparativeDefinition",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "gamification.ts",
-      "file_type": "code",
-      "norm_label": "weightcomparativedefinition",
-      "source_file": "src/constants/weight-comparatives.ts",
-      "source_location": "L13"
-    },
-    {
       "id": "src_db_gamification_cardiobests",
       "label": "CardioBests",
       "_callable": true,
@@ -597,43 +519,69 @@
       "source_location": "L76"
     },
     {
-      "id": "src_db_gamification_workoutrecap",
-      "label": "WorkoutRecap",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "gamification.ts",
-      "file_type": "code",
-      "norm_label": "workoutrecap",
-      "source_file": "src/db/gamification.ts",
-      "source_location": "L57"
-    },
-    {
-      "id": "src_db_stats_weeklyconsistency",
-      "label": "WeeklyConsistency",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "gamification.ts",
-      "file_type": "code",
-      "norm_label": "weeklyconsistency",
-      "source_file": "src/db/stats.ts",
-      "source_location": "L38"
-    },
-    {
-      "id": "src_store_workout_goals_weeklygoalstate",
-      "label": "WeeklyGoalState",
+      "id": "src_app_tabs_index_homedata",
+      "label": "HomeData",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "index.tsx",
       "file_type": "code",
-      "norm_label": "weeklygoalstate",
-      "source_file": "src/store/workout-goals.ts",
-      "source_location": "L9"
+      "norm_label": "homedata",
+      "source_file": "src/app/(tabs)/index.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "src_components_weekstrip_weekdayitem",
+      "label": "WeekDayItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "index.tsx",
+      "file_type": "code",
+      "norm_label": "weekdayitem",
+      "source_file": "src/components/WeekStrip.tsx",
+      "source_location": "L4"
+    },
+    {
+      "id": "src_components_weekstrip_weekstripprops",
+      "label": "WeekStripProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "index.tsx",
+      "file_type": "code",
+      "norm_label": "weekstripprops",
+      "source_file": "src/components/WeekStrip.tsx",
+      "source_location": "L15"
+    },
+    {
+      "id": "src_db_achievements_achievementprogressitem",
+      "label": "AchievementProgressItem",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "index.tsx",
+      "file_type": "code",
+      "norm_label": "achievementprogressitem",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L43"
+    },
+    {
+      "id": "src_constants_achievements_achievementcategory",
+      "label": "AchievementCategory",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "constants/achievements.ts",
+      "file_type": "code",
+      "norm_label": "achievementcategory",
+      "source_file": "src/constants/achievements.ts",
+      "source_location": "L22"
     },
     {
       "id": "src_constants_achievements_achievementmetric",
@@ -675,69 +623,30 @@
       "source_location": "L44"
     },
     {
-      "id": "src_constants_achievements_achievementtier",
-      "label": "AchievementTier",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "achievementtier",
-      "source_file": "src/constants/achievements.ts",
-      "source_location": "L29"
-    },
-    {
-      "id": "src_constants_distance_achievements_distanceachievementdefinition",
-      "label": "DistanceAchievementDefinition",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "distanceachievementdefinition",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "src_constants_distance_achievements_distanceachievementkind",
-      "label": "DistanceAchievementKind",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "distanceachievementkind",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L18"
-    },
-    {
-      "id": "src_db_achievements_distanceunlock",
-      "label": "DistanceUnlock",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "distanceunlock",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L405"
-    },
-    {
-      "id": "src_components_routineform_routineformprops",
-      "label": "RoutineFormProps",
+      "id": "src_components_detailmodal_detailmodalprops",
+      "label": "DetailModalProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
-      "norm_label": "routineformprops",
-      "source_file": "src/components/RoutineForm.tsx",
-      "source_location": "L6"
+      "norm_label": "detailmodalprops",
+      "source_file": "src/components/DetailModal.tsx",
+      "source_location": "L7"
+    },
+    {
+      "id": "src_components_exerciseform_exerciseformprops",
+      "label": "ExerciseFormProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "exerciseformprops",
+      "source_file": "src/components/ExerciseForm.tsx",
+      "source_location": "L7"
     },
     {
       "id": "src_components_screen_screenprops",
@@ -746,11 +655,50 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "screenprops",
       "source_file": "src/components/Screen.tsx",
       "source_location": "L6"
+    },
+    {
+      "id": "src_components_exercisethumbnail_exercisethumbnailprops",
+      "label": "ExerciseThumbnailProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "exercisethumbnailprops",
+      "source_file": "src/components/ExerciseThumbnail.tsx",
+      "source_location": "L9"
+    },
+    {
+      "id": "src_components_loadingoverlay_loadingoverlayprops",
+      "label": "LoadingOverlayProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "loadingoverlayprops",
+      "source_file": "src/components/LoadingOverlay.tsx",
+      "source_location": "L5"
+    },
+    {
+      "id": "src_components_swipetodelete_swipetodeleteprops",
+      "label": "SwipeToDeleteProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "swipetodeleteprops",
+      "source_file": "src/components/SwipeToDelete.tsx",
+      "source_location": "L18"
     },
     {
       "id": "src_hooks_use_focus_query_usefocusqueryoptions",
@@ -779,13 +727,91 @@
       "source_location": "L7"
     },
     {
+      "id": "src_components_routineform_routineformprops",
+      "label": "RoutineFormProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "routineformprops",
+      "source_file": "src/components/RoutineForm.tsx",
+      "source_location": "L6"
+    },
+    {
+      "id": "src_db_routines_routineinput",
+      "label": "RoutineInput",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "routineinput",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L15"
+    },
+    {
+      "id": "src_db_routines_targetvolume",
+      "label": "TargetVolume",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "targetvolume",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L187"
+    },
+    {
+      "id": "src_db_types_routine",
+      "label": "Routine",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "routine",
+      "source_file": "src/db/types.ts",
+      "source_location": "L8"
+    },
+    {
+      "id": "src_db_types_routinewithcount",
+      "label": "RoutineWithCount",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "routinewithcount",
+      "source_file": "src/db/types.ts",
+      "source_location": "L18"
+    },
+    {
+      "id": "src_components_exercisedetailmodal_exercisedetailmodalprops",
+      "label": "ExerciseDetailModalProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "exercisedetailmodalprops",
+      "source_file": "src/components/ExerciseDetailModal.tsx",
+      "source_location": "L9"
+    },
+    {
       "id": "src_db_exercises_exercisefilters",
       "label": "ExerciseFilters",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 18,
-      "community_name": "expo-sqlite",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "exercisefilters",
       "source_file": "src/db/exercises.ts",
@@ -797,12 +823,12 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 18,
-      "community_name": "expo-sqlite",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "newexerciseinput",
       "source_file": "src/db/exercises.ts",
-      "source_location": "L89"
+      "source_location": "L106"
     },
     {
       "id": "src_db_exercises_updateexerciseinput",
@@ -810,38 +836,12 @@
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 18,
-      "community_name": "expo-sqlite",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "updateexerciseinput",
       "source_file": "src/db/exercises.ts",
-      "source_location": "L96"
-    },
-    {
-      "id": "src_components_detailmodal_detailmodalprops",
-      "label": "DetailModalProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "react-i18next",
-      "file_type": "code",
-      "norm_label": "detailmodalprops",
-      "source_file": "src/components/DetailModal.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_components_exercisedetailmodal_exercisedetailmodalprops",
-      "label": "ExerciseDetailModalProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "react-i18next",
-      "file_type": "code",
-      "norm_label": "exercisedetailmodalprops",
-      "source_file": "src/components/ExerciseDetailModal.tsx",
-      "source_location": "L9"
+      "source_location": "L113"
     },
     {
       "id": "src_db_types_exercise",
@@ -850,7 +850,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "exercise",
       "source_file": "src/db/types.ts",
@@ -881,19 +881,6 @@
       "norm_label": "backuperrorcode",
       "source_file": "src/db/backup.ts",
       "source_location": "L175"
-    },
-    {
-      "id": "src_db_backup_backupfile",
-      "label": "BackupFile",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 2,
-      "community_name": "backup.ts",
-      "file_type": "code",
-      "norm_label": "backupfile",
-      "source_file": "src/db/backup.ts",
-      "source_location": "L165"
     },
     {
       "id": "src_db_backup_backuprow",
@@ -974,13 +961,39 @@
       "source_location": "L10"
     },
     {
+      "id": "src_components_android_navigation_bar_navigationbarprops",
+      "label": "NavigationBarProps",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "navigationbarprops",
+      "source_file": "src/components/android-navigation-bar.tsx",
+      "source_location": "L8"
+    },
+    {
+      "id": "src_components_android_navigation_bar_navigationbarstyle",
+      "label": "NavigationBarStyle",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "navigationbarstyle",
+      "source_file": "src/components/android-navigation-bar.tsx",
+      "source_location": "L6"
+    },
+    {
       "id": "src_components_appdialog_dialogapi",
       "label": "DialogApi",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "dialogapi",
       "source_file": "src/components/AppDialog.tsx",
@@ -993,7 +1006,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "dialogbutton",
       "source_file": "src/components/AppDialog.tsx",
@@ -1006,7 +1019,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "dialogbuttonstyle",
       "source_file": "src/components/AppDialog.tsx",
@@ -1019,7 +1032,7 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "dialogoptions",
       "source_file": "src/components/AppDialog.tsx",
@@ -1032,63 +1045,24 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "dialogtone",
       "source_file": "src/components/AppDialog.tsx",
       "source_location": "L33"
     },
     {
-      "id": "src_components_workoutelapsed_workoutelapsedbarprops",
-      "label": "WorkoutElapsedBarProps",
+      "id": "src_app_routine_id_exercise_reid_setdraft",
+      "label": "SetDraft",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community": 3,
+      "community_name": "[exerciseId].tsx",
       "file_type": "code",
-      "norm_label": "workoutelapsedbarprops",
-      "source_file": "src/components/WorkoutElapsed.tsx",
-      "source_location": "L29"
-    },
-    {
-      "id": "src_theme_app_theme_provider_appcolorscheme",
-      "label": "AppColorScheme",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "appcolorscheme",
-      "source_file": "src/theme/app-theme-provider.tsx",
-      "source_location": "L7"
-    },
-    {
-      "id": "src_theme_app_theme_provider_apptheme",
-      "label": "AppTheme",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "apptheme",
-      "source_file": "src/theme/app-theme-provider.tsx",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_theme_colors_themecolors",
-      "label": "ThemeColors",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "themecolors",
-      "source_file": "src/theme/colors.ts",
-      "source_location": "L29"
+      "norm_label": "setdraft",
+      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
+      "source_location": "L26"
     },
     {
       "id": "src_app_workout_id_exercise_exerciseid_setdraft",
@@ -1273,43 +1247,69 @@
       "source_location": "L6"
     },
     {
-      "id": "src_components_exerciseform_exerciseformprops",
-      "label": "ExerciseFormProps",
+      "id": "src_db_backup_backupfile",
+      "label": "BackupFile",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "backup-file.ts",
+      "file_type": "code",
+      "norm_label": "backupfile",
+      "source_file": "src/db/backup.ts",
+      "source_location": "L165"
+    },
+    {
+      "id": "src_db_backup_backuppreferences",
+      "label": "BackupPreferences",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 31,
+      "community_name": "backup-file.ts",
+      "file_type": "code",
+      "norm_label": "backuppreferences",
+      "source_file": "src/db/backup.ts",
+      "source_location": "L157"
+    },
+    {
+      "id": "src_theme_app_theme_provider_appcolorscheme",
+      "label": "AppColorScheme",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "exerciseformprops",
-      "source_file": "src/components/ExerciseForm.tsx",
+      "norm_label": "appcolorscheme",
+      "source_file": "src/theme/app-theme-provider.tsx",
       "source_location": "L7"
     },
     {
-      "id": "src_components_exercisethumbnail_exercisethumbnailprops",
-      "label": "ExerciseThumbnailProps",
+      "id": "src_theme_app_theme_provider_apptheme",
+      "label": "AppTheme",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "exercisethumbnailprops",
-      "source_file": "src/components/ExerciseThumbnail.tsx",
+      "norm_label": "apptheme",
+      "source_file": "src/theme/app-theme-provider.tsx",
       "source_location": "L9"
     },
     {
-      "id": "src_components_swipetodelete_swipetodeleteprops",
-      "label": "SwipeToDeleteProps",
+      "id": "src_theme_colors_themecolors",
+      "label": "ThemeColors",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "swipetodeleteprops",
-      "source_file": "src/components/SwipeToDelete.tsx",
-      "source_location": "L18"
+      "norm_label": "themecolors",
+      "source_file": "src/theme/colors.ts",
+      "source_location": "L29"
     },
     {
       "id": "src_components_toastprovider_toastapi",
@@ -1377,121 +1377,82 @@
       "source_location": "L4"
     },
     {
-      "id": "src_app_routine_id_exercise_reid_setdraft",
-      "label": "SetDraft",
+      "id": "src_components_workoutrecap_workoutrecapmodalprops",
+      "label": "WorkoutRecapModalProps",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
+      "community": 35,
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "setdraft",
-      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
-      "source_location": "L26"
+      "norm_label": "workoutrecapmodalprops",
+      "source_file": "src/components/WorkoutRecap.tsx",
+      "source_location": "L13"
     },
     {
-      "id": "src_components_loadingoverlay_loadingoverlayprops",
-      "label": "LoadingOverlayProps",
+      "id": "src_constants_weight_comparatives_weightcomparativedefinition",
+      "label": "WeightComparativeDefinition",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
+      "community": 35,
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "loadingoverlayprops",
-      "source_file": "src/components/LoadingOverlay.tsx",
-      "source_location": "L5"
+      "norm_label": "weightcomparativedefinition",
+      "source_file": "src/constants/weight-comparatives.ts",
+      "source_location": "L13"
     },
     {
-      "id": "src_components_android_navigation_bar_navigationbarprops",
-      "label": "NavigationBarProps",
+      "id": "src_db_gamification_workoutrecap",
+      "label": "WorkoutRecap",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
+      "community": 35,
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "navigationbarprops",
-      "source_file": "src/components/android-navigation-bar.tsx",
-      "source_location": "L8"
+      "norm_label": "workoutrecap",
+      "source_file": "src/db/gamification.ts",
+      "source_location": "L57"
     },
     {
-      "id": "src_components_android_navigation_bar_navigationbarstyle",
-      "label": "NavigationBarStyle",
+      "id": "src_db_stats_weeklyconsistency",
+      "label": "WeeklyConsistency",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
+      "community": 35,
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "navigationbarstyle",
-      "source_file": "src/components/android-navigation-bar.tsx",
-      "source_location": "L6"
+      "norm_label": "weeklyconsistency",
+      "source_file": "src/db/stats.ts",
+      "source_location": "L38"
     },
     {
-      "id": "src_app_tabs_index_homedata",
-      "label": "HomeData",
+      "id": "src_db_types_workoutsummary",
+      "label": "WorkoutSummary",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
+      "community": 35,
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "homedata",
-      "source_file": "src/app/(tabs)/index.tsx",
-      "source_location": "L24"
+      "norm_label": "workoutsummary",
+      "source_file": "src/db/types.ts",
+      "source_location": "L161"
     },
     {
-      "id": "src_components_weekstrip_weekdayitem",
-      "label": "WeekDayItem",
+      "id": "src_constants_achievements_achievementtier",
+      "label": "AchievementTier",
       "_callable": true,
       "_callable_class": true,
       "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
+      "community": 5,
+      "community_name": "db/achievements.ts",
       "file_type": "code",
-      "norm_label": "weekdayitem",
-      "source_file": "src/components/WeekStrip.tsx",
-      "source_location": "L4"
-    },
-    {
-      "id": "src_components_weekstrip_weekstripprops",
-      "label": "WeekStripProps",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
-      "file_type": "code",
-      "norm_label": "weekstripprops",
-      "source_file": "src/components/WeekStrip.tsx",
-      "source_location": "L15"
-    },
-    {
-      "id": "src_constants_achievements_achievementcategory",
-      "label": "AchievementCategory",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
-      "file_type": "code",
-      "norm_label": "achievementcategory",
+      "norm_label": "achievementtier",
       "source_file": "src/constants/achievements.ts",
-      "source_location": "L22"
-    },
-    {
-      "id": "src_db_achievements_achievementprogressitem",
-      "label": "AchievementProgressItem",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
-      "file_type": "code",
-      "norm_label": "achievementprogressitem",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L43"
+      "source_location": "L29"
     },
     {
       "id": "src_constants_achievements_exerciseachievementstats",
@@ -1507,6 +1468,32 @@
       "source_location": "L263"
     },
     {
+      "id": "src_constants_distance_achievements_distanceachievementdefinition",
+      "label": "DistanceAchievementDefinition",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distanceachievementdefinition",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "src_constants_distance_achievements_distanceachievementkind",
+      "label": "DistanceAchievementKind",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distanceachievementkind",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L18"
+    },
+    {
       "id": "src_db_achievements_achievementrow",
       "label": "AchievementRow",
       "_callable": true,
@@ -1518,6 +1505,19 @@
       "norm_label": "achievementrow",
       "source_file": "src/db/achievements.ts",
       "source_location": "L25"
+    },
+    {
+      "id": "src_db_achievements_distanceunlock",
+      "label": "DistanceUnlock",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distanceunlock",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L405"
     },
     {
       "id": "src_db_achievements_exerciseachievementoptions",
@@ -1598,19 +1598,6 @@
       "source_location": "L34"
     },
     {
-      "id": "src_db_backup_backuppreferences",
-      "label": "BackupPreferences",
-      "_callable": true,
-      "_callable_class": true,
-      "_origin": "ast",
-      "community": 6,
-      "community_name": "settings.tsx",
-      "file_type": "code",
-      "norm_label": "backuppreferences",
-      "source_file": "src/db/backup.ts",
-      "source_location": "L157"
-    },
-    {
       "id": "src_store_weight_step_weightstepstate",
       "label": "WeightStepState",
       "_callable": true,
@@ -1622,6 +1609,19 @@
       "norm_label": "weightstepstate",
       "source_file": "src/store/weight-step.ts",
       "source_location": "L18"
+    },
+    {
+      "id": "src_store_workout_goals_weeklygoalstate",
+      "label": "WeeklyGoalState",
+      "_callable": true,
+      "_callable_class": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "settings.tsx",
+      "file_type": "code",
+      "norm_label": "weeklygoalstate",
+      "source_file": "src/store/workout-goals.ts",
+      "source_location": "L9"
     },
     {
       "id": "src_theme_theme_store_themepreference",
@@ -1754,18 +1754,6 @@
       "source_location": "L284"
     },
     {
-      "id": "src_app_routine_new_newroutinescreen",
-      "label": "NewRoutineScreen()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "newroutinescreen()",
-      "source_file": "src/app/routine/new.tsx",
-      "source_location": "L9"
-    },
-    {
       "id": "src_app_workout_id_workoutsessionscreen",
       "label": "WorkoutSessionScreen()",
       "_callable": true,
@@ -1814,102 +1802,6 @@
       "source_location": "L34"
     },
     {
-      "id": "src_constants_exercise_metrics_getdefaultsettarget",
-      "label": "getDefaultSetTarget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "getdefaultsettarget()",
-      "source_file": "src/constants/exercise-metrics.ts",
-      "source_location": "L80"
-    },
-    {
-      "id": "src_db_achievements_getexercisesachievements",
-      "label": "getExercisesAchievements()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "getexercisesachievements()",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L285"
-    },
-    {
-      "id": "src_db_gamification_detectandrecordprs",
-      "label": "detectAndRecordPRs()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "detectandrecordprs()",
-      "source_file": "src/db/gamification.ts",
-      "source_location": "L165"
-    },
-    {
-      "id": "src_db_gamification_detectandunlockspecials",
-      "label": "detectAndUnlockSpecials()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "detectandunlockspecials()",
-      "source_file": "src/db/gamification.ts",
-      "source_location": "L437"
-    },
-    {
-      "id": "src_db_gamification_getworkoutrecap",
-      "label": "getWorkoutRecap()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "getworkoutrecap()",
-      "source_file": "src/db/gamification.ts",
-      "source_location": "L568"
-    },
-    {
-      "id": "src_db_routines_addexercisetoroutine",
-      "label": "addExerciseToRoutine()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "addexercisetoroutine()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L206"
-    },
-    {
-      "id": "src_db_routines_clampint",
-      "label": "clampInt()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "clampint()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L422"
-    },
-    {
-      "id": "src_db_routines_createroutine",
-      "label": "createRoutine()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "createroutine()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L140"
-    },
-    {
       "id": "src_db_routines_getroutineexercisesets",
       "label": "getRoutineExerciseSets()",
       "_callable": true,
@@ -1920,90 +1812,6 @@
       "norm_label": "getroutineexercisesets()",
       "source_file": "src/db/routines.ts",
       "source_location": "L124"
-    },
-    {
-      "id": "src_db_routines_istimedtarget",
-      "label": "isTimedTarget()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "istimedtarget()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L427"
-    },
-    {
-      "id": "src_db_routines_moveroutineexercise",
-      "label": "moveRoutineExercise()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "moveroutineexercise()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L345"
-    },
-    {
-      "id": "src_db_routines_positiveintornull",
-      "label": "positiveIntOrNull()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "positiveintornull()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L434"
-    },
-    {
-      "id": "src_db_routines_positiveornull",
-      "label": "positiveOrNull()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "positiveornull()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L438"
-    },
-    {
-      "id": "src_db_routines_reorderroutines",
-      "label": "reorderRoutines()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "reorderroutines()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L447"
-    },
-    {
-      "id": "src_db_routines_saveroutineexercisesets",
-      "label": "saveRoutineExerciseSets()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "saveroutineexercisesets()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L285"
-    },
-    {
-      "id": "src_db_tests_routines_test_makedb",
-      "label": "makeDb()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "makedb()",
-      "source_file": "src/db/__tests__/routines.test.ts",
-      "source_location": "L8"
     },
     {
       "id": "src_db_tests_workouts_test_exerciserow",
@@ -2102,6 +1910,18 @@
       "source_location": "L486"
     },
     {
+      "id": "src_db_workouts_getactiveworkoutexercise",
+      "label": "getActiveWorkoutExercise()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "workout/[id].tsx",
+      "file_type": "code",
+      "norm_label": "getactiveworkoutexercise()",
+      "source_file": "src/db/workouts.ts",
+      "source_location": "L415"
+    },
+    {
       "id": "src_db_workouts_getactiveworkoutexercises",
       "label": "getActiveWorkoutExercises()",
       "_callable": true,
@@ -2112,18 +1932,6 @@
       "norm_label": "getactiveworkoutexercises()",
       "source_file": "src/db/workouts.ts",
       "source_location": "L310"
-    },
-    {
-      "id": "src_db_workouts_getcurrentstreak",
-      "label": "getCurrentStreak()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "getcurrentstreak()",
-      "source_file": "src/db/workouts.ts",
-      "source_location": "L228"
     },
     {
       "id": "src_db_workouts_getroutinesetvaluechanges",
@@ -2184,18 +1992,6 @@
       "norm_label": "getworkoutsets()",
       "source_file": "src/db/workouts.ts",
       "source_location": "L425"
-    },
-    {
-      "id": "src_db_workouts_getworkoutsummary",
-      "label": "getWorkoutSummary()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "getworkoutsummary()",
-      "source_file": "src/db/workouts.ts",
-      "source_location": "L544"
     },
     {
       "id": "src_db_workouts_setdiffersfromtarget",
@@ -2570,40 +2366,28 @@
       "source_location": "L79"
     },
     {
-      "id": "src_constants_achievements_computeexerciseachievementprogress",
-      "label": "computeExerciseAchievementProgress()",
+      "id": "src_constants_distance_achievements_getdistanceachievementbykey",
+      "label": "getDistanceAchievementByKey()",
       "_callable": true,
       "_origin": "ast",
       "community": 12,
       "community_name": "gamification.ts",
       "file_type": "code",
-      "norm_label": "computeexerciseachievementprogress()",
-      "source_file": "src/constants/achievements.ts",
-      "source_location": "L317"
+      "norm_label": "getdistanceachievementbykey()",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L147"
     },
     {
-      "id": "src_constants_weight_comparatives_getnextweightcomparative",
-      "label": "getNextWeightComparative()",
+      "id": "src_db_achievements_unlockachievementifnew",
+      "label": "unlockAchievementIfNew()",
       "_callable": true,
       "_origin": "ast",
       "community": 12,
       "community_name": "gamification.ts",
       "file_type": "code",
-      "norm_label": "getnextweightcomparative()",
-      "source_file": "src/constants/weight-comparatives.ts",
-      "source_location": "L101"
-    },
-    {
-      "id": "src_constants_weight_comparatives_getweightcomparativebykey",
-      "label": "getWeightComparativeByKey()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "gamification.ts",
-      "file_type": "code",
-      "norm_label": "getweightcomparativebykey()",
-      "source_file": "src/constants/weight-comparatives.ts",
-      "source_location": "L81"
+      "norm_label": "unlockachievementifnew()",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L160"
     },
     {
       "id": "src_db_gamification_buildcardiobests",
@@ -2654,6 +2438,30 @@
       "source_location": "L307"
     },
     {
+      "id": "src_db_gamification_detectandrecordprs",
+      "label": "detectAndRecordPRs()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "gamification.ts",
+      "file_type": "code",
+      "norm_label": "detectandrecordprs()",
+      "source_file": "src/db/gamification.ts",
+      "source_location": "L165"
+    },
+    {
+      "id": "src_db_gamification_detectandunlockspecials",
+      "label": "detectAndUnlockSpecials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "gamification.ts",
+      "file_type": "code",
+      "norm_label": "detectandunlockspecials()",
+      "source_file": "src/db/gamification.ts",
+      "source_location": "L437"
+    },
+    {
       "id": "src_db_gamification_detectcardioprs",
       "label": "detectCardioPRs()",
       "_callable": true,
@@ -2690,6 +2498,18 @@
       "source_location": "L102"
     },
     {
+      "id": "src_db_gamification_getworkoutrecap",
+      "label": "getWorkoutRecap()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "gamification.ts",
+      "file_type": "code",
+      "norm_label": "getworkoutrecap()",
+      "source_file": "src/db/gamification.ts",
+      "source_location": "L568"
+    },
+    {
       "id": "src_db_gamification_insertpersonalrecord",
       "label": "insertPersonalRecord()",
       "_callable": true,
@@ -2714,6 +2534,18 @@
       "source_location": "L267"
     },
     {
+      "id": "src_db_gamification_unlockearnedachievements",
+      "label": "unlockEarnedAchievements()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "gamification.ts",
+      "file_type": "code",
+      "norm_label": "unlockearnedachievements()",
+      "source_file": "src/db/gamification.ts",
+      "source_location": "L502"
+    },
+    {
       "id": "src_db_gamification_unlockearnedexerciseachievements",
       "label": "unlockEarnedExerciseAchievements()",
       "_callable": true,
@@ -2724,6 +2556,18 @@
       "norm_label": "unlockearnedexerciseachievements()",
       "source_file": "src/db/gamification.ts",
       "source_location": "L536"
+    },
+    {
+      "id": "src_db_stats_getweeklyconsistency",
+      "label": "getWeeklyConsistency()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "gamification.ts",
+      "file_type": "code",
+      "norm_label": "getweeklyconsistency()",
+      "source_file": "src/db/stats.ts",
+      "source_location": "L232"
     },
     {
       "id": "src_db_tests_gamification_test_makedb",
@@ -2762,6 +2606,18 @@
       "source_location": "L118"
     },
     {
+      "id": "src_db_workouts_getworkoutsummary",
+      "label": "getWorkoutSummary()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 12,
+      "community_name": "gamification.ts",
+      "file_type": "code",
+      "norm_label": "getworkoutsummary()",
+      "source_file": "src/db/workouts.ts",
+      "source_location": "L544"
+    },
+    {
       "id": "src_app_achievements_achievementsscreen",
       "label": "AchievementsScreen()",
       "_callable": true,
@@ -2798,40 +2654,16 @@
       "source_location": "L37"
     },
     {
-      "id": "src_constants_achievements_computeachievementprogress",
-      "label": "computeAchievementProgress()",
+      "id": "src_components_weekstrip_weekstrip",
+      "label": "WeekStrip()",
       "_callable": true,
       "_origin": "ast",
       "community": 13,
       "community_name": "index.tsx",
       "file_type": "code",
-      "norm_label": "computeachievementprogress()",
-      "source_file": "src/constants/achievements.ts",
-      "source_location": "L370"
-    },
-    {
-      "id": "src_constants_achievements_getachievementbykey",
-      "label": "getAchievementByKey()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "index.tsx",
-      "file_type": "code",
-      "norm_label": "getachievementbykey()",
-      "source_file": "src/constants/achievements.ts",
-      "source_location": "L335"
-    },
-    {
-      "id": "src_db_achievements_buildachievementitems",
-      "label": "buildAchievementItems()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "index.tsx",
-      "file_type": "code",
-      "norm_label": "buildachievementitems()",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L85"
+      "norm_label": "weekstrip()",
+      "source_file": "src/components/WeekStrip.tsx",
+      "source_location": "L23"
     },
     {
       "id": "src_db_achievements_getachievementexercisemeta",
@@ -2870,18 +2702,6 @@
       "source_location": "L316"
     },
     {
-      "id": "src_db_gamification_unlockearnedachievements",
-      "label": "unlockEarnedAchievements()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "index.tsx",
-      "file_type": "code",
-      "norm_label": "unlockearnedachievements()",
-      "source_file": "src/db/gamification.ts",
-      "source_location": "L502"
-    },
-    {
       "id": "src_db_workouts_getallexercisestats",
       "label": "getAllExerciseStats()",
       "_callable": true,
@@ -2892,6 +2712,18 @@
       "norm_label": "getallexercisestats()",
       "source_file": "src/db/workouts.ts",
       "source_location": "L167"
+    },
+    {
+      "id": "src_db_workouts_getcurrentstreak",
+      "label": "getCurrentStreak()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "index.tsx",
+      "file_type": "code",
+      "norm_label": "getcurrentstreak()",
+      "source_file": "src/db/workouts.ts",
+      "source_location": "L228"
     },
     {
       "id": "src_db_workouts_getworkoutdaysinrange",
@@ -2918,6 +2750,42 @@
       "source_location": "L40"
     },
     {
+      "id": "src_constants_achievements_computeachievementprogress",
+      "label": "computeAchievementProgress()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "constants/achievements.ts",
+      "file_type": "code",
+      "norm_label": "computeachievementprogress()",
+      "source_file": "src/constants/achievements.ts",
+      "source_location": "L370"
+    },
+    {
+      "id": "src_constants_achievements_computeexerciseachievementprogress",
+      "label": "computeExerciseAchievementProgress()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "constants/achievements.ts",
+      "file_type": "code",
+      "norm_label": "computeexerciseachievementprogress()",
+      "source_file": "src/constants/achievements.ts",
+      "source_location": "L317"
+    },
+    {
+      "id": "src_constants_achievements_getachievementbykey",
+      "label": "getAchievementByKey()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 15,
+      "community_name": "constants/achievements.ts",
+      "file_type": "code",
+      "norm_label": "getachievementbykey()",
+      "source_file": "src/constants/achievements.ts",
+      "source_location": "L335"
+    },
+    {
       "id": "src_constants_achievements_normalizedistanceachievement",
       "label": "normalizeDistanceAchievement()",
       "_callable": true,
@@ -2930,16 +2798,28 @@
       "source_location": "L290"
     },
     {
-      "id": "src_constants_distance_achievements_getdistanceachievementbykey",
-      "label": "getDistanceAchievementByKey()",
+      "id": "src_db_achievements_buildachievementitems",
+      "label": "buildAchievementItems()",
       "_callable": true,
       "_origin": "ast",
       "community": 15,
       "community_name": "constants/achievements.ts",
       "file_type": "code",
-      "norm_label": "getdistanceachievementbykey()",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L147"
+      "norm_label": "buildachievementitems()",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L85"
+    },
+    {
+      "id": "src_app_exercise_id_edit_editexercisescreen",
+      "label": "EditExerciseScreen()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "editexercisescreen()",
+      "source_file": "src/app/exercise/[id]/edit.tsx",
+      "source_location": "L12"
     },
     {
       "id": "src_app_exercise_new_newexercisescreen",
@@ -2947,23 +2827,47 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "newexercisescreen()",
       "source_file": "src/app/exercise/new.tsx",
       "source_location": "L10"
     },
     {
-      "id": "src_components_routineform_routineform",
-      "label": "RoutineForm()",
+      "id": "src_components_detailmodal_detailmodal",
+      "label": "DetailModal()",
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
-      "norm_label": "routineform()",
-      "source_file": "src/components/RoutineForm.tsx",
-      "source_location": "L14"
+      "norm_label": "detailmodal()",
+      "source_file": "src/components/DetailModal.tsx",
+      "source_location": "L17"
+    },
+    {
+      "id": "src_components_exerciseform_chip",
+      "label": "Chip()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "chip()",
+      "source_file": "src/components/ExerciseForm.tsx",
+      "source_location": "L130"
+    },
+    {
+      "id": "src_components_exerciseform_exerciseform",
+      "label": "ExerciseForm()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "exerciseform()",
+      "source_file": "src/components/ExerciseForm.tsx",
+      "source_location": "L24"
     },
     {
       "id": "src_components_screen_screen",
@@ -2971,7 +2875,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "screen()",
       "source_file": "src/components/Screen.tsx",
@@ -2983,23 +2887,59 @@
       "_callable": true,
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "createexercise()",
       "source_file": "src/db/exercises.ts",
-      "source_location": "L99"
+      "source_location": "L116"
     },
     {
-      "id": "src_app_routine_id_edit_editroutinescreen",
-      "label": "EditRoutineScreen()",
+      "id": "src_db_exercises_deleteexercise",
+      "label": "deleteExercise()",
       "_callable": true,
       "_origin": "ast",
-      "community": 17,
-      "community_name": "routine/[id].tsx",
+      "community": 16,
+      "community_name": "useAppTheme",
       "file_type": "code",
-      "norm_label": "editroutinescreen()",
-      "source_file": "src/app/routine/[id]/edit.tsx",
-      "source_location": "L12"
+      "norm_label": "deleteexercise()",
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L166"
+    },
+    {
+      "id": "src_db_exercises_updateexercise",
+      "label": "updateExercise()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "updateexercise()",
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L138"
+    },
+    {
+      "id": "src_hooks_use_focus_query_usefocusquery",
+      "label": "useFocusQuery()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "usefocusquery()",
+      "source_file": "src/hooks/use-focus-query.ts",
+      "source_location": "L24"
+    },
+    {
+      "id": "src_theme_app_theme_provider_useapptheme",
+      "label": "useAppTheme()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "useapptheme()",
+      "source_file": "src/theme/app-theme-provider.tsx",
+      "source_location": "L47"
     },
     {
       "id": "src_app_routine_id_routinedetailscreen",
@@ -3026,40 +2966,52 @@
       "source_location": "L18"
     },
     {
-      "id": "src_components_appdialog_usedialog",
-      "label": "useDialog()",
+      "id": "src_components_exercisethumbnail_exercisethumbnail",
+      "label": "ExerciseThumbnail()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
       "community_name": "routine/[id].tsx",
       "file_type": "code",
-      "norm_label": "usedialog()",
-      "source_file": "src/components/AppDialog.tsx",
-      "source_location": "L171"
+      "norm_label": "exercisethumbnail()",
+      "source_file": "src/components/ExerciseThumbnail.tsx",
+      "source_location": "L21"
     },
     {
-      "id": "src_db_routines_deleteroutine",
-      "label": "deleteRoutine()",
+      "id": "src_components_loadingoverlay_loadingoverlay",
+      "label": "LoadingOverlay()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
       "community_name": "routine/[id].tsx",
       "file_type": "code",
-      "norm_label": "deleteroutine()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L182"
+      "norm_label": "loadingoverlay()",
+      "source_file": "src/components/LoadingOverlay.tsx",
+      "source_location": "L16"
     },
     {
-      "id": "src_db_routines_getroutine",
-      "label": "getRoutine()",
+      "id": "src_components_swipetodelete_swipetodelete",
+      "label": "SwipeToDelete()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
       "community_name": "routine/[id].tsx",
       "file_type": "code",
-      "norm_label": "getroutine()",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L31"
+      "norm_label": "swipetodelete()",
+      "source_file": "src/components/SwipeToDelete.tsx",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_constants_exercises_exerciseframesource",
+      "label": "exerciseFrameSource()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "exerciseframesource()",
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L81"
     },
     {
       "id": "src_db_routines_getroutineexercises",
@@ -3110,16 +3062,16 @@
       "source_location": "L392"
     },
     {
-      "id": "src_db_routines_updateroutine",
-      "label": "updateRoutine()",
+      "id": "src_db_routines_reorderroutines",
+      "label": "reorderRoutines()",
       "_callable": true,
       "_origin": "ast",
       "community": 17,
       "community_name": "routine/[id].tsx",
       "file_type": "code",
-      "norm_label": "updateroutine()",
+      "norm_label": "reorderroutines()",
       "source_file": "src/db/routines.ts",
-      "source_location": "L159"
+      "source_location": "L447"
     },
     {
       "id": "src_db_workouts_startworkout",
@@ -3134,64 +3086,196 @@
       "source_location": "L276"
     },
     {
-      "id": "src_hooks_use_focus_query_usefocusquery",
-      "label": "useFocusQuery()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "routine/[id].tsx",
-      "file_type": "code",
-      "norm_label": "usefocusquery()",
-      "source_file": "src/hooks/use-focus-query.ts",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_app_exercise_id_edit_editexercisescreen",
-      "label": "EditExerciseScreen()",
+      "id": "src_app_routine_id_edit_editroutinescreen",
+      "label": "EditRoutineScreen()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "code",
-      "norm_label": "editexercisescreen()",
-      "source_file": "src/app/exercise/[id]/edit.tsx",
+      "norm_label": "editroutinescreen()",
+      "source_file": "src/app/routine/[id]/edit.tsx",
       "source_location": "L12"
     },
     {
-      "id": "src_db_exercises_deleteexercise",
-      "label": "deleteExercise()",
+      "id": "src_app_routine_new_newroutinescreen",
+      "label": "NewRoutineScreen()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "code",
-      "norm_label": "deleteexercise()",
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L149"
+      "norm_label": "newroutinescreen()",
+      "source_file": "src/app/routine/new.tsx",
+      "source_location": "L9"
     },
     {
-      "id": "src_db_exercises_getexercisebyid",
-      "label": "getExerciseById()",
+      "id": "src_components_routineform_routineform",
+      "label": "RoutineForm()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "code",
-      "norm_label": "getexercisebyid()",
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L85"
+      "norm_label": "routineform()",
+      "source_file": "src/components/RoutineForm.tsx",
+      "source_location": "L14"
     },
     {
-      "id": "src_db_exercises_updateexercise",
-      "label": "updateExercise()",
+      "id": "src_constants_exercise_metrics_getdefaultsettarget",
+      "label": "getDefaultSetTarget()",
       "_callable": true,
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "code",
-      "norm_label": "updateexercise()",
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L121"
+      "norm_label": "getdefaultsettarget()",
+      "source_file": "src/constants/exercise-metrics.ts",
+      "source_location": "L80"
+    },
+    {
+      "id": "src_db_routines_addexercisetoroutine",
+      "label": "addExerciseToRoutine()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "addexercisetoroutine()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L206"
+    },
+    {
+      "id": "src_db_routines_clampint",
+      "label": "clampInt()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "clampint()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L422"
+    },
+    {
+      "id": "src_db_routines_createroutine",
+      "label": "createRoutine()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "createroutine()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L140"
+    },
+    {
+      "id": "src_db_routines_deleteroutine",
+      "label": "deleteRoutine()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "deleteroutine()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L182"
+    },
+    {
+      "id": "src_db_routines_getroutine",
+      "label": "getRoutine()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "getroutine()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L31"
+    },
+    {
+      "id": "src_db_routines_istimedtarget",
+      "label": "isTimedTarget()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "istimedtarget()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L427"
+    },
+    {
+      "id": "src_db_routines_moveroutineexercise",
+      "label": "moveRoutineExercise()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "moveroutineexercise()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L345"
+    },
+    {
+      "id": "src_db_routines_positiveintornull",
+      "label": "positiveIntOrNull()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "positiveintornull()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L434"
+    },
+    {
+      "id": "src_db_routines_positiveornull",
+      "label": "positiveOrNull()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "positiveornull()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L438"
+    },
+    {
+      "id": "src_db_routines_saveroutineexercisesets",
+      "label": "saveRoutineExerciseSets()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "saveroutineexercisesets()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L285"
+    },
+    {
+      "id": "src_db_routines_updateroutine",
+      "label": "updateRoutine()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "updateroutine()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L159"
+    },
+    {
+      "id": "src_db_tests_routines_test_makedb",
+      "label": "makeDb()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "makedb()",
+      "source_file": "src/db/__tests__/routines.test.ts",
+      "source_location": "L8"
     },
     {
       "id": "src_app_routine_id_add_exercise_addexercisescreen",
@@ -3199,7 +3283,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "addexercisescreen()",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
@@ -3211,23 +3295,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "filterchip()",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L215"
+      "source_location": "L250"
     },
     {
-      "id": "src_components_detailmodal_detailmodal",
-      "label": "DetailModal()",
+      "id": "src_app_routine_id_add_exercise_filtersection",
+      "label": "FilterSection()",
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
-      "norm_label": "detailmodal()",
-      "source_file": "src/components/DetailModal.tsx",
-      "source_location": "L17"
+      "norm_label": "filtersection()",
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L234"
     },
     {
       "id": "src_components_exercisedetailmodal_exercisedetailmodal",
@@ -3235,7 +3319,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "exercisedetailmodal()",
       "source_file": "src/components/ExerciseDetailModal.tsx",
@@ -3247,11 +3331,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "musclelabel()",
       "source_file": "src/components/ExerciseDetailModal.tsx",
       "source_location": "L15"
+    },
+    {
+      "id": "src_constants_exercises_equipmenti18nkey",
+      "label": "equipmentI18nKey()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "equipmenti18nkey()",
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L71"
     },
     {
       "id": "src_constants_exercises_exercisetypei18nkey",
@@ -3259,11 +3355,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "exercisetypei18nkey()",
       "source_file": "src/constants/exercises.ts",
-      "source_location": "L50"
+      "source_location": "L76"
     },
     {
       "id": "src_constants_exercises_musclei18nkey",
@@ -3271,11 +3367,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "musclei18nkey()",
       "source_file": "src/constants/exercises.ts",
-      "source_location": "L45"
+      "source_location": "L66"
+    },
+    {
+      "id": "src_db_exercises_getexerciseequipment",
+      "label": "getExerciseEquipment()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "getexerciseequipment()",
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L92"
     },
     {
       "id": "src_db_exercises_getexercisemuscles",
@@ -3283,11 +3391,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "getexercisemuscles()",
       "source_file": "src/db/exercises.ts",
-      "source_location": "L78"
+      "source_location": "L84"
     },
     {
       "id": "src_db_exercises_getexercises",
@@ -3295,11 +3403,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "getexercises()",
       "source_file": "src/db/exercises.ts",
-      "source_location": "L58"
+      "source_location": "L60"
     },
     {
       "id": "src_db_backup_backuperror_constructor",
@@ -3434,12 +3542,72 @@
       "source_location": "L22"
     },
     {
+      "id": "src_app_layout_rootlayout",
+      "label": "RootLayout()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "rootlayout()",
+      "source_file": "src/app/_layout.tsx",
+      "source_location": "L29"
+    },
+    {
+      "id": "src_app_layout_rootnavigator",
+      "label": "RootNavigator()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "rootnavigator()",
+      "source_file": "src/app/_layout.tsx",
+      "source_location": "L18"
+    },
+    {
+      "id": "src_components_android_navigation_bar_androidnavigationbar",
+      "label": "AndroidNavigationBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "androidnavigationbar()",
+      "source_file": "src/components/android-navigation-bar.tsx",
+      "source_location": "L24"
+    },
+    {
+      "id": "src_components_android_navigation_bar_androidnavigationbar_loadnavigationbar",
+      "label": "loadNavigationBar()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "loadnavigationbar()",
+      "source_file": "src/components/android-navigation-bar.tsx",
+      "source_location": "L35"
+    },
+    {
+      "id": "src_components_androidexactalarmpermissionprompt_androidexactalarmpermissionprompt",
+      "label": "AndroidExactAlarmPermissionPrompt()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "androidexactalarmpermissionprompt()",
+      "source_file": "src/components/AndroidExactAlarmPermissionPrompt.tsx",
+      "source_location": "L24"
+    },
+    {
       "id": "src_components_appdialog_appdialogprovider",
       "label": "AppDialogProvider()",
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "appdialogprovider()",
       "source_file": "src/components/AppDialog.tsx",
@@ -3451,7 +3619,7 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "buttoncolor()",
       "source_file": "src/components/AppDialog.tsx",
@@ -3463,11 +3631,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "tonecolor()",
       "source_file": "src/components/AppDialog.tsx",
       "source_location": "L51"
+    },
+    {
+      "id": "src_components_appdialog_usedialog",
+      "label": "useDialog()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "usedialog()",
+      "source_file": "src/components/AppDialog.tsx",
+      "source_location": "L171"
     },
     {
       "id": "src_components_notificationpermissionprompt_notificationpermissionprompt",
@@ -3475,11 +3655,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "notificationpermissionprompt()",
       "source_file": "src/components/NotificationPermissionPrompt.tsx",
       "source_location": "L17"
+    },
+    {
+      "id": "src_theme_app_theme_provider_appthemeprovider",
+      "label": "AppThemeProvider()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "appthemeprovider()",
+      "source_file": "src/theme/app-theme-provider.tsx",
+      "source_location": "L25"
+    },
+    {
+      "id": "src_app_routine_id_exercise_reid_routineseteditorscreen",
+      "label": "RoutineSetEditorScreen()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "[exerciseId].tsx",
+      "file_type": "code",
+      "norm_label": "routineseteditorscreen()",
+      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
+      "source_location": "L39"
     },
     {
       "id": "src_app_workout_id_exercise_exerciseid_firstincompleteset",
@@ -3794,28 +3998,28 @@
       "source_location": "L155"
     },
     {
-      "id": "src_db_achievements_getexerciseachievements",
-      "label": "getExerciseAchievements()",
+      "id": "src_db_exercises_getexercisebyid",
+      "label": "getExerciseById()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "[exerciseId].tsx",
       "file_type": "code",
-      "norm_label": "getexerciseachievements()",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L273"
+      "norm_label": "getexercisebyid()",
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L102"
     },
     {
-      "id": "src_db_achievements_unlockweightcomparatives",
-      "label": "unlockWeightComparatives()",
+      "id": "src_db_routines_getroutineexercise",
+      "label": "getRoutineExercise()",
       "_callable": true,
       "_origin": "ast",
       "community": 3,
       "community_name": "[exerciseId].tsx",
       "file_type": "code",
-      "norm_label": "unlockweightcomparatives()",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L351"
+      "norm_label": "getroutineexercise()",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L81"
     },
     {
       "id": "src_db_workouts_deletesetandshift",
@@ -3828,18 +4032,6 @@
       "norm_label": "deletesetandshift()",
       "source_file": "src/db/workouts.ts",
       "source_location": "L593"
-    },
-    {
-      "id": "src_db_workouts_getactiveworkoutexercise",
-      "label": "getActiveWorkoutExercise()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "[exerciseId].tsx",
-      "file_type": "code",
-      "norm_label": "getactiveworkoutexercise()",
-      "source_file": "src/db/workouts.ts",
-      "source_location": "L415"
     },
     {
       "id": "src_db_workouts_markworkoutsetsedited",
@@ -4219,83 +4411,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
       "norm_label": "tabslayout()",
       "source_file": "src/app/(tabs)/_layout.tsx",
       "source_location": "L6"
-    },
-    {
-      "id": "src_components_exerciseform_chip",
-      "label": "Chip()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "chip()",
-      "source_file": "src/components/ExerciseForm.tsx",
-      "source_location": "L130"
-    },
-    {
-      "id": "src_components_exerciseform_exerciseform",
-      "label": "ExerciseForm()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "exerciseform()",
-      "source_file": "src/components/ExerciseForm.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_components_exercisethumbnail_exercisethumbnail",
-      "label": "ExerciseThumbnail()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "exercisethumbnail()",
-      "source_file": "src/components/ExerciseThumbnail.tsx",
-      "source_location": "L21"
-    },
-    {
-      "id": "src_components_swipetodelete_swipetodelete",
-      "label": "SwipeToDelete()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "swipetodelete()",
-      "source_file": "src/components/SwipeToDelete.tsx",
-      "source_location": "L29"
-    },
-    {
-      "id": "src_constants_exercises_exerciseframesource",
-      "label": "exerciseFrameSource()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "exerciseframesource()",
-      "source_file": "src/constants/exercises.ts",
-      "source_location": "L55"
-    },
-    {
-      "id": "src_theme_app_theme_provider_useapptheme",
-      "label": "useAppTheme()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "useapptheme()",
-      "source_file": "src/theme/app-theme-provider.tsx",
-      "source_location": "L47"
     },
     {
       "id": "src_components_toastprovider_toastprovider",
@@ -4334,18 +4454,6 @@
       "source_location": "L13"
     },
     {
-      "id": "src_i18n_index_resetapplanguage",
-      "label": "resetAppLanguage()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 34,
-      "community_name": "index.ts",
-      "file_type": "code",
-      "norm_label": "resetapplanguage()",
-      "source_file": "src/i18n/index.ts",
-      "source_location": "L57"
-    },
-    {
       "id": "src_i18n_tests_locales_test_flattenkeys",
       "label": "flattenKeys()",
       "_callable": true,
@@ -4358,124 +4466,88 @@
       "source_location": "L6"
     },
     {
-      "id": "src_app_layout_rootlayout",
-      "label": "RootLayout()",
+      "id": "src_constants_weight_comparatives_getnextweightcomparative",
+      "label": "getNextWeightComparative()",
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "app/_layout.tsx",
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "rootlayout()",
-      "source_file": "src/app/_layout.tsx",
-      "source_location": "L29"
+      "norm_label": "getnextweightcomparative()",
+      "source_file": "src/constants/weight-comparatives.ts",
+      "source_location": "L101"
     },
     {
-      "id": "src_app_layout_rootnavigator",
-      "label": "RootNavigator()",
+      "id": "src_constants_weight_comparatives_getweightcomparativebykey",
+      "label": "getWeightComparativeByKey()",
       "_callable": true,
       "_origin": "ast",
       "community": 35,
-      "community_name": "app/_layout.tsx",
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "rootnavigator()",
-      "source_file": "src/app/_layout.tsx",
-      "source_location": "L18"
-    },
-    {
-      "id": "src_components_androidexactalarmpermissionprompt_androidexactalarmpermissionprompt",
-      "label": "AndroidExactAlarmPermissionPrompt()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
-      "file_type": "code",
-      "norm_label": "androidexactalarmpermissionprompt()",
-      "source_file": "src/components/AndroidExactAlarmPermissionPrompt.tsx",
-      "source_location": "L24"
-    },
-    {
-      "id": "src_theme_app_theme_provider_appthemeprovider",
-      "label": "AppThemeProvider()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
-      "file_type": "code",
-      "norm_label": "appthemeprovider()",
-      "source_file": "src/theme/app-theme-provider.tsx",
-      "source_location": "L25"
-    },
-    {
-      "id": "src_app_routine_id_exercise_reid_routineseteditorscreen",
-      "label": "RoutineSetEditorScreen()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
-      "file_type": "code",
-      "norm_label": "routineseteditorscreen()",
-      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
-      "source_location": "L39"
-    },
-    {
-      "id": "src_components_loadingoverlay_loadingoverlay",
-      "label": "LoadingOverlay()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
-      "file_type": "code",
-      "norm_label": "loadingoverlay()",
-      "source_file": "src/components/LoadingOverlay.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_db_routines_getroutineexercise",
-      "label": "getRoutineExercise()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
-      "file_type": "code",
-      "norm_label": "getroutineexercise()",
-      "source_file": "src/db/routines.ts",
+      "norm_label": "getweightcomparativebykey()",
+      "source_file": "src/constants/weight-comparatives.ts",
       "source_location": "L81"
     },
     {
-      "id": "src_components_android_navigation_bar_androidnavigationbar",
-      "label": "AndroidNavigationBar()",
+      "id": "src_db_achievements_seedachievements",
+      "label": "seedAchievements()",
       "_callable": true,
       "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
+      "community": 36,
+      "community_name": "database.ts",
       "file_type": "code",
-      "norm_label": "androidnavigationbar()",
-      "source_file": "src/components/android-navigation-bar.tsx",
-      "source_location": "L24"
+      "norm_label": "seedachievements()",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L228"
     },
     {
-      "id": "src_components_android_navigation_bar_androidnavigationbar_loadnavigationbar",
-      "label": "loadNavigationBar()",
+      "id": "src_db_database_initializedatabase",
+      "label": "initializeDatabase()",
       "_callable": true,
       "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
+      "community": 36,
+      "community_name": "database.ts",
       "file_type": "code",
-      "norm_label": "loadnavigationbar()",
-      "source_file": "src/components/android-navigation-bar.tsx",
-      "source_location": "L35"
+      "norm_label": "initializedatabase()",
+      "source_file": "src/db/database.ts",
+      "source_location": "L42"
     },
     {
-      "id": "src_components_weekstrip_weekstrip",
-      "label": "WeekStrip()",
+      "id": "src_db_database_migratedbifneeded",
+      "label": "migrateDbIfNeeded()",
       "_callable": true,
       "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
+      "community": 36,
+      "community_name": "database.ts",
       "file_type": "code",
-      "norm_label": "weekstrip()",
-      "source_file": "src/components/WeekStrip.tsx",
-      "source_location": "L23"
+      "norm_label": "migratedbifneeded()",
+      "source_file": "src/db/database.ts",
+      "source_location": "L20"
+    },
+    {
+      "id": "src_db_exercises_seedexercisecatalog",
+      "label": "seedExerciseCatalog()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "database.ts",
+      "file_type": "code",
+      "norm_label": "seedexercisecatalog()",
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L25"
+    },
+    {
+      "id": "src_db_workouts_deleteorphanedsets",
+      "label": "deleteOrphanedSets()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 36,
+      "community_name": "database.ts",
+      "file_type": "code",
+      "norm_label": "deleteorphanedsets()",
+      "source_file": "src/db/workouts.ts",
+      "source_location": "L530"
     },
     {
       "id": "src_constants_distance_achievements_getearneddistanceachievements",
@@ -4514,6 +4586,30 @@
       "source_location": "L458"
     },
     {
+      "id": "src_db_achievements_getexerciseachievements",
+      "label": "getExerciseAchievements()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "getexerciseachievements()",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L273"
+    },
+    {
+      "id": "src_db_achievements_getexercisesachievements",
+      "label": "getExercisesAchievements()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "getexercisesachievements()",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L285"
+    },
+    {
       "id": "src_db_achievements_getliveexercisedistance",
       "label": "getLiveExerciseDistance()",
       "_callable": true,
@@ -4550,30 +4646,6 @@
       "source_location": "L544"
     },
     {
-      "id": "src_db_achievements_seedachievements",
-      "label": "seedAchievements()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "db/achievements.ts",
-      "file_type": "code",
-      "norm_label": "seedachievements()",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L228"
-    },
-    {
-      "id": "src_db_achievements_unlockachievementifnew",
-      "label": "unlockAchievementIfNew()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "db/achievements.ts",
-      "file_type": "code",
-      "norm_label": "unlockachievementifnew()",
-      "source_file": "src/db/achievements.ts",
-      "source_location": "L160"
-    },
-    {
       "id": "src_db_achievements_unlockdistanceachievements",
       "label": "unlockDistanceAchievements()",
       "_callable": true,
@@ -4598,40 +4670,16 @@
       "source_location": "L254"
     },
     {
-      "id": "src_db_database_initializedatabase",
-      "label": "initializeDatabase()",
+      "id": "src_db_achievements_unlockweightcomparatives",
+      "label": "unlockWeightComparatives()",
       "_callable": true,
       "_origin": "ast",
       "community": 5,
       "community_name": "db/achievements.ts",
       "file_type": "code",
-      "norm_label": "initializedatabase()",
-      "source_file": "src/db/database.ts",
-      "source_location": "L42"
-    },
-    {
-      "id": "src_db_database_migratedbifneeded",
-      "label": "migrateDbIfNeeded()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "db/achievements.ts",
-      "file_type": "code",
-      "norm_label": "migratedbifneeded()",
-      "source_file": "src/db/database.ts",
-      "source_location": "L20"
-    },
-    {
-      "id": "src_db_exercises_seedexercisecatalog",
-      "label": "seedExerciseCatalog()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "db/achievements.ts",
-      "file_type": "code",
-      "norm_label": "seedexercisecatalog()",
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L23"
+      "norm_label": "unlockweightcomparatives()",
+      "source_file": "src/db/achievements.ts",
+      "source_location": "L351"
     },
     {
       "id": "src_db_tests_achievements_test_createmockdb",
@@ -4658,18 +4706,6 @@
       "source_location": "L159"
     },
     {
-      "id": "src_db_workouts_deleteorphanedsets",
-      "label": "deleteOrphanedSets()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "db/achievements.ts",
-      "file_type": "code",
-      "norm_label": "deleteorphanedsets()",
-      "source_file": "src/db/workouts.ts",
-      "source_location": "L530"
-    },
-    {
       "id": "src_app_settings_settingsscreen",
       "label": "SettingsScreen()",
       "_callable": true,
@@ -4692,6 +4728,18 @@
       "norm_label": "switchrow()",
       "source_file": "src/app/settings.tsx",
       "source_location": "L41"
+    },
+    {
+      "id": "src_i18n_index_resetapplanguage",
+      "label": "resetAppLanguage()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "settings.tsx",
+      "file_type": "code",
+      "norm_label": "resetapplanguage()",
+      "source_file": "src/i18n/index.ts",
+      "source_location": "L57"
     },
     {
       "id": "src_i18n_index_setapplanguage",
@@ -4862,18 +4910,6 @@
       "source_location": "L65"
     },
     {
-      "id": "src_db_stats_getweeklyconsistency",
-      "label": "getWeeklyConsistency()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "statistics.tsx",
-      "file_type": "code",
-      "norm_label": "getweeklyconsistency()",
-      "source_file": "src/db/stats.ts",
-      "source_location": "L232"
-    },
-    {
       "id": "src_db_stats_getworkoutdaycounts",
       "label": "getWorkoutDayCounts()",
       "_callable": true,
@@ -4931,17 +4967,6 @@
       "norm_label": "exercise-frames.ts",
       "source_file": "src/constants/exercise-frames.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "src_constants_exercise_frames_exercise_frames",
-      "label": "EXERCISE_FRAMES",
-      "_origin": "ast",
-      "community": 0,
-      "community_name": "exercise-frames.ts",
-      "file_type": "code",
-      "norm_label": "exercise_frames",
-      "source_file": "src/constants/exercise-frames.ts",
-      "source_location": "L313"
     },
     {
       "id": "src_constants_exercise_frames_frame_ab_wheel",
@@ -8288,59 +8313,26 @@
       "source_location": "L472"
     },
     {
-      "id": "src_db_routines",
-      "label": "routines.ts",
+      "id": "src_components_workoutelapsed",
+      "label": "WorkoutElapsed.tsx",
       "_origin": "ast",
       "community": 1,
       "community_name": "workout/[id].tsx",
       "file_type": "code",
-      "norm_label": "routines.ts",
-      "source_file": "src/db/routines.ts",
+      "norm_label": "workoutelapsed.tsx",
+      "source_file": "src/components/WorkoutElapsed.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_db_routines_default_rest_seconds",
-      "label": "DEFAULT_REST_SECONDS",
+      "id": "src_components_workoutelapsed_styles",
+      "label": "styles",
       "_origin": "ast",
       "community": 1,
       "community_name": "workout/[id].tsx",
       "file_type": "code",
-      "norm_label": "default_rest_seconds",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L13"
-    },
-    {
-      "id": "src_db_routines_default_target_reps",
-      "label": "DEFAULT_TARGET_REPS",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "default_target_reps",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "src_db_routines_default_target_sets",
-      "label": "DEFAULT_TARGET_SETS",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "default_target_sets",
-      "source_file": "src/db/routines.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "src_db_tests_routines_test",
-      "label": "routines.test.ts",
-      "_origin": "ast",
-      "community": 1,
-      "community_name": "workout/[id].tsx",
-      "file_type": "code",
-      "norm_label": "routines.test.ts",
-      "source_file": "src/db/__tests__/routines.test.ts",
-      "source_location": "L1"
+      "norm_label": "styles",
+      "source_file": "src/components/WorkoutElapsed.tsx",
+      "source_location": "L48"
     },
     {
       "id": "src_db_tests_workouts_test",
@@ -8385,6 +8377,17 @@
       "norm_label": "empty_exercise_stats",
       "source_file": "src/db/workouts.ts",
       "source_location": "L107"
+    },
+    {
+      "id": "ref_dayjs",
+      "label": "dayjs",
+      "_origin": "ast",
+      "community": 1,
+      "community_name": "workout/[id].tsx",
+      "file_type": "concept",
+      "norm_label": "dayjs",
+      "source_file": "package.json",
+      "source_location": "L14"
     },
     {
       "id": "src_components_resttimer",
@@ -8530,6 +8533,17 @@
       "source_location": "L6"
     },
     {
+      "id": "src_store_workout_tools_useworkouttoolsstore",
+      "label": "useWorkoutToolsStore",
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "WorkoutTools.tsx",
+      "file_type": "code",
+      "norm_label": "useworkouttoolsstore",
+      "source_file": "src/store/workout-tools.ts",
+      "source_location": "L167"
+    },
+    {
       "id": "src_utils_alarm",
       "label": "alarm.ts",
       "_origin": "ast",
@@ -8572,17 +8586,6 @@
       "norm_label": "expo-audio",
       "source_file": "package.json",
       "source_location": "L17"
-    },
-    {
-      "id": "ref_expo_haptics",
-      "label": "expo-haptics",
-      "_origin": "ast",
-      "community": 10,
-      "community_name": "WorkoutTools.tsx",
-      "file_type": "concept",
-      "norm_label": "expo-haptics",
-      "source_file": "package.json",
-      "source_location": "L26"
     },
     {
       "id": "package_scripts",
@@ -8717,28 +8720,6 @@
       "source_location": "L75"
     },
     {
-      "id": "src_constants_weight_comparatives",
-      "label": "weight-comparatives.ts",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "gamification.ts",
-      "file_type": "code",
-      "norm_label": "weight-comparatives.ts",
-      "source_file": "src/constants/weight-comparatives.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_constants_weight_comparatives_weight_comparatives",
-      "label": "WEIGHT_COMPARATIVES",
-      "_origin": "ast",
-      "community": 12,
-      "community_name": "gamification.ts",
-      "file_type": "code",
-      "norm_label": "weight_comparatives",
-      "source_file": "src/constants/weight-comparatives.ts",
-      "source_location": "L22"
-    },
-    {
       "id": "src_db_gamification",
       "label": "gamification.ts",
       "_origin": "ast",
@@ -8816,15 +8797,26 @@
       "source_location": "L203"
     },
     {
-      "id": "src_store_workout_goals",
-      "label": "workout-goals.ts",
+      "id": "src_components_weekstrip",
+      "label": "WeekStrip.tsx",
       "_origin": "ast",
       "community": 13,
       "community_name": "index.tsx",
       "file_type": "code",
-      "norm_label": "workout-goals.ts",
-      "source_file": "src/store/workout-goals.ts",
+      "norm_label": "weekstrip.tsx",
+      "source_file": "src/components/WeekStrip.tsx",
       "source_location": "L1"
+    },
+    {
+      "id": "src_components_weekstrip_styles",
+      "label": "styles",
+      "_origin": "ast",
+      "community": 13,
+      "community_name": "index.tsx",
+      "file_type": "code",
+      "norm_label": "styles",
+      "source_file": "src/components/WeekStrip.tsx",
+      "source_location": "L54"
     },
     {
       "id": "src_store_workout_goals_useweeklygoalstore",
@@ -8836,17 +8828,6 @@
       "norm_label": "useweeklygoalstore",
       "source_file": "src/store/workout-goals.ts",
       "source_location": "L18"
-    },
-    {
-      "id": "src_store_workout_goals_weekly_workouts_storage_key",
-      "label": "WEEKLY_WORKOUTS_STORAGE_KEY",
-      "_origin": "ast",
-      "community": 13,
-      "community_name": "index.tsx",
-      "file_type": "code",
-      "norm_label": "weekly_workouts_storage_key",
-      "source_file": "src/store/workout-goals.ts",
-      "source_location": "L5"
     },
     {
       "id": "package_devdependencies",
@@ -9025,121 +9006,99 @@
       "source_location": "L249"
     },
     {
-      "id": "src_constants_distance_achievements",
-      "label": "distance-achievements.ts",
+      "id": "src_app_exercise_id_edit",
+      "label": "exercise/[id]/edit.tsx",
       "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
+      "community": 16,
+      "community_name": "useAppTheme",
       "file_type": "code",
-      "norm_label": "distance-achievements.ts",
-      "source_file": "src/constants/distance-achievements.ts",
+      "norm_label": "exercise/[id]/edit.tsx",
+      "source_file": "src/app/exercise/[id]/edit.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_constants_distance_achievements_distance_achievements",
-      "label": "DISTANCE_ACHIEVEMENTS",
+      "id": "src_app_exercise_id_edit_styles",
+      "label": "styles",
       "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
+      "community": 16,
+      "community_name": "useAppTheme",
       "file_type": "code",
-      "norm_label": "distance_achievements",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L138"
-    },
-    {
-      "id": "src_constants_distance_achievements_distance_effort_key_prefix",
-      "label": "DISTANCE_EFFORT_KEY_PREFIX",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "distance_effort_key_prefix",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L144"
-    },
-    {
-      "id": "src_constants_distance_achievements_distance_efforts",
-      "label": "DISTANCE_EFFORTS",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "distance_efforts",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L31"
-    },
-    {
-      "id": "src_constants_distance_achievements_distance_landmark_key_prefix",
-      "label": "DISTANCE_LANDMARK_KEY_PREFIX",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "distance_landmark_key_prefix",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L145"
-    },
-    {
-      "id": "src_constants_distance_achievements_distance_landmarks",
-      "label": "DISTANCE_LANDMARKS",
-      "_origin": "ast",
-      "community": 15,
-      "community_name": "constants/achievements.ts",
-      "file_type": "code",
-      "norm_label": "distance_landmarks",
-      "source_file": "src/constants/distance-achievements.ts",
-      "source_location": "L70"
+      "norm_label": "styles",
+      "source_file": "src/app/exercise/[id]/edit.tsx",
+      "source_location": "L90"
     },
     {
       "id": "src_app_exercise_new",
       "label": "exercise/new.tsx",
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "exercise/new.tsx",
       "source_file": "src/app/exercise/new.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_app_routine_new",
-      "label": "routine/new.tsx",
+      "id": "src_components_detailmodal",
+      "label": "DetailModal.tsx",
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
-      "norm_label": "routine/new.tsx",
-      "source_file": "src/app/routine/new.tsx",
+      "norm_label": "detailmodal.tsx",
+      "source_file": "src/components/DetailModal.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_routineform",
-      "label": "RoutineForm.tsx",
-      "_origin": "ast",
-      "community": 16,
-      "community_name": "react-native",
-      "file_type": "code",
-      "norm_label": "routineform.tsx",
-      "source_file": "src/components/RoutineForm.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_routineform_styles",
+      "id": "src_components_detailmodal_styles",
       "label": "styles",
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "styles",
-      "source_file": "src/components/RoutineForm.tsx",
-      "source_location": "L75"
+      "source_file": "src/components/DetailModal.tsx",
+      "source_location": "L73"
+    },
+    {
+      "id": "src_components_exerciseform",
+      "label": "ExerciseForm.tsx",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "exerciseform.tsx",
+      "source_file": "src/components/ExerciseForm.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_exerciseform_exercise_types",
+      "label": "EXERCISE_TYPES",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "exercise_types",
+      "source_file": "src/components/ExerciseForm.tsx",
+      "source_location": "L21"
+    },
+    {
+      "id": "src_components_exerciseform_styles",
+      "label": "styles",
+      "_origin": "ast",
+      "community": 16,
+      "community_name": "useAppTheme",
+      "file_type": "code",
+      "norm_label": "styles",
+      "source_file": "src/components/ExerciseForm.tsx",
+      "source_location": "L159"
     },
     {
       "id": "src_components_screen",
       "label": "Screen.tsx",
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "screen.tsx",
       "source_file": "src/components/Screen.tsx",
@@ -9150,22 +9109,22 @@
       "label": "styles",
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "code",
       "norm_label": "styles",
       "source_file": "src/components/Screen.tsx",
       "source_location": "L30"
     },
     {
-      "id": "ref_react_native",
-      "label": "react-native",
+      "id": "ref_react_native_safe_area_context",
+      "label": "react-native-safe-area-context",
       "_origin": "ast",
       "community": 16,
-      "community_name": "react-native",
+      "community_name": "useAppTheme",
       "file_type": "concept",
-      "norm_label": "react-native",
+      "norm_label": "react-native-safe-area-context",
       "source_file": "package.json",
-      "source_location": "L46"
+      "source_location": "L49"
     },
     {
       "id": "src_app_routine_id",
@@ -9177,28 +9136,6 @@
       "norm_label": "routine/[id].tsx",
       "source_file": "src/app/routine/[id].tsx",
       "source_location": "L1"
-    },
-    {
-      "id": "src_app_routine_id_edit",
-      "label": "routine/[id]/edit.tsx",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "routine/[id].tsx",
-      "file_type": "code",
-      "norm_label": "routine/[id]/edit.tsx",
-      "source_file": "src/app/routine/[id]/edit.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_app_routine_id_edit_styles",
-      "label": "styles",
-      "_origin": "ast",
-      "community": 17,
-      "community_name": "routine/[id].tsx",
-      "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/app/routine/[id]/edit.tsx",
-      "source_location": "L79"
     },
     {
       "id": "src_app_routine_id_styles",
@@ -9234,6 +9171,72 @@
       "source_location": "L143"
     },
     {
+      "id": "src_components_exercisethumbnail",
+      "label": "ExerciseThumbnail.tsx",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "exercisethumbnail.tsx",
+      "source_file": "src/components/ExerciseThumbnail.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_exercisethumbnail_styles",
+      "label": "styles",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "styles",
+      "source_file": "src/components/ExerciseThumbnail.tsx",
+      "source_location": "L68"
+    },
+    {
+      "id": "src_components_loadingoverlay",
+      "label": "LoadingOverlay.tsx",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "loadingoverlay.tsx",
+      "source_file": "src/components/LoadingOverlay.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_loadingoverlay_styles",
+      "label": "styles",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "styles",
+      "source_file": "src/components/LoadingOverlay.tsx",
+      "source_location": "L46"
+    },
+    {
+      "id": "src_components_swipetodelete",
+      "label": "SwipeToDelete.tsx",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "swipetodelete.tsx",
+      "source_file": "src/components/SwipeToDelete.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_swipetodelete_styles",
+      "label": "styles",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "code",
+      "norm_label": "styles",
+      "source_file": "src/components/SwipeToDelete.tsx",
+      "source_location": "L64"
+    },
+    {
       "id": "src_hooks_use_focus_query",
       "label": "use-focus-query.ts",
       "_origin": "ast",
@@ -9245,15 +9248,26 @@
       "source_location": "L1"
     },
     {
-      "id": "ref_expo_router",
-      "label": "expo-router",
+      "id": "ref_expo_vector_icons",
+      "label": "@expo/vector-icons",
       "_origin": "ast",
       "community": 17,
       "community_name": "routine/[id].tsx",
       "file_type": "concept",
-      "norm_label": "expo-router",
+      "norm_label": "@expo/vector-icons",
       "source_file": "package.json",
-      "source_location": "L34"
+      "source_location": "L8"
+    },
+    {
+      "id": "ref_react",
+      "label": "react",
+      "_origin": "ast",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "file_type": "concept",
+      "norm_label": "react",
+      "source_file": "package.json",
+      "source_location": "L43"
     },
     {
       "id": "ref_react_native_reanimated",
@@ -9278,36 +9292,113 @@
       "source_location": "L51"
     },
     {
-      "id": "src_app_exercise_id_edit",
-      "label": "exercise/[id]/edit.tsx",
+      "id": "src_app_routine_id_edit",
+      "label": "routine/[id]/edit.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "code",
-      "norm_label": "exercise/[id]/edit.tsx",
-      "source_file": "src/app/exercise/[id]/edit.tsx",
+      "norm_label": "routine/[id]/edit.tsx",
+      "source_file": "src/app/routine/[id]/edit.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_app_exercise_id_edit_styles",
+      "id": "src_app_routine_id_edit_styles",
       "label": "styles",
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "code",
       "norm_label": "styles",
-      "source_file": "src/app/exercise/[id]/edit.tsx",
-      "source_location": "L90"
+      "source_file": "src/app/routine/[id]/edit.tsx",
+      "source_location": "L79"
     },
     {
-      "id": "src_db_exercises",
-      "label": "db/exercises.ts",
+      "id": "src_app_routine_new",
+      "label": "routine/new.tsx",
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "code",
-      "norm_label": "db/exercises.ts",
-      "source_file": "src/db/exercises.ts",
+      "norm_label": "routine/new.tsx",
+      "source_file": "src/app/routine/new.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_routineform",
+      "label": "RoutineForm.tsx",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "routineform.tsx",
+      "source_file": "src/components/RoutineForm.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_routineform_styles",
+      "label": "styles",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "styles",
+      "source_file": "src/components/RoutineForm.tsx",
+      "source_location": "L75"
+    },
+    {
+      "id": "src_db_routines",
+      "label": "routines.ts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "routines.ts",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_db_routines_default_rest_seconds",
+      "label": "DEFAULT_REST_SECONDS",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "default_rest_seconds",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L13"
+    },
+    {
+      "id": "src_db_routines_default_target_reps",
+      "label": "DEFAULT_TARGET_REPS",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "default_target_reps",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_db_routines_default_target_sets",
+      "label": "DEFAULT_TARGET_SETS",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "default_target_sets",
+      "source_file": "src/db/routines.ts",
+      "source_location": "L11"
+    },
+    {
+      "id": "src_db_tests_routines_test",
+      "label": "routines.test.ts",
+      "_origin": "ast",
+      "community": 18,
+      "community_name": "routines.ts",
+      "file_type": "code",
+      "norm_label": "routines.test.ts",
+      "source_file": "src/db/__tests__/routines.test.ts",
       "source_location": "L1"
     },
     {
@@ -9315,7 +9406,7 @@
       "label": "expo-sqlite",
       "_origin": "ast",
       "community": 18,
-      "community_name": "expo-sqlite",
+      "community_name": "routines.ts",
       "file_type": "concept",
       "norm_label": "expo-sqlite",
       "source_file": "package.json",
@@ -9326,7 +9417,7 @@
       "label": "add-exercise.tsx",
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "add-exercise.tsx",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
@@ -9337,40 +9428,18 @@
       "label": "styles",
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "styles",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L246"
-    },
-    {
-      "id": "src_components_detailmodal",
-      "label": "DetailModal.tsx",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "react-i18next",
-      "file_type": "code",
-      "norm_label": "detailmodal.tsx",
-      "source_file": "src/components/DetailModal.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_detailmodal_styles",
-      "label": "styles",
-      "_origin": "ast",
-      "community": 19,
-      "community_name": "react-i18next",
-      "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/components/DetailModal.tsx",
-      "source_location": "L73"
+      "source_location": "L281"
     },
     {
       "id": "src_components_exercisedetailmodal",
       "label": "ExerciseDetailModal.tsx",
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "exercisedetailmodal.tsx",
       "source_file": "src/components/ExerciseDetailModal.tsx",
@@ -9381,22 +9450,88 @@
       "label": "styles",
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
       "file_type": "code",
       "norm_label": "styles",
       "source_file": "src/components/ExerciseDetailModal.tsx",
-      "source_location": "L99"
+      "source_location": "L102"
     },
     {
-      "id": "ref_react_i18next",
-      "label": "react-i18next",
+      "id": "src_constants_exercise_frames_exercise_frames",
+      "label": "EXERCISE_FRAMES",
       "_origin": "ast",
       "community": 19,
-      "community_name": "react-i18next",
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "exercise_frames",
+      "source_file": "src/constants/exercise-frames.ts",
+      "source_location": "L313"
+    },
+    {
+      "id": "src_constants_exercises",
+      "label": "constants/exercises.ts",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "constants/exercises.ts",
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_constants_exercises_equipment_i18n_keys",
+      "label": "EQUIPMENT_I18N_KEYS",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "equipment_i18n_keys",
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L36"
+    },
+    {
+      "id": "src_constants_exercises_exercise_type_i18n_keys",
+      "label": "EXERCISE_TYPE_I18N_KEYS",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "exercise_type_i18n_keys",
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L57"
+    },
+    {
+      "id": "src_constants_exercises_muscle_i18n_keys",
+      "label": "MUSCLE_I18N_KEYS",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "muscle_i18n_keys",
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L12"
+    },
+    {
+      "id": "src_db_exercises",
+      "label": "db/exercises.ts",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
+      "file_type": "code",
+      "norm_label": "db/exercises.ts",
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "ref_bryllim_workout_guide",
+      "label": "@bryllim/workout-guide",
+      "_origin": "ast",
+      "community": 19,
+      "community_name": "add-exercise.tsx",
       "file_type": "concept",
-      "norm_label": "react-i18next",
+      "norm_label": "@bryllim/workout-guide",
       "source_file": "package.json",
-      "source_location": "L45"
+      "source_location": "L6"
     },
     {
       "id": "src_db_backup",
@@ -9476,6 +9611,17 @@
       "source_location": "L64"
     },
     {
+      "id": "src_db_schema_database_version",
+      "label": "DATABASE_VERSION",
+      "_origin": "ast",
+      "community": 2,
+      "community_name": "backup.ts",
+      "file_type": "code",
+      "norm_label": "database_version",
+      "source_file": "src/db/schema.ts",
+      "source_location": "L9"
+    },
+    {
       "id": "src_db_tests_backup_test",
       "label": "backup.test.ts",
       "_origin": "ast",
@@ -9496,28 +9642,6 @@
       "norm_label": "schema.ts",
       "source_file": "src/db/schema.ts",
       "source_location": "L1"
-    },
-    {
-      "id": "src_db_schema_database_version",
-      "label": "DATABASE_VERSION",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "schema.ts",
-      "file_type": "code",
-      "norm_label": "database_version",
-      "source_file": "src/db/schema.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "src_db_schema_migrations",
-      "label": "MIGRATIONS",
-      "_origin": "ast",
-      "community": 20,
-      "community_name": "schema.ts",
-      "file_type": "code",
-      "norm_label": "migrations",
-      "source_file": "src/db/schema.ts",
-      "source_location": "L328"
     },
     {
       "id": "src_db_schema_schema_v1",
@@ -9927,11 +10051,55 @@
       "source_location": "L21"
     },
     {
+      "id": "expo_navigation_bar",
+      "label": "expo-navigation-bar",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "confidence": "EXTRACTED",
+      "file_type": "code",
+      "norm_label": "expo-navigation-bar",
+      "source_file": "expo-navigation-bar"
+    },
+    {
+      "id": "src_app_layout",
+      "label": "app/_layout.tsx",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "app/_layout.tsx",
+      "source_file": "src/app/_layout.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_android_navigation_bar",
+      "label": "android-navigation-bar.tsx",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "android-navigation-bar.tsx",
+      "source_file": "src/components/android-navigation-bar.tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_components_androidexactalarmpermissionprompt",
+      "label": "AndroidExactAlarmPermissionPrompt.tsx",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "code",
+      "norm_label": "androidexactalarmpermissionprompt.tsx",
+      "source_file": "src/components/AndroidExactAlarmPermissionPrompt.tsx",
+      "source_location": "L1"
+    },
+    {
       "id": "src_components_appdialog",
       "label": "AppDialog.tsx",
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "appdialog.tsx",
       "source_file": "src/components/AppDialog.tsx",
@@ -9942,7 +10110,7 @@
       "label": "DialogContext",
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "dialogcontext",
       "source_file": "src/components/AppDialog.tsx",
@@ -9953,7 +10121,7 @@
       "label": "styles",
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "styles",
       "source_file": "src/components/AppDialog.tsx",
@@ -9964,110 +10132,121 @@
       "label": "NotificationPermissionPrompt.tsx",
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
       "norm_label": "notificationpermissionprompt.tsx",
       "source_file": "src/components/NotificationPermissionPrompt.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_workoutelapsed",
-      "label": "WorkoutElapsed.tsx",
+      "id": "src_db_database_database_name",
+      "label": "DATABASE_NAME",
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "code",
-      "norm_label": "workoutelapsed.tsx",
-      "source_file": "src/components/WorkoutElapsed.tsx",
-      "source_location": "L1"
+      "norm_label": "database_name",
+      "source_file": "src/db/database.ts",
+      "source_location": "L11"
     },
     {
-      "id": "src_components_workoutelapsed_styles",
-      "label": "styles",
+      "id": "ref_expo_constants",
+      "label": "expo-constants",
       "_origin": "ast",
       "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/components/WorkoutElapsed.tsx",
-      "source_location": "L48"
-    },
-    {
-      "id": "src_theme_app_theme_provider",
-      "label": "app-theme-provider.tsx",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "app-theme-provider.tsx",
-      "source_file": "src/theme/app-theme-provider.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_theme_app_theme_provider_appthemecontext",
-      "label": "AppThemeContext",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "appthemecontext",
-      "source_file": "src/theme/app-theme-provider.tsx",
-      "source_location": "L16"
-    },
-    {
-      "id": "src_theme_colors",
-      "label": "colors.ts",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "colors.ts",
-      "source_file": "src/theme/colors.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_theme_colors_darkcolors",
-      "label": "darkColors",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "darkcolors",
-      "source_file": "src/theme/colors.ts",
-      "source_location": "L65"
-    },
-    {
-      "id": "src_theme_colors_lightcolors",
-      "label": "lightColors",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "lightcolors",
-      "source_file": "src/theme/colors.ts",
-      "source_location": "L51"
-    },
-    {
-      "id": "src_theme_colors_palette",
-      "label": "palette",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
-      "file_type": "code",
-      "norm_label": "palette",
-      "source_file": "src/theme/colors.ts",
-      "source_location": "L9"
-    },
-    {
-      "id": "ref_react",
-      "label": "react",
-      "_origin": "ast",
-      "community": 23,
-      "community_name": "app-theme-provider.tsx",
+      "community_name": "react-native",
       "file_type": "concept",
-      "norm_label": "react",
+      "norm_label": "expo-constants",
       "source_file": "package.json",
-      "source_location": "L43"
+      "source_location": "L19"
+    },
+    {
+      "id": "ref_expo_intent_launcher",
+      "label": "expo-intent-launcher",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "expo-intent-launcher",
+      "source_file": "package.json",
+      "source_location": "L28"
+    },
+    {
+      "id": "ref_expo_navigation_bar",
+      "label": "expo-navigation-bar",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "expo-navigation-bar",
+      "source_file": "package.json",
+      "source_location": "L32"
+    },
+    {
+      "id": "ref_expo_notifications",
+      "label": "expo-notifications",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "expo-notifications",
+      "source_file": "package.json",
+      "source_location": "L33"
+    },
+    {
+      "id": "ref_expo_status_bar",
+      "label": "expo-status-bar",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "expo-status-bar",
+      "source_file": "package.json",
+      "source_location": "L38"
+    },
+    {
+      "id": "ref_expo_system_ui",
+      "label": "expo-system-ui",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "expo-system-ui",
+      "source_file": "package.json",
+      "source_location": "L40"
+    },
+    {
+      "id": "ref_react_i18next",
+      "label": "react-i18next",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "react-i18next",
+      "source_file": "package.json",
+      "source_location": "L45"
+    },
+    {
+      "id": "ref_react_native",
+      "label": "react-native",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "react-native",
+      "source_file": "package.json",
+      "source_location": "L46"
+    },
+    {
+      "id": "ref_react_native_gesture_handler",
+      "label": "react-native-gesture-handler",
+      "_origin": "ast",
+      "community": 23,
+      "community_name": "react-native",
+      "file_type": "concept",
+      "norm_label": "react-native-gesture-handler",
+      "source_file": "package.json",
+      "source_location": "L47"
     },
     {
       "id": "eslint_config",
@@ -10156,6 +10335,28 @@
       "norm_label": "variants",
       "source_file": "app.config.js",
       "source_location": "L13"
+    },
+    {
+      "id": "src_app_routine_id_exercise_reid",
+      "label": "[reId].tsx",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "[exerciseId].tsx",
+      "file_type": "code",
+      "norm_label": "[reid].tsx",
+      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_app_routine_id_exercise_reid_styles",
+      "label": "styles",
+      "_origin": "ast",
+      "community": 3,
+      "community_name": "[exerciseId].tsx",
+      "file_type": "code",
+      "norm_label": "styles",
+      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
+      "source_location": "L277"
     },
     {
       "id": "src_app_workout_id_exercise_exerciseid",
@@ -10455,17 +10656,6 @@
       "source_location": "L22"
     },
     {
-      "id": "src_store_workout_tools_useworkouttoolsstore",
-      "label": "useWorkoutToolsStore",
-      "_origin": "ast",
-      "community": 3,
-      "community_name": "[exerciseId].tsx",
-      "file_type": "code",
-      "norm_label": "useworkouttoolsstore",
-      "source_file": "src/store/workout-tools.ts",
-      "source_location": "L167"
-    },
-    {
       "id": "src_utils_distance",
       "label": "distance.ts",
       "_origin": "ast",
@@ -10624,132 +10814,88 @@
       "label": "(tabs)/_layout.tsx",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
       "norm_label": "(tabs)/_layout.tsx",
       "source_file": "src/app/(tabs)/_layout.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_exerciseform",
-      "label": "ExerciseForm.tsx",
+      "id": "src_theme_app_theme_provider",
+      "label": "app-theme-provider.tsx",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "exerciseform.tsx",
-      "source_file": "src/components/ExerciseForm.tsx",
+      "norm_label": "app-theme-provider.tsx",
+      "source_file": "src/theme/app-theme-provider.tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_components_exerciseform_exercise_types",
-      "label": "EXERCISE_TYPES",
+      "id": "src_theme_app_theme_provider_appthemecontext",
+      "label": "AppThemeContext",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "exercise_types",
-      "source_file": "src/components/ExerciseForm.tsx",
-      "source_location": "L21"
+      "norm_label": "appthemecontext",
+      "source_file": "src/theme/app-theme-provider.tsx",
+      "source_location": "L16"
     },
     {
-      "id": "src_components_exerciseform_styles",
-      "label": "styles",
+      "id": "src_theme_colors",
+      "label": "colors.ts",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/components/ExerciseForm.tsx",
-      "source_location": "L159"
-    },
-    {
-      "id": "src_components_exercisethumbnail",
-      "label": "ExerciseThumbnail.tsx",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "exercisethumbnail.tsx",
-      "source_file": "src/components/ExerciseThumbnail.tsx",
+      "norm_label": "colors.ts",
+      "source_file": "src/theme/colors.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_components_exercisethumbnail_styles",
-      "label": "styles",
+      "id": "src_theme_colors_darkcolors",
+      "label": "darkColors",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/components/ExerciseThumbnail.tsx",
-      "source_location": "L68"
+      "norm_label": "darkcolors",
+      "source_file": "src/theme/colors.ts",
+      "source_location": "L65"
     },
     {
-      "id": "src_components_swipetodelete",
-      "label": "SwipeToDelete.tsx",
+      "id": "src_theme_colors_lightcolors",
+      "label": "lightColors",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "swipetodelete.tsx",
-      "source_file": "src/components/SwipeToDelete.tsx",
-      "source_location": "L1"
+      "norm_label": "lightcolors",
+      "source_file": "src/theme/colors.ts",
+      "source_location": "L51"
     },
     {
-      "id": "src_components_swipetodelete_styles",
-      "label": "styles",
+      "id": "src_theme_colors_palette",
+      "label": "palette",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/components/SwipeToDelete.tsx",
-      "source_location": "L64"
+      "norm_label": "palette",
+      "source_file": "src/theme/colors.ts",
+      "source_location": "L9"
     },
     {
-      "id": "src_constants_exercises",
-      "label": "constants/exercises.ts",
+      "id": "ref_expo_router",
+      "label": "expo-router",
       "_origin": "ast",
       "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "constants/exercises.ts",
-      "source_file": "src/constants/exercises.ts",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_constants_exercises_exercise_type_i18n_keys",
-      "label": "EXERCISE_TYPE_I18N_KEYS",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "exercise_type_i18n_keys",
-      "source_file": "src/constants/exercises.ts",
-      "source_location": "L36"
-    },
-    {
-      "id": "src_constants_exercises_muscle_i18n_keys",
-      "label": "MUSCLE_I18N_KEYS",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "file_type": "code",
-      "norm_label": "muscle_i18n_keys",
-      "source_file": "src/constants/exercises.ts",
-      "source_location": "L12"
-    },
-    {
-      "id": "ref_expo_vector_icons",
-      "label": "@expo/vector-icons",
-      "_origin": "ast",
-      "community": 32,
-      "community_name": "useAppTheme",
+      "community_name": "app-theme-provider.tsx",
       "file_type": "concept",
-      "norm_label": "@expo/vector-icons",
+      "norm_label": "expo-router",
       "source_file": "package.json",
-      "source_location": "L8"
+      "source_location": "L34"
     },
     {
       "id": "src_components_toastprovider",
@@ -10794,17 +10940,6 @@
       "norm_label": "toastcontext",
       "source_file": "src/components/ToastProvider.tsx",
       "source_location": "L44"
-    },
-    {
-      "id": "ref_react_native_safe_area_context",
-      "label": "react-native-safe-area-context",
-      "_origin": "ast",
-      "community": 33,
-      "community_name": "ToastProvider.tsx",
-      "file_type": "concept",
-      "norm_label": "react-native-safe-area-context",
-      "source_file": "package.json",
-      "source_location": "L49"
     },
     {
       "id": "src_i18n_index",
@@ -10862,202 +10997,48 @@
       "source_location": "L42"
     },
     {
-      "id": "src_app_layout",
-      "label": "app/_layout.tsx",
+      "id": "src_constants_weight_comparatives",
+      "label": "weight-comparatives.ts",
       "_origin": "ast",
       "community": 35,
-      "community_name": "app/_layout.tsx",
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "app/_layout.tsx",
-      "source_file": "src/app/_layout.tsx",
+      "norm_label": "weight-comparatives.ts",
+      "source_file": "src/constants/weight-comparatives.ts",
       "source_location": "L1"
     },
     {
-      "id": "src_components_androidexactalarmpermissionprompt",
-      "label": "AndroidExactAlarmPermissionPrompt.tsx",
+      "id": "src_constants_weight_comparatives_weight_comparatives",
+      "label": "WEIGHT_COMPARATIVES",
       "_origin": "ast",
       "community": 35,
-      "community_name": "app/_layout.tsx",
+      "community_name": "weight-comparatives.ts",
       "file_type": "code",
-      "norm_label": "androidexactalarmpermissionprompt.tsx",
-      "source_file": "src/components/AndroidExactAlarmPermissionPrompt.tsx",
-      "source_location": "L1"
+      "norm_label": "weight_comparatives",
+      "source_file": "src/constants/weight-comparatives.ts",
+      "source_location": "L22"
     },
     {
-      "id": "src_db_database_database_name",
-      "label": "DATABASE_NAME",
+      "id": "src_db_database",
+      "label": "database.ts",
       "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
+      "community": 36,
+      "community_name": "database.ts",
       "file_type": "code",
-      "norm_label": "database_name",
+      "norm_label": "database.ts",
       "source_file": "src/db/database.ts",
-      "source_location": "L11"
-    },
-    {
-      "id": "ref_expo_constants",
-      "label": "expo-constants",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
-      "file_type": "concept",
-      "norm_label": "expo-constants",
-      "source_file": "package.json",
-      "source_location": "L19"
-    },
-    {
-      "id": "ref_expo_intent_launcher",
-      "label": "expo-intent-launcher",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
-      "file_type": "concept",
-      "norm_label": "expo-intent-launcher",
-      "source_file": "package.json",
-      "source_location": "L28"
-    },
-    {
-      "id": "ref_expo_notifications",
-      "label": "expo-notifications",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
-      "file_type": "concept",
-      "norm_label": "expo-notifications",
-      "source_file": "package.json",
-      "source_location": "L33"
-    },
-    {
-      "id": "ref_expo_status_bar",
-      "label": "expo-status-bar",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
-      "file_type": "concept",
-      "norm_label": "expo-status-bar",
-      "source_file": "package.json",
-      "source_location": "L38"
-    },
-    {
-      "id": "ref_react_native_gesture_handler",
-      "label": "react-native-gesture-handler",
-      "_origin": "ast",
-      "community": 35,
-      "community_name": "app/_layout.tsx",
-      "file_type": "concept",
-      "norm_label": "react-native-gesture-handler",
-      "source_file": "package.json",
-      "source_location": "L47"
-    },
-    {
-      "id": "src_app_routine_id_exercise_reid",
-      "label": "[reId].tsx",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
-      "file_type": "code",
-      "norm_label": "[reid].tsx",
-      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
       "source_location": "L1"
     },
     {
-      "id": "src_app_routine_id_exercise_reid_styles",
-      "label": "styles",
+      "id": "src_db_schema_migrations",
+      "label": "MIGRATIONS",
       "_origin": "ast",
       "community": 36,
-      "community_name": "[reId].tsx",
+      "community_name": "database.ts",
       "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/app/routine/[id]/exercise/[reId].tsx",
-      "source_location": "L277"
-    },
-    {
-      "id": "src_components_loadingoverlay",
-      "label": "LoadingOverlay.tsx",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
-      "file_type": "code",
-      "norm_label": "loadingoverlay.tsx",
-      "source_file": "src/components/LoadingOverlay.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_loadingoverlay_styles",
-      "label": "styles",
-      "_origin": "ast",
-      "community": 36,
-      "community_name": "[reId].tsx",
-      "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/components/LoadingOverlay.tsx",
-      "source_location": "L46"
-    },
-    {
-      "id": "expo_navigation_bar",
-      "label": "expo-navigation-bar",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
-      "confidence": "EXTRACTED",
-      "file_type": "code",
-      "norm_label": "expo-navigation-bar",
-      "source_file": "expo-navigation-bar"
-    },
-    {
-      "id": "src_components_android_navigation_bar",
-      "label": "android-navigation-bar.tsx",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
-      "file_type": "code",
-      "norm_label": "android-navigation-bar.tsx",
-      "source_file": "src/components/android-navigation-bar.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "ref_expo_navigation_bar",
-      "label": "expo-navigation-bar",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
-      "file_type": "concept",
-      "norm_label": "expo-navigation-bar",
-      "source_file": "package.json",
-      "source_location": "L32"
-    },
-    {
-      "id": "ref_expo_system_ui",
-      "label": "expo-system-ui",
-      "_origin": "ast",
-      "community": 37,
-      "community_name": "android-navigation-bar.tsx",
-      "file_type": "concept",
-      "norm_label": "expo-system-ui",
-      "source_file": "package.json",
-      "source_location": "L40"
-    },
-    {
-      "id": "src_components_weekstrip",
-      "label": "WeekStrip.tsx",
-      "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
-      "file_type": "code",
-      "norm_label": "weekstrip.tsx",
-      "source_file": "src/components/WeekStrip.tsx",
-      "source_location": "L1"
-    },
-    {
-      "id": "src_components_weekstrip_styles",
-      "label": "styles",
-      "_origin": "ast",
-      "community": 38,
-      "community_name": "WeekStrip.tsx",
-      "file_type": "code",
-      "norm_label": "styles",
-      "source_file": "src/components/WeekStrip.tsx",
-      "source_location": "L54"
+      "norm_label": "migrations",
+      "source_file": "src/db/schema.ts",
+      "source_location": "L328"
     },
     {
       "id": "package_dependencies",
@@ -11654,6 +11635,72 @@
       "source_location": "L309"
     },
     {
+      "id": "src_constants_distance_achievements",
+      "label": "distance-achievements.ts",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distance-achievements.ts",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L1"
+    },
+    {
+      "id": "src_constants_distance_achievements_distance_achievements",
+      "label": "DISTANCE_ACHIEVEMENTS",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distance_achievements",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L138"
+    },
+    {
+      "id": "src_constants_distance_achievements_distance_effort_key_prefix",
+      "label": "DISTANCE_EFFORT_KEY_PREFIX",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distance_effort_key_prefix",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L144"
+    },
+    {
+      "id": "src_constants_distance_achievements_distance_efforts",
+      "label": "DISTANCE_EFFORTS",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distance_efforts",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L31"
+    },
+    {
+      "id": "src_constants_distance_achievements_distance_landmark_key_prefix",
+      "label": "DISTANCE_LANDMARK_KEY_PREFIX",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distance_landmark_key_prefix",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L145"
+    },
+    {
+      "id": "src_constants_distance_achievements_distance_landmarks",
+      "label": "DISTANCE_LANDMARKS",
+      "_origin": "ast",
+      "community": 5,
+      "community_name": "db/achievements.ts",
+      "file_type": "code",
+      "norm_label": "distance_landmarks",
+      "source_file": "src/constants/distance-achievements.ts",
+      "source_location": "L70"
+    },
+    {
       "id": "src_db_achievements",
       "label": "db/achievements.ts",
       "_origin": "ast",
@@ -11674,17 +11721,6 @@
       "norm_label": "achievement_seed",
       "source_file": "src/db/achievements.ts",
       "source_location": "L178"
-    },
-    {
-      "id": "src_db_database",
-      "label": "database.ts",
-      "_origin": "ast",
-      "community": 5,
-      "community_name": "db/achievements.ts",
-      "file_type": "code",
-      "norm_label": "database.ts",
-      "source_file": "src/db/database.ts",
-      "source_location": "L1"
     },
     {
       "id": "src_db_tests_achievements_test",
@@ -11830,6 +11866,17 @@
       "source_location": "L6"
     },
     {
+      "id": "src_store_workout_goals",
+      "label": "workout-goals.ts",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "settings.tsx",
+      "file_type": "code",
+      "norm_label": "workout-goals.ts",
+      "source_file": "src/store/workout-goals.ts",
+      "source_location": "L1"
+    },
+    {
       "id": "src_store_workout_goals_weekly_workouts_max",
       "label": "WEEKLY_WORKOUTS_MAX",
       "_origin": "ast",
@@ -11850,6 +11897,17 @@
       "norm_label": "weekly_workouts_min",
       "source_file": "src/store/workout-goals.ts",
       "source_location": "L6"
+    },
+    {
+      "id": "src_store_workout_goals_weekly_workouts_storage_key",
+      "label": "WEEKLY_WORKOUTS_STORAGE_KEY",
+      "_origin": "ast",
+      "community": 6,
+      "community_name": "settings.tsx",
+      "file_type": "code",
+      "norm_label": "weekly_workouts_storage_key",
+      "source_file": "src/store/workout-goals.ts",
+      "source_location": "L5"
     },
     {
       "id": "src_theme_theme_store",
@@ -11951,17 +12009,6 @@
       "source_location": "L4"
     },
     {
-      "id": "ref_bryllim_workout_guide",
-      "label": "@bryllim/workout-guide",
-      "_origin": "ast",
-      "community": 7,
-      "community_name": "package.json",
-      "file_type": "concept",
-      "norm_label": "@bryllim/workout-guide",
-      "source_file": "package.json",
-      "source_location": "L6"
-    },
-    {
       "id": "ref_eslint",
       "label": "eslint",
       "_origin": "ast",
@@ -12059,6 +12106,17 @@
       "norm_label": "expo-glass-effect",
       "source_file": "package.json",
       "source_location": "L25"
+    },
+    {
+      "id": "ref_expo_haptics",
+      "label": "expo-haptics",
+      "_origin": "ast",
+      "community": 7,
+      "community_name": "package.json",
+      "file_type": "concept",
+      "norm_label": "expo-haptics",
+      "source_file": "package.json",
+      "source_location": "L26"
     },
     {
       "id": "ref_expo_image",
@@ -12422,17 +12480,6 @@
       "norm_label": "days",
       "source_file": "src/db/__tests__/stats.test.ts",
       "source_location": "L5"
-    },
-    {
-      "id": "ref_dayjs",
-      "label": "dayjs",
-      "_origin": "ast",
-      "community": 8,
-      "community_name": "statistics.tsx",
-      "file_type": "concept",
-      "norm_label": "dayjs",
-      "source_file": "package.json",
-      "source_location": "L14"
     },
     {
       "id": "ref_victory_native",
@@ -13046,6 +13093,18 @@
       "type": "external"
     },
     {
+      "id": "ref_react_native_gesture_handler_reanimatedswipeable",
+      "label": "ref_react_native_gesture_handler_reanimatedswipeable",
+      "_origin": "semantic",
+      "community": 17,
+      "community_name": "routine/[id].tsx",
+      "external": true,
+      "file_type": "concept",
+      "norm_label": "ref_react_native_gesture_handler_reanimatedswipeable",
+      "source_file": "",
+      "type": "external"
+    },
+    {
       "id": "ref_node_child_process",
       "label": "ref_node_child_process",
       "_origin": "semantic",
@@ -13126,18 +13185,6 @@
       "external": true,
       "file_type": "concept",
       "norm_label": "ref_eslint_config_expo_flat",
-      "source_file": "",
-      "type": "external"
-    },
-    {
-      "id": "ref_react_native_gesture_handler_reanimatedswipeable",
-      "label": "ref_react_native_gesture_handler_reanimatedswipeable",
-      "_origin": "semantic",
-      "community": 32,
-      "community_name": "useAppTheme",
-      "external": true,
-      "file_type": "concept",
-      "norm_label": "ref_react_native_gesture_handler_reanimatedswipeable",
       "source_file": "",
       "type": "external"
     },
@@ -13433,6 +13480,18 @@
     },
     {
       "source": "src_app_routine_id_add_exercise_addexercisescreen",
+      "target": "src_constants_exercises_equipmenti18nkey",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_routine_id_add_exercise_addexercisescreen",
       "target": "src_theme_app_theme_provider_useapptheme",
       "relation": "calls",
       "_origin": "ast",
@@ -13452,7 +13511,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
@@ -13464,12 +13523,12 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L38",
+      "source_location": "L39",
       "weight": 1.0
     },
     {
       "source": "src_app_routine_id_add_exercise_addexercisescreen",
-      "target": "src_db_exercises_getexercises",
+      "target": "src_db_exercises_getexerciseequipment",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -13481,6 +13540,18 @@
     },
     {
       "source": "src_app_routine_id_add_exercise_addexercisescreen",
+      "target": "src_db_exercises_getexercises",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L46",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_routine_id_add_exercise_addexercisescreen",
       "target": "src_db_routines_addexercisetoroutine",
       "relation": "calls",
       "_origin": "ast",
@@ -13488,7 +13559,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L51",
+      "source_location": "L56",
       "weight": 1.0
     },
     {
@@ -13512,7 +13583,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L224",
+      "source_location": "L259",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_routine_id_add_exercise_filtersection",
+      "target": "src_theme_app_theme_provider_useapptheme",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L235",
       "weight": 1.0
     },
     {
@@ -15457,6 +15540,18 @@
       "context": "call",
       "source_file": "src/components/ExerciseDetailModal.tsx",
       "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_exercisedetailmodal_exercisedetailmodal",
+      "target": "src_constants_exercises_equipmenti18nkey",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "src/components/ExerciseDetailModal.tsx",
+      "source_location": "L28",
       "weight": 1.0
     },
     {
@@ -20502,6 +20597,18 @@
     },
     {
       "source": "src_app_routine_id_add_exercise",
+      "target": "src_constants_exercises_equipmenti18nkey",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_routine_id_add_exercise",
       "target": "src_constants_exercises_musclei18nkey",
       "relation": "imports",
       "_origin": "ast",
@@ -20510,6 +20617,18 @@
       "context": "import",
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
       "source_location": "L19",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_routine_id_add_exercise",
+      "target": "src_db_exercises_getexerciseequipment",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -22994,6 +23113,18 @@
       "context": "import",
       "source_file": "src/components/ExerciseDetailModal.tsx",
       "source_location": "L4",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_exercisedetailmodal",
+      "target": "src_constants_exercises_equipmenti18nkey",
+      "relation": "imports",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "import",
+      "source_file": "src/components/ExerciseDetailModal.tsx",
+      "source_location": "L5",
       "weight": 1.0
     },
     {
@@ -33154,24 +33285,24 @@
     },
     {
       "source": "src_app_routine_id_add_exercise",
+      "target": "src_app_routine_id_add_exercise_filtersection",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L234",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_routine_id_add_exercise",
       "target": "src_app_routine_id_add_exercise_filterchip",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L215",
-      "weight": 1.0
-    },
-    {
-      "source": "src_app_routine_id_add_exercise",
-      "target": "src_app_routine_id_add_exercise_styles",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/app/routine/[id]/add-exercise.tsx",
-      "source_location": "L246",
+      "source_location": "L250",
       "weight": 1.0
     },
     {
@@ -33183,6 +33314,17 @@
       "confidence_score": 1.0,
       "source_file": "src/app/routine/[id]/add-exercise.tsx",
       "source_location": "L26",
+      "weight": 1.0
+    },
+    {
+      "source": "src_app_routine_id_add_exercise",
+      "target": "src_app_routine_id_add_exercise_styles",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/app/routine/[id]/add-exercise.tsx",
+      "source_location": "L281",
       "weight": 1.0
     },
     {
@@ -33836,6 +33978,17 @@
     },
     {
       "source": "src_components_exercisedetailmodal",
+      "target": "src_components_exercisedetailmodal_styles",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/components/ExerciseDetailModal.tsx",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_components_exercisedetailmodal",
       "target": "src_components_exercisedetailmodal_musclelabel",
       "relation": "contains",
       "_origin": "ast",
@@ -33865,17 +34018,6 @@
       "confidence_score": 1.0,
       "source_file": "src/components/ExerciseDetailModal.tsx",
       "source_location": "L9",
-      "weight": 1.0
-    },
-    {
-      "source": "src_components_exercisedetailmodal",
-      "target": "src_components_exercisedetailmodal_styles",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/components/ExerciseDetailModal.tsx",
-      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -38588,7 +38730,7 @@
     },
     {
       "source": "src_constants_exercises",
-      "target": "src_constants_exercises_exercise_type_i18n_keys",
+      "target": "src_constants_exercises_equipment_i18n_keys",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -38599,13 +38741,35 @@
     },
     {
       "source": "src_constants_exercises",
+      "target": "src_constants_exercises_exercise_type_i18n_keys",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L57",
+      "weight": 1.0
+    },
+    {
+      "source": "src_constants_exercises",
       "target": "src_constants_exercises_musclei18nkey",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/constants/exercises.ts",
-      "source_location": "L45",
+      "source_location": "L66",
+      "weight": 1.0
+    },
+    {
+      "source": "src_constants_exercises",
+      "target": "src_constants_exercises_equipmenti18nkey",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/constants/exercises.ts",
+      "source_location": "L71",
       "weight": 1.0
     },
     {
@@ -38616,7 +38780,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/constants/exercises.ts",
-      "source_location": "L50",
+      "source_location": "L76",
       "weight": 1.0
     },
     {
@@ -38627,7 +38791,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/constants/exercises.ts",
-      "source_location": "L55",
+      "source_location": "L81",
       "weight": 1.0
     },
     {
@@ -39314,24 +39478,57 @@
     },
     {
       "source": "src_db_exercises",
+      "target": "src_db_exercises_getexercisebyid",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L102",
+      "weight": 1.0
+    },
+    {
+      "source": "src_db_exercises",
+      "target": "src_db_exercises_newexerciseinput",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L106",
+      "weight": 1.0
+    },
+    {
+      "source": "src_db_exercises",
+      "target": "src_db_exercises_updateexerciseinput",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L113",
+      "weight": 1.0
+    },
+    {
+      "source": "src_db_exercises",
+      "target": "src_db_exercises_createexercise",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L116",
+      "weight": 1.0
+    },
+    {
+      "source": "src_db_exercises",
       "target": "src_db_exercises_updateexercise",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/db/exercises.ts",
-      "source_location": "L121",
-      "weight": 1.0
-    },
-    {
-      "source": "src_db_exercises",
-      "target": "src_db_exercises_deleteexercise",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L149",
+      "source_location": "L138",
       "weight": 1.0
     },
     {
@@ -39347,13 +39544,24 @@
     },
     {
       "source": "src_db_exercises",
+      "target": "src_db_exercises_deleteexercise",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "src/db/exercises.ts",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "src_db_exercises",
       "target": "src_db_exercises_seedexercisecatalog",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/db/exercises.ts",
-      "source_location": "L23",
+      "source_location": "L25",
       "weight": 1.0
     },
     {
@@ -39364,7 +39572,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/db/exercises.ts",
-      "source_location": "L58",
+      "source_location": "L60",
       "weight": 1.0
     },
     {
@@ -39375,51 +39583,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/db/exercises.ts",
-      "source_location": "L78",
+      "source_location": "L84",
       "weight": 1.0
     },
     {
       "source": "src_db_exercises",
-      "target": "src_db_exercises_getexercisebyid",
+      "target": "src_db_exercises_getexerciseequipment",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/db/exercises.ts",
-      "source_location": "L85",
-      "weight": 1.0
-    },
-    {
-      "source": "src_db_exercises",
-      "target": "src_db_exercises_newexerciseinput",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L89",
-      "weight": 1.0
-    },
-    {
-      "source": "src_db_exercises",
-      "target": "src_db_exercises_updateexerciseinput",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L96",
-      "weight": 1.0
-    },
-    {
-      "source": "src_db_exercises",
-      "target": "src_db_exercises_createexercise",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "src/db/exercises.ts",
-      "source_location": "L99",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -42528,5 +42703,5 @@
       "source_file": "assets/images/icon.png"
     }
   ],
-  "built_at_commit": "2f33dd6f6eb433a8d0d10f3708a60ab5dc8fb7a2"
+  "built_at_commit": "99b5fb00f828691f0bf88591bf06dfb2f6476a47"
 }
