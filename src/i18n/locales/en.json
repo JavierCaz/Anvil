@@ -92,7 +92,9 @@
     "avgPace": "Average pace",
     "distancePerDay": "Distance per day ({{unit}})",
     "distancePerWeek": "Distance per week ({{unit}})",
-    "distancePerMonth": "Distance per month ({{unit}})"
+    "distancePerMonth": "Distance per month ({{unit}})",
+    "setsUnit": "sets",
+    "peak": "Peak {{value}}"
   },
   "home": {
     "tagline": "Forge your strength. Track your progress.",
@@ -101,7 +103,12 @@
     "workoutsOf": "{{done}} of {{goal}} workouts",
     "achievements": "Achievements",
     "achievementsHint": "Keep training to unlock more achievements.",
-    "seeAll": "See all"
+    "seeAll": "See all",
+    "goalRemaining_one": "{{count}} more workout to hit your goal",
+    "goalRemaining_other": "{{count}} more workouts to hit your goal",
+    "goalReached": "Weekly goal reached. Keep forging.",
+    "workoutsLabel": "workouts",
+    "unlockedOf": "{{unlocked}} of {{total}} unlocked"
   },
   "achievements": {
     "title": "Achievements",

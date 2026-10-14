@@ -20,6 +20,7 @@ import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { clampIncline, distanceScale, getExerciseMetrics } from '@/constants/exercise-metrics';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, shape, typography } from '@/theme/tokens';
 import { displayToMeters, formatDistance } from '@/utils/distance';
 import { displayToKg, kgToDisplay } from '@/utils/weight';
 
@@ -236,7 +237,11 @@ export default function RoutineSetEditorScreen() {
               <Pressable
                 accessibilityRole="button"
                 onPress={() => router.push(`/exercise/${exercise.exercise_id}/edit`)}
-                style={({ pressed }) => [styles.removeRow, { opacity: pressed ? 0.6 : 1 }]}
+                style={({ pressed }) => [
+                  shape.secondaryButton,
+                  styles.editExerciseButton,
+                  { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+                ]}
               >
                 <Ionicons name="pencil" size={16} color={colors.textSecondary} />
                 <Text style={[styles.editExerciseLabel, { color: colors.textSecondary }]}>
@@ -253,17 +258,18 @@ export default function RoutineSetEditorScreen() {
             />
           )}
 
-          <View style={styles.footer}>
+          <View style={[styles.footer, { borderTopColor: colors.border, backgroundColor: colors.background }]}>
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('common.save')}
               onPress={handleSave}
               style={({ pressed }) => [
-                styles.saveButton,
+                shape.primaryButton,
                 { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
               ]}
             >
-              <Text style={styles.saveLabel}>{t('common.save')}</Text>
+              <Ionicons name="checkmark" size={20} color={colors.onPrimary} />
+              <Text style={[typography.button, { color: colors.onPrimary }]}>{t('common.save')}</Text>
             </Pressable>
           </View>
         </>
@@ -277,32 +283,19 @@ export default function RoutineSetEditorScreen() {
 const styles = StyleSheet.create({
   listContent: {
     padding: 20,
-    paddingBottom: 8,
+    paddingBottom: 12,
   },
-  removeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    paddingVertical: 10,
-    marginTop: 4,
+  editExerciseButton: {
+    marginTop: 14,
   },
   editExerciseLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   footer: {
     paddingHorizontal: 20,
+    paddingTop: 12,
     paddingBottom: 16,
-  },
-  saveButton: {
-    alignItems: 'center',
-    borderRadius: 14,
-    paddingVertical: 15,
-  },
-  saveLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    borderTopWidth: hairline,
   },
 });

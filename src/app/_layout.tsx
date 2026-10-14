@@ -16,11 +16,21 @@ import { DATABASE_NAME, initializeDatabase } from '@/db/database';
 import { AppThemeProvider, useAppTheme } from '@/theme/app-theme-provider';
 
 function RootNavigator() {
-  const { scheme } = useAppTheme();
+  const { scheme, colors } = useAppTheme();
 
   return (
     <>
-      <Stack screenOptions={{ headerShown: false }} />
+      <Stack
+        screenOptions={{
+          headerShown: false,
+          // Pushed screens share one flat, brand-tinted header.
+          headerShadowVisible: false,
+          headerTintColor: colors.primary,
+          headerTitleStyle: { color: colors.text, fontWeight: '800', fontSize: 17 },
+          headerBackButtonDisplayMode: 'minimal',
+          contentStyle: { backgroundColor: colors.background },
+        }}
+      />
       <StatusBar style={scheme === 'dark' ? 'light' : 'dark'} />
     </>
   );

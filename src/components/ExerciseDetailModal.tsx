@@ -5,6 +5,7 @@ import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import { equipmentI18nKey, exerciseTypeI18nKey, muscleI18nKey } from '@/constants/exercises';
 import type { Exercise } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, radius } from '@/theme/tokens';
 
 interface ExerciseDetailModalProps {
   exercise: Exercise;
@@ -47,18 +48,18 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
     <DetailModal onClose={onClose}>
       {/* Visual */}
       <View style={[styles.visualWrap, { backgroundColor: colors.background, borderColor: colors.border }]}>
-        <ExerciseThumbnail slug={exercise.slug} size={190} borderRadius={14} />
+        <ExerciseThumbnail slug={exercise.slug} size={190} borderRadius={radius.lg} />
       </View>
 
       {/* Name + badges */}
       <View style={styles.badgeRow}>
         {primaryMuscle && (
-          <View style={[styles.badge, { backgroundColor: colors.background }]}>
-            <Text style={[styles.badgeLabel, { color: colors.textSecondary }]}>{primaryMuscle}</Text>
+          <View style={[styles.badge, { backgroundColor: colors.primarySoft }]}>
+            <Text style={[styles.badgeLabel, { color: colors.primary }]}>{primaryMuscle}</Text>
           </View>
         )}
         {exercise.source === 'custom' && (
-          <View style={[styles.badge, { backgroundColor: colors.background }]}>
+          <View style={[styles.badge, styles.badgeOutlined, { borderColor: colors.border }]}>
             <Text style={[styles.badgeLabel, { color: colors.textSecondary }]}>
               {t('routines.detail.customBadge')}
             </Text>
@@ -67,9 +68,9 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
       </View>
 
       {/* Details */}
-      <View style={styles.details}>
+      <View style={[styles.details, { backgroundColor: colors.background, borderColor: colors.border }]}>
         {typeLabel && (
-          <View style={styles.detailRow}>
+          <View style={[styles.detailRow, { borderColor: colors.border }]}>
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
               {t('exercises.detail.type')}
             </Text>
@@ -77,7 +78,7 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
           </View>
         )}
         {exercise.equipment ? (
-          <View style={styles.detailRow}>
+          <View style={[styles.detailRow, { borderColor: colors.border }]}>
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
               {t('exercises.detail.equipment')}
             </Text>
@@ -87,7 +88,7 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
           </View>
         ) : null}
         {secondaryLabel && (
-          <View style={styles.detailRow}>
+          <View style={[styles.detailRow, { borderColor: colors.border }]}>
             <Text style={[styles.detailLabel, { color: colors.textSecondary }]}>
               {t('exercises.detail.secondaryMuscles')}
             </Text>
@@ -103,12 +104,12 @@ const styles = StyleSheet.create({
   visualWrap: {
     width: 190,
     height: 190,
-    borderRadius: 18,
-    borderWidth: 1,
+    borderRadius: radius.lg,
+    borderWidth: hairline,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
-    marginBottom: 14,
+    marginBottom: 16,
   },
   name: {
     fontSize: 18,
@@ -125,26 +126,34 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   badge: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
-    paddingVertical: 3,
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  badgeOutlined: {
+    borderWidth: hairline,
   },
   badgeLabel: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 1,
   },
   details: {
     alignSelf: 'stretch',
-    gap: 8,
-    marginBottom: 16,
+    borderRadius: radius.md,
+    borderWidth: hairline,
+    paddingHorizontal: 14,
+    marginBottom: 18,
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     gap: 12,
+    paddingVertical: 11,
+    borderTopWidth: hairline,
+    marginTop: -hairline,
   },
   detailLabel: {
     fontSize: 13,

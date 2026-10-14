@@ -1,4 +1,4 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
+import { DarkTheme, DefaultTheme, ThemeProvider, type Theme } from 'expo-router';
 import { createContext, useContext, useMemo, type ReactNode } from 'react';
 import { useColorScheme } from 'react-native';
 import { darkColors, lightColors, type ThemeColors } from './colors';
@@ -34,9 +34,25 @@ export function AppThemeProvider({ children }: { children: ReactNode }) {
     [scheme]
   );
 
+  // Navigation chrome (stack headers, screen backgrounds) follows the brand palette.
+  const navigationTheme = useMemo<Theme>(() => {
+    const base = scheme === 'dark' ? DarkTheme : DefaultTheme;
+    return {
+      ...base,
+      colors: {
+        ...base.colors,
+        primary: value.colors.primary,
+        background: value.colors.background,
+        card: value.colors.background,
+        text: value.colors.text,
+        border: value.colors.border,
+      },
+    };
+  }, [scheme, value.colors]);
+
   return (
     <AppThemeContext.Provider value={value}>
-      <ThemeProvider value={scheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <ThemeProvider value={navigationTheme}>
         {children}
       </ThemeProvider>
     </AppThemeContext.Provider>

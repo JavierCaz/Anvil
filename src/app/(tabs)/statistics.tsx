@@ -1,10 +1,12 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { Bar, CartesianChart, Pie, PolarChart } from 'victory-native';
 import { Screen } from '@/components/Screen';
+import { BarTrendChart, type BarTrendPoint } from '@/components/charts/BarTrendChart';
+import { MuscleDonut, type DonutSlice } from '@/components/charts/MuscleDonut';
 import { muscleI18nKey } from '@/constants/exercises';
 import {
   buildTimeSeries,
@@ -18,6 +20,7 @@ import {
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
 import { distanceUnitLabel, formatDistance, formatPace, metersToDisplay } from '@/utils/distance';
 import { formatDuration } from '@/utils/duration';
 
@@ -60,19 +63,63 @@ function getRangeBounds(range: RangeKey): { from: string | null; to: string | nu
   }
 }
 
-interface StatCardProps {
+type ThemeColors = ReturnType<typeof useAppTheme>['colors'];
+
+interface StatTileProps {
+  icon: keyof typeof Ionicons.glyphMap;
+  tint: string;
   label: string;
   value: string;
-  colors: ReturnType<typeof useAppTheme>['colors'];
+  colors: ThemeColors;
 }
 
-function StatCard({ label, value, colors }: StatCardProps) {
+/** Metric tile: tinted icon well, large figure, quiet label. */
+function StatTile({ icon, tint, label, value, colors }: StatTileProps) {
   return (
-    <View style={[styles.statCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Text style={[styles.statValue, { color: colors.text }]}>{value}</Text>
-      <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{label}</Text>
+    <View style={[styles.statTile, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={[styles.statIcon, { backgroundColor: withAlpha(tint, 0.16) }]}>
+        <Ionicons name={icon} size={16} color={tint} />
+      </View>
+      <Text style={[styles.statValue, { color: colors.text }]} numberOfLines={1} adjustsFontSizeToFit>
+        {value}
+      </Text>
+      <Text style={[styles.statLabel, { color: colors.textSecondary }]} numberOfLines={2}>
+        {label}
+      </Text>
     </View>
   );
+}
+
+interface ChartCardProps {
+  title: string;
+  /** Short figure on the right of the title (total, peak…). */
+  meta?: string;
+  colors: ThemeColors;
+  children: ReactNode;
+}
+
+function ChartCard({ title, meta, colors, children }: ChartCardProps) {
+  return (
+    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      <View style={styles.cardHeader}>
+        <Text style={[styles.cardTitle, { color: colors.text }]}>{title}</Text>
+        {meta ? <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>{meta}</Text> : null}
+      </View>
+      {children}
+    </View>
+  );
+}
+
+/** Index of the bucket containing today (the "current" bar), or -1. */
+function currentBucketIndex(series: { start: string }[]): number {
+  const today = dayjs().format('YYYY-MM-DD');
+  let index = -1;
+  series.forEach((point, i) => {
+    if (point.start <= today) {
+      index = i;
+    }
+  });
+  return index;
 }
 
 export default function StatisticsScreen() {
@@ -118,37 +165,14 @@ export default function StatisticsScreen() {
   const distanceSeries = useMemo(() => data?.distanceSeries ?? [], [data]);
   const hasCardio = cardio !== null && cardio.sets > 0;
 
-  // Categorical palette built from semantic theme colors (never hardcode hex).
-  const chartPalette = useMemo(
-    () => [
-      colors.primary,
-      colors.accent,
-      colors.success,
-      colors.warning,
-      colors.error,
-      colors.primaryPressed,
-      colors.textSecondary,
-    ],
-    [colors]
-  );
-
-  const pieData = useMemo(
+  const pieData = useMemo<DonutSlice[]>(
     () =>
       muscles.map((m, index) => ({
         label: m.muscle ? t(muscleI18nKey(m.muscle) ?? 'statistics.other') : t('statistics.other'),
         value: m.sets,
-        color: chartPalette[index % chartPalette.length],
+        color: colors.chartSeries[index % colors.chartSeries.length],
       })),
-    [muscles, chartPalette, t]
-  );
-
-  const barData = useMemo(
-    () =>
-      series.map((point) => ({
-        x: point.start,
-        y: point.count,
-      })),
-    [series]
+    [muscles, colors, t]
   );
 
   // Bucket labels: "Mon" (day), "Aug 3" (week), "Jan" or "Jan '25" (month, year-aware when long).
@@ -163,14 +187,6 @@ export default function StatisticsScreen() {
     return series.length > 12 ? d.format('MMM YY') : d.format('MMM');
   };
 
-  const distanceBarData = useMemo(
-    () =>
-      distanceSeries.map((point) => ({
-        x: point.start,
-        y: metersToDisplay(point.count, unit),
-      })),
-    [distanceSeries, unit]
-  );
   const hasDistance = (cardio?.totalDistanceM ?? 0) > 0;
 
   const distanceChartTitle =
@@ -181,6 +197,18 @@ export default function StatisticsScreen() {
         : t('statistics.distancePerMonth', { unit: distanceUnitLabel(unit) });
 
   const avgPace = cardio ? formatPace(cardio.pacedSeconds, cardio.pacedDistanceM, unit) : null;
+
+  const sessionPoints: BarTrendPoint[] = series.map((point) => ({
+    label: bucketLabel(point.start),
+    value: point.count,
+  }));
+  const distancePoints: BarTrendPoint[] = distanceSeries.map((point) => ({
+    label: bucketLabel(point.start),
+    value: metersToDisplay(point.count, unit),
+  }));
+  const sessionsHighlight = currentBucketIndex(series);
+  const distanceHighlight = currentBucketIndex(distanceSeries);
+  const peakSessions = Math.max(0, ...series.map((point) => point.count));
 
   const barChartTitle =
     granularity === 'day'
@@ -207,19 +235,18 @@ export default function StatisticsScreen() {
               accessibilityRole="button"
               accessibilityState={{ selected: active }}
               onPress={() => setRange(key)}
-              style={[
-                styles.filterPill,
-                active && { backgroundColor: colors.primary },
-              ]}
+              style={[styles.filterPill, active && { backgroundColor: colors.surfaceElevated }]}
             >
               <Text
                 style={[
                   styles.filterLabel,
-                  { color: active ? '#FFFFFF' : colors.textSecondary },
+                  { color: active ? colors.text : colors.textSecondary },
+                  active && styles.filterLabelActive,
                 ]}
               >
                 {t(`statistics.filters.${key}`)}
               </Text>
+              {active && <View style={[styles.filterDot, { backgroundColor: colors.primary }]} />}
             </Pressable>
           );
         })}
@@ -238,147 +265,112 @@ export default function StatisticsScreen() {
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
           <View style={styles.statsGrid}>
-            <StatCard
+            <StatTile
+              icon="barbell"
+              tint={colors.primary}
               label={t('statistics.sessions')}
               value={String(stats.sessions)}
               colors={colors}
             />
-            <StatCard
+            <StatTile
+              icon="time"
+              tint={colors.accent}
               label={t('statistics.totalTime')}
               value={`${totalHours} ${t('statistics.hoursShort')}`}
               colors={colors}
             />
-            <StatCard
+            <StatTile
+              icon="hourglass"
+              tint={colors.gold}
               label={t('statistics.avgDuration')}
               value={`${avgMinutes} ${t('statistics.minutesShort')}`}
               colors={colors}
             />
-            <StatCard
+            <StatTile
+              icon="layers"
+              tint={colors.success}
               label={t('statistics.setsCompleted')}
               value={String(stats.setsCompleted)}
               colors={colors}
             />
           </View>
 
-          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>{t('statistics.musclesTitle')}</Text>
+          <ChartCard
+            title={barChartTitle}
+            meta={
+              stats.sessions > 0 ? t('statistics.peak', { value: peakSessions }) : undefined
+            }
+            colors={colors}
+          >
+            {stats.sessions === 0 || sessionPoints.length === 0 ? (
+              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
+                {t('statistics.noData')}
+              </Text>
+            ) : (
+              <BarTrendChart
+                data={sessionPoints}
+                highlightIndex={sessionsHighlight}
+                color={colors.primaryBright}
+                colorDeep={colors.primaryPressed}
+              />
+            )}
+          </ChartCard>
+
+          <ChartCard title={t('statistics.musclesTitle')} colors={colors}>
             {stats.sessions === 0 || pieData.length === 0 ? (
               <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
                 {t('statistics.noData')}
               </Text>
             ) : (
-              <>
-                <View style={styles.chartBox}>
-                  <PolarChart
-                    data={pieData}
-                    labelKey="label"
-                    valueKey="value"
-                    colorKey="color"
-                  >
-                    <Pie.Chart innerRadius="55%" />
-                  </PolarChart>
-                </View>
-                <View style={styles.legend}>
-                  {pieData.map((slice, index) => (
-                    <View key={`${slice.label}-${index}`} style={styles.legendItem}>
-                      <View style={[styles.legendDot, { backgroundColor: slice.color }]} />
-                      <Text style={[styles.legendText, { color: colors.text }]}>
-                        {slice.label} · {slice.value}
-                      </Text>
-                    </View>
-                  ))}
-                </View>
-              </>
+              <MuscleDonut slices={pieData} centerCaption={t('statistics.setsUnit')} />
             )}
-          </View>
-
-          <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-            <Text style={[styles.cardTitle, { color: colors.text }]}>{barChartTitle}</Text>
-            {stats.sessions === 0 || barData.length === 0 ? (
-              <Text style={[styles.emptyText, { color: colors.textSecondary }]}>
-                {t('statistics.noData')}
-              </Text>
-            ) : (
-              <>
-                <View style={styles.chartBox}>
-                  <CartesianChart data={barData} xKey="x" yKeys={['y']}>
-                    {({ points, chartBounds }) => (
-                      <Bar
-                        points={points.y}
-                        chartBounds={chartBounds}
-                        color={colors.primary}
-                        roundedCorners={{ topLeft: 6, topRight: 6 }}
-                      />
-                    )}
-                  </CartesianChart>
-                </View>
-                <View style={styles.axisRow}>
-                  {series.map((point) => (
-                    <Text
-                      key={point.start}
-                      numberOfLines={1}
-                      style={[styles.axisLabel, { color: colors.textSecondary }]}
-                    >
-                      {bucketLabel(point.start)}
-                    </Text>
-                  ))}
-                </View>
-              </>
-            )}
-          </View>
+          </ChartCard>
 
           {hasCardio && cardio && (
-            <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-              <Text style={[styles.cardTitle, { color: colors.text }]}>{t('statistics.cardioTitle')}</Text>
+            <ChartCard title={t('statistics.cardioTitle')} colors={colors}>
               <View style={styles.statsGrid}>
                 {hasDistance && (
-                  <StatCard
+                  <StatTile
+                    icon="navigate"
+                    tint={colors.accent}
                     label={t('statistics.totalDistance')}
                     value={`${formatDistance(cardio.totalDistanceM, unit)} ${distanceUnitLabel(unit)}`}
                     colors={colors}
                   />
                 )}
-                <StatCard
+                <StatTile
+                  icon="stopwatch"
+                  tint={colors.primary}
                   label={t('statistics.cardioTime')}
                   value={formatDuration(cardio.totalDurationSeconds)}
                   colors={colors}
                 />
                 {avgPace && (
-                  <StatCard label={t('statistics.avgPace')} value={avgPace} colors={colors} />
+                  <StatTile
+                    icon="speedometer"
+                    tint={colors.gold}
+                    label={t('statistics.avgPace')}
+                    value={avgPace}
+                    colors={colors}
+                  />
                 )}
               </View>
 
-              {hasDistance && distanceBarData.length > 0 && (
+              {hasDistance && distancePoints.length > 0 && (
                 <>
                   <Text style={[styles.cardSubtitle, { color: colors.textSecondary }]}>
                     {distanceChartTitle}
                   </Text>
-                  <View style={styles.chartBox}>
-                    <CartesianChart data={distanceBarData} xKey="x" yKeys={['y']}>
-                      {({ points, chartBounds }) => (
-                        <Bar
-                          points={points.y}
-                          chartBounds={chartBounds}
-                          color={colors.success}
-                          roundedCorners={{ topLeft: 6, topRight: 6 }}
-                        />
-                      )}
-                    </CartesianChart>
-                  </View>
-                  <View style={styles.axisRow}>
-                    {distanceSeries.map((point) => (
-                      <Text
-                        key={point.start}
-                        numberOfLines={1}
-                        style={[styles.axisLabel, { color: colors.textSecondary }]}
-                      >
-                        {bucketLabel(point.start)}
-                      </Text>
-                    ))}
-                  </View>
+                  <BarTrendChart
+                    data={distancePoints}
+                    highlightIndex={distanceHighlight}
+                    color={withAlpha(colors.accent, 1)}
+                    colorDeep={withAlpha(colors.accent, 0.35)}
+                    height={150}
+                  />
                 </>
               )}
-            </View>
+            </ChartCard>
           )}
         </ScrollView>
       )}
@@ -389,30 +381,42 @@ export default function StatisticsScreen() {
 const styles = StyleSheet.create({
   header: {
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 12,
+    paddingBottom: 14,
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: '800',
+    letterSpacing: -0.6,
   },
   filterRow: {
     flexDirection: 'row',
     marginHorizontal: 20,
-    marginBottom: 12,
-    borderRadius: 14,
-    borderWidth: 1,
+    marginBottom: 16,
+    borderRadius: 16,
+    borderWidth: StyleSheet.hairlineWidth,
     padding: 4,
   },
   filterPill: {
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingTop: 8,
+    paddingBottom: 6,
+    borderRadius: 12,
+    gap: 3,
   },
   filterLabel: {
-    fontSize: 14,
+    fontSize: 13,
     fontWeight: '600',
+  },
+  filterLabelActive: {
+    fontWeight: '800',
+  },
+  filterDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
   centered: {
     flex: 1,
@@ -421,79 +425,72 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
-    gap: 12,
+    paddingBottom: 32,
+    gap: 14,
   },
   statsGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 12,
   },
-  statCard: {
-    flexBasis: '47%',
+  statTile: {
+    flexBasis: '46%',
     flexGrow: 1,
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingVertical: 16,
-    paddingHorizontal: 16,
-    gap: 4,
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: 16,
+    gap: 6,
+  },
+  statIcon: {
+    width: 30,
+    height: 30,
+    borderRadius: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 6,
   },
   statValue: {
-    fontSize: 22,
+    fontSize: 26,
     fontWeight: '800',
+    letterSpacing: -0.6,
     fontVariant: ['tabular-nums'],
   },
   statLabel: {
-    fontSize: 13,
+    fontSize: 12,
+    fontWeight: '500',
   },
   card: {
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 16,
-    gap: 12,
+    borderRadius: 22,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: 18,
+    gap: 16,
+  },
+  cardHeader: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'space-between',
+    gap: 8,
   },
   cardTitle: {
+    flexShrink: 1,
     fontSize: 17,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: -0.2,
+  },
+  cardMeta: {
+    fontSize: 12,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
   },
   cardSubtitle: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
   },
   emptyText: {
     fontSize: 14,
     textAlign: 'center',
     paddingVertical: 32,
-  },
-  chartBox: {
-    height: 220,
-  },
-  legend: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 10,
-  },
-  legendItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  legendDot: {
-    width: 10,
-    height: 10,
-    borderRadius: 5,
-  },
-  legendText: {
-    fontSize: 13,
-  },
-  axisRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 4,
-  },
-  axisLabel: {
-    flex: 1,
-    textAlign: 'center',
-    fontSize: 10,
   },
 });

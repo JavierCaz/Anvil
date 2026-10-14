@@ -16,6 +16,8 @@ import {
   useWorkoutToolsStore,
 } from '@/store/workout-tools';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 import {
   ALARM_SOUND,
   cancelAlarmNotification,
@@ -187,7 +189,11 @@ export function WorkoutToolsButton({ onPress }: WorkoutToolsButtonProps) {
       accessibilityLabel={t('workout.tools.open')}
       hitSlop={8}
       onPress={onPress}
-      style={({ pressed }) => [styles.headerButton, { opacity: pressed ? 0.6 : 1 }]}
+      style={({ pressed }) => [
+        styles.headerButton,
+        readout && { backgroundColor: withAlpha(readoutColor, 0.14) },
+        { opacity: pressed ? 0.6 : 1 },
+      ]}
     >
       <Ionicons name={icon} size={22} color={readout ? readoutColor : colors.textSecondary} />
       {readout && (
@@ -228,8 +234,9 @@ export function WorkoutToolsSheet({ visible, onClose }: WorkoutToolsSheetProps) 
             },
           ]}
         >
+          <View style={[styles.grabber, { backgroundColor: colors.border }]} />
           <View style={styles.sheetHeader}>
-            <View style={[styles.segmented, { backgroundColor: colors.background }]}>
+            <View style={[styles.segmented, { backgroundColor: colors.background, borderColor: colors.border }]}>
               {(['timer', 'stopwatch'] as const).map((value) => {
                 const selected = tab === value;
                 return (
@@ -240,7 +247,7 @@ export function WorkoutToolsSheet({ visible, onClose }: WorkoutToolsSheetProps) 
                     onPress={() => setTab(value)}
                     style={[
                       styles.segment,
-                      selected && { backgroundColor: colors.surface, borderColor: colors.border },
+                      selected && { backgroundColor: colors.surfaceElevated },
                     ]}
                   >
                     <Ionicons
@@ -343,12 +350,18 @@ function TimerPanel() {
                 styles.preset,
                 {
                   borderColor: selected ? colors.primary : colors.border,
-                  backgroundColor: selected ? colors.primary : 'transparent',
+                  backgroundColor: selected ? colors.primarySoft : 'transparent',
                   opacity: status !== 'idle' ? 0.4 : pressed ? 0.7 : 1,
                 },
               ]}
             >
-              <Text style={[styles.presetLabel, { color: selected ? '#FFFFFF' : colors.text }]}>
+              <Text
+                style={[
+                  styles.presetLabel,
+                  { color: selected ? colors.primary : colors.text },
+                  selected && styles.presetLabelSelected,
+                ]}
+              >
                 {formatTimer(seconds * 1000)}
               </Text>
             </Pressable>
@@ -469,7 +482,7 @@ function AdjustButton({ label, accessibilityLabel, onPress }: AdjustButtonProps)
       onPress={onPress}
       style={({ pressed }) => [
         styles.adjustButton,
-        { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+        { backgroundColor: colors.primarySoft, opacity: pressed ? 0.6 : 1 },
       ]}
     >
       <Text style={[styles.adjustLabel, { color: colors.primary }]}>{label}</Text>
@@ -504,20 +517,21 @@ function ControlRow({
         disabled={secondaryDisabled}
         onPress={onSecondary}
         style={({ pressed }) => [
+          shape.secondaryButton,
           styles.controlButton,
           {
-            borderWidth: 1,
             borderColor: colors.border,
             opacity: secondaryDisabled ? 0.4 : pressed ? 0.6 : 1,
           },
         ]}
       >
-        <Text style={[styles.controlLabel, { color: colors.text }]}>{secondaryLabel}</Text>
+        <Text style={[typography.button, { color: colors.text }]}>{secondaryLabel}</Text>
       </Pressable>
       <Pressable
         accessibilityRole="button"
         onPress={onPrimary}
         style={({ pressed }) => [
+          shape.primaryButton,
           styles.controlButton,
           {
             backgroundColor: primaryRunning ? colors.warning : colors.primary,
@@ -525,7 +539,7 @@ function ControlRow({
           },
         ]}
       >
-        <Text style={[styles.controlLabel, { color: '#FFFFFF' }]}>{primaryLabel}</Text>
+        <Text style={[typography.button, { color: colors.onPrimary }]}>{primaryLabel}</Text>
       </Pressable>
     </View>
   );
@@ -536,6 +550,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
+    borderRadius: radius.pill,
+    paddingHorizontal: 6,
+    paddingVertical: 4,
   },
   headerReadout: {
     fontSize: 14,
@@ -548,12 +565,12 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-end',
   },
   sheet: {
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    borderWidth: 1,
+    borderTopLeftRadius: radius.xl + 4,
+    borderTopRightRadius: radius.xl + 4,
+    borderWidth: hairline,
     borderBottomWidth: 0,
     paddingHorizontal: 20,
-    paddingTop: 16,
+    paddingTop: 10,
     gap: 20,
   },
   sheetHeader: {
@@ -564,8 +581,9 @@ const styles = StyleSheet.create({
   segmented: {
     flex: 1,
     flexDirection: 'row',
-    borderRadius: 12,
-    padding: 3,
+    borderRadius: radius.md,
+    borderWidth: hairline,
+    padding: 4,
   },
   segment: {
     flex: 1,
@@ -573,14 +591,12 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: 'transparent',
-    paddingVertical: 8,
+    borderRadius: radius.sm,
+    paddingVertical: 9,
   },
   segmentLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   panel: {
     alignItems: 'center',
@@ -593,21 +609,21 @@ const styles = StyleSheet.create({
     alignSelf: 'stretch',
   },
   adjustButton: {
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
-    paddingVertical: 8,
-    minWidth: 64,
+    borderRadius: radius.pill,
+    paddingHorizontal: 14,
+    paddingVertical: 9,
+    minWidth: 68,
     alignItems: 'center',
   },
   adjustLabel: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
     fontVariant: ['tabular-nums'],
   },
   bigTime: {
-    fontSize: 56,
+    fontSize: 60,
     fontWeight: '800',
+    letterSpacing: -2,
     fontVariant: ['tabular-nums'],
   },
   presets: {
@@ -617,10 +633,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   preset: {
-    borderWidth: 1,
-    borderRadius: 999,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    ...shape.chip,
   },
   presetLabel: {
     fontSize: 14,
@@ -634,13 +647,15 @@ const styles = StyleSheet.create({
   },
   controlButton: {
     flex: 1,
-    alignItems: 'center',
-    borderRadius: 14,
-    paddingVertical: 15,
   },
-  controlLabel: {
-    fontSize: 16,
-    fontWeight: '700',
+  grabber: {
+    alignSelf: 'center',
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+  },
+  presetLabelSelected: {
+    fontWeight: '800',
   },
   laps: {
     alignSelf: 'stretch',

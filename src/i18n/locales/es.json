@@ -92,7 +92,9 @@
     "avgPace": "Ritmo medio",
     "distancePerDay": "Distancia por día ({{unit}})",
     "distancePerWeek": "Distancia por semana ({{unit}})",
-    "distancePerMonth": "Distancia por mes ({{unit}})"
+    "distancePerMonth": "Distancia por mes ({{unit}})",
+    "setsUnit": "series",
+    "peak": "Máximo {{value}}"
   },
   "home": {
     "tagline": "Forja tu fuerza. Sigue tu progreso.",
@@ -101,7 +103,12 @@
     "workoutsOf": "{{done}} de {{goal}} entrenamientos",
     "achievements": "Logros",
     "achievementsHint": "Sigue entrenando para desbloquear más logros.",
-    "seeAll": "Ver todos"
+    "seeAll": "Ver todos",
+    "goalRemaining_one": "Te falta {{count}} entrenamiento para tu meta",
+    "goalRemaining_other": "Te faltan {{count}} entrenamientos para tu meta",
+    "goalReached": "Meta semanal cumplida. Sigue forjando.",
+    "workoutsLabel": "entrenamientos",
+    "unlockedOf": "{{unlocked}} de {{total}} desbloqueados"
   },
   "achievements": {
     "title": "Logros",

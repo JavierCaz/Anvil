@@ -1,18 +1,17 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, Pressable, StyleSheet, Text } from 'react-native';
+import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
 import { ExerciseForm } from '@/components/ExerciseForm';
+import { DangerButton } from '@/components/DangerButton';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { deleteExercise, getExerciseById, updateExercise } from '@/db/exercises';
 import { useFocusQuery } from '@/hooks/use-focus-query';
-import { useAppTheme } from '@/theme/app-theme-provider';
 
 export default function EditExerciseScreen() {
   const db = useSQLiteContext();
   const router = useRouter();
-  const { colors } = useAppTheme();
   const { t } = useTranslation();
   const dialog = useDialog();
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -77,9 +76,7 @@ export default function EditExerciseScreen() {
               submitLabel={t('common.save')}
               onSave={handleSave}
             />
-            <Pressable accessibilityRole="button" onPress={confirmDelete} style={styles.deleteButton}>
-              <Text style={[styles.deleteLabel, { color: colors.error }]}>{t('common.delete')}</Text>
-            </Pressable>
+            <DangerButton label={t('common.delete')} onPress={confirmDelete} style={styles.deleteButton} />
           </>
         )}
       </KeyboardAvoidingView>
@@ -89,11 +86,6 @@ export default function EditExerciseScreen() {
 
 const styles = StyleSheet.create({
   deleteButton: {
-    alignItems: 'center',
-    paddingVertical: 14,
-  },
-  deleteLabel: {
-    fontSize: 16,
-    fontWeight: '600',
+    marginHorizontal: 20,
   },
 });

@@ -4,9 +4,11 @@ import { Ionicons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { ActivityIndicator, Platform, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSQLiteContext } from 'expo-sqlite';
+import { AnvilMark } from '@/components/AnvilLogo';
 import { Screen } from '@/components/Screen';
+import { StepIcon } from '@/components/StepIcon';
 import { useDialog } from '@/components/AppDialog';
 import { resetAppLanguage, setAppLanguage, type AppLanguage } from '@/i18n';
 import { type BackupPreferences } from '@/db/backup';
@@ -28,6 +30,8 @@ import {
   WEIGHT_STEP_LB_MIN,
 } from '@/store/weight-step';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 import { useThemeStore } from '@/theme/theme-store';
 import { weightUnitLabel } from '@/utils/weight';
 
@@ -38,32 +42,34 @@ interface SwitchRowProps {
   onValueChange: (value: boolean) => void;
 }
 
+/** Two-option segmented control (kept as `SwitchRow` for its on/off API). */
 function SwitchRow({ offLabel, onLabel, value, onValueChange }: SwitchRowProps) {
   const { colors } = useAppTheme();
   return (
-    <View style={styles.row}>
-      <Text
-        style={[
-          styles.rowLabel,
-          { color: value ? colors.textSecondary : colors.text },
-        ]}
-      >
-        {offLabel}
-      </Text>
-      <Switch
-        value={value}
-        onValueChange={onValueChange}
-        trackColor={{ false: colors.border, true: colors.primary }}
-        ios_backgroundColor={colors.border}
-      />
-      <Text
-        style={[
-          styles.rowLabel,
-          { color: value ? colors.text : colors.textSecondary },
-        ]}
-      >
-        {onLabel}
-      </Text>
+    <View style={[styles.segmented, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+      {([false, true] as const).map((option) => {
+        const active = option === value;
+        return (
+          <Pressable
+            key={String(option)}
+            accessibilityRole="button"
+            accessibilityState={{ selected: active }}
+            onPress={() => onValueChange(option)}
+            style={[styles.segment, active && { backgroundColor: colors.surfaceElevated }]}
+          >
+            <Text
+              style={[
+                styles.segmentLabel,
+                { color: active ? colors.text : colors.textSecondary },
+                active && styles.segmentLabelActive,
+              ]}
+            >
+              {option ? onLabel : offLabel}
+            </Text>
+            {active && <View style={[styles.segmentDot, { backgroundColor: colors.primary }]} />}
+          </Pressable>
+        );
+      })}
     </View>
   );
 }
@@ -245,43 +251,37 @@ export default function SettingsScreen() {
         }}
       />
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.appearance')}
         </Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <SwitchRow
-            offLabel={t('theme.light')}
-            onLabel={t('theme.dark')}
-            value={isDark}
-            onValueChange={(dark) => setPreference(dark ? 'dark' : 'light')}
-          />
-        </View>
+        <SwitchRow
+          offLabel={t('theme.light')}
+          onLabel={t('theme.dark')}
+          value={isDark}
+          onValueChange={(dark) => setPreference(dark ? 'dark' : 'light')}
+        />
 
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.language')}
         </Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <SwitchRow
-            offLabel={t('language.english')}
-            onLabel={t('language.spanish')}
-            value={language === 'es'}
-            onValueChange={(es) => void setAppLanguage(es ? 'es' : 'en')}
-          />
-        </View>
+        <SwitchRow
+          offLabel={t('language.english')}
+          onLabel={t('language.spanish')}
+          value={language === 'es'}
+          onValueChange={(es) => void setAppLanguage(es ? 'es' : 'en')}
+        />
 
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.units')}
         </Text>
-        <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <SwitchRow
-            offLabel={t('units.metric')}
-            onLabel={t('units.imperial')}
-            value={unitSystem === 'imperial'}
-            onValueChange={(imperial) => setUnitSystem(imperial ? 'imperial' : 'metric')}
-          />
-        </View>
+        <SwitchRow
+          offLabel={t('units.metric')}
+          onLabel={t('units.imperial')}
+          value={unitSystem === 'imperial'}
+          onValueChange={(imperial) => setUnitSystem(imperial ? 'imperial' : 'metric')}
+        />
 
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.weightIncrement')}
         </Text>
         <View
@@ -302,11 +302,7 @@ export default function SettingsScreen() {
               hitSlop={8}
               onPress={() => setWeightStep(weightStep - stepAdjust)}
             >
-              <Ionicons
-                name="remove-circle-outline"
-                size={30}
-                color={weightStep <= stepMin ? colors.textSecondary : colors.primary}
-              />
+              <StepIcon kind="minus" disabled={weightStep <= stepMin} />
             </Pressable>
             <Text style={[styles.weightStepValue, { color: colors.text }]}>
               {formatWeightStep(weightStep)} {weightUnitLabel(unitSystem)}
@@ -318,16 +314,12 @@ export default function SettingsScreen() {
               hitSlop={8}
               onPress={() => setWeightStep(weightStep + stepAdjust)}
             >
-              <Ionicons
-                name="add-circle-outline"
-                size={30}
-                color={weightStep >= stepMax ? colors.textSecondary : colors.primary}
-              />
+              <StepIcon kind="plus" disabled={weightStep >= stepMax} />
             </Pressable>
           </View>
         </View>
 
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.weeklyGoal')}
         </Text>
         <View
@@ -348,15 +340,7 @@ export default function SettingsScreen() {
               hitSlop={8}
               onPress={() => setWeeklyWorkouts(weeklyWorkouts - 1)}
             >
-              <Ionicons
-                name="remove-circle-outline"
-                size={30}
-                color={
-                  weeklyWorkouts <= WEEKLY_WORKOUTS_MIN
-                    ? colors.textSecondary
-                    : colors.primary
-                }
-              />
+              <StepIcon kind="minus" disabled={weeklyWorkouts <= WEEKLY_WORKOUTS_MIN} />
             </Pressable>
             <Text style={[styles.goalValue, { color: colors.text }]}>{weeklyWorkouts}</Text>
             <Pressable
@@ -366,19 +350,11 @@ export default function SettingsScreen() {
               hitSlop={8}
               onPress={() => setWeeklyWorkouts(weeklyWorkouts + 1)}
             >
-              <Ionicons
-                name="add-circle-outline"
-                size={30}
-                color={
-                  weeklyWorkouts >= WEEKLY_WORKOUTS_MAX
-                    ? colors.textSecondary
-                    : colors.primary
-                }
-              />
+              <StepIcon kind="plus" disabled={weeklyWorkouts >= WEEKLY_WORKOUTS_MAX} />
             </Pressable>
           </View>
         </View>
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.data')}
         </Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
@@ -386,13 +362,18 @@ export default function SettingsScreen() {
             accessibilityRole="button"
             disabled={busyAction !== null}
             onPress={confirmExport}
-            style={styles.row}
+            style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
           >
-            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settings.exportData')}</Text>
+            <View style={[shape.iconWell, styles.rowIcon, { backgroundColor: colors.accentSoft }]}>
+              <Ionicons name="share-outline" size={17} color={colors.accent} />
+            </View>
+            <Text style={[styles.rowLabel, styles.rowLabelFlex, { color: colors.text }]}>
+              {t('settings.exportData')}
+            </Text>
             {busyAction === 'export' ? (
               <ActivityIndicator size="small" color={colors.primary} />
             ) : (
-              <Ionicons name="share-outline" size={22} color={colors.textSecondary} />
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
             )}
           </Pressable>
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -400,13 +381,18 @@ export default function SettingsScreen() {
             accessibilityRole="button"
             disabled={busyAction !== null}
             onPress={confirmImport}
-            style={styles.row}
+            style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
           >
-            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settings.importData')}</Text>
+            <View style={[shape.iconWell, styles.rowIcon, { backgroundColor: colors.accentSoft }]}>
+              <Ionicons name="download-outline" size={17} color={colors.accent} />
+            </View>
+            <Text style={[styles.rowLabel, styles.rowLabelFlex, { color: colors.text }]}>
+              {t('settings.importData')}
+            </Text>
             {busyAction === 'import' ? (
               <ActivityIndicator size="small" color={colors.primary} />
             ) : (
-              <Ionicons name="download-outline" size={22} color={colors.textSecondary} />
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
             )}
           </Pressable>
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
@@ -414,25 +400,42 @@ export default function SettingsScreen() {
             accessibilityRole="button"
             disabled={busyAction !== null}
             onPress={confirmErase}
-            style={styles.row}
+            style={({ pressed }) => [styles.row, { opacity: pressed ? 0.6 : 1 }]}
           >
-            <Text style={[styles.rowLabel, { color: colors.error }]}>{t('settings.eraseAllData')}</Text>
+            <View style={[shape.iconWell, styles.rowIcon, { backgroundColor: withAlpha(colors.error, 0.14) }]}>
+              <Ionicons name="trash-outline" size={17} color={colors.error} />
+            </View>
+            <Text style={[styles.rowLabel, styles.rowLabelFlex, { color: colors.error }]}>
+              {t('settings.eraseAllData')}
+            </Text>
             {busyAction === 'erase' ? (
               <ActivityIndicator size="small" color={colors.error} />
             ) : (
-              <Ionicons name="trash-outline" size={22} color={colors.error} />
+              <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
             )}
           </Pressable>
         </View>
 
-        <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.about')}
         </Text>
         <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <View style={styles.row}>
-            <Text style={[styles.rowLabel, { color: colors.text }]}>{t('settings.version')}</Text>
+            <View style={[shape.iconWell, styles.rowIcon, { backgroundColor: colors.primarySoft }]}>
+              <Ionicons name="information-circle-outline" size={18} color={colors.primary} />
+            </View>
+            <Text style={[styles.rowLabel, styles.rowLabelFlex, { color: colors.text }]}>
+              {t('settings.version')}
+            </Text>
             <Text style={[styles.rowLabel, { color: colors.textSecondary }]}>{appVersion}</Text>
           </View>
+        </View>
+
+        <View style={styles.brandFooter}>
+          <AnvilMark width={72} />
+          <Text style={[styles.brandTagline, { color: colors.textSecondary }]}>
+            {t('home.tagline')}
+          </Text>
         </View>
       </ScrollView>
     </Screen>
@@ -440,37 +443,84 @@ export default function SettingsScreen() {
 }
 
 const styles = StyleSheet.create({
+  brandFooter: {
+    alignItems: 'center',
+    gap: 10,
+    marginTop: 28,
+    marginBottom: 8,
+    opacity: 0.85,
+  },
+  brandTagline: {
+    fontSize: 12,
+    letterSpacing: 0.4,
+  },
   content: {
     padding: 20,
-    gap: 8,
+    paddingBottom: 32,
+    gap: 10,
   },
   sectionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 8,
+    marginTop: 14,
+    marginLeft: 4,
   },
   card: {
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 16,
+    borderRadius: radius.lg,
+    borderWidth: hairline,
+    paddingHorizontal: 14,
   },
   row: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingVertical: 14,
+    gap: 12,
+    paddingVertical: 12,
   },
   rowLabel: {
-    fontSize: 16,
+    fontSize: 15,
+    fontWeight: '600',
   },
   divider: {
-    height: StyleSheet.hairlineWidth,
+    height: hairline,
+    marginLeft: 46,
+  },
+  rowIcon: {
+    width: 34,
+    height: 34,
+    borderRadius: radius.sm,
+  },
+  rowLabelFlex: {
+    flex: 1,
+  },
+  segmented: {
+    flexDirection: 'row',
+    borderRadius: radius.lg,
+    borderWidth: hairline,
+    padding: 4,
+  },
+  segment: {
+    flex: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 10,
+    paddingBottom: 7,
+    borderRadius: radius.md,
+    gap: 4,
+  },
+  segmentLabel: {
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  segmentLabelActive: {
+    fontWeight: '800',
+  },
+  segmentDot: {
+    width: 4,
+    height: 4,
+    borderRadius: 2,
   },
   goalCard: {
-    paddingVertical: 14,
-    gap: 12,
+    paddingVertical: 16,
+    gap: 14,
   },
   goalHint: {
     fontSize: 13,
@@ -479,19 +529,21 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 24,
+    gap: 28,
   },
   goalValue: {
-    fontSize: 28,
+    fontSize: 34,
     fontWeight: '800',
-    minWidth: 40,
+    letterSpacing: -1,
+    minWidth: 48,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },
   weightStepValue: {
-    fontSize: 20,
+    fontSize: 24,
     fontWeight: '800',
-    minWidth: 72,
+    letterSpacing: -0.5,
+    minWidth: 88,
     textAlign: 'center',
     fontVariant: ['tabular-nums'],
   },

@@ -7,6 +7,7 @@ import ReanimatedSwipeable, {
   type SwipeableMethods,
 } from 'react-native-gesture-handler/ReanimatedSwipeable';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { radius } from '@/theme/tokens';
 
 /**
  * Swipe distance (px) that counts as a delete gesture. Small on purpose so a
@@ -51,8 +52,8 @@ export function SwipeToDelete({ onDelete, children }: SwipeToDeleteProps) {
       childrenContainerStyle={styles.children}
       renderLeftActions={() => (
         <View style={[styles.action, { backgroundColor: colors.error }]}>
-          <Ionicons name="trash-outline" size={22} color="#FFFFFF" />
-          <Text style={styles.actionLabel}>{t('common.delete')}</Text>
+          <Ionicons name="trash-outline" size={22} color={colors.onPrimary} />
+          <Text style={[styles.actionLabel, { color: colors.onPrimary }]}>{t('common.delete')}</Text>
         </View>
       )}
     >
@@ -63,7 +64,7 @@ export function SwipeToDelete({ onDelete, children }: SwipeToDeleteProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 14,
+    borderRadius: radius.lg,
     overflow: 'hidden',
   },
   children: {
@@ -74,11 +75,12 @@ const styles = StyleSheet.create({
     alignItems: 'flex-start',
     justifyContent: 'center',
     gap: 4,
-    paddingLeft: 16,
+    paddingLeft: 20,
   },
   actionLabel: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 11,
+    fontWeight: '800',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
   },
 });

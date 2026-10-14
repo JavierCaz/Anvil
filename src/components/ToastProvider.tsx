@@ -20,11 +20,16 @@ import {
 } from 'react';
 import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AchievementBadge } from '@/components/AchievementBadge';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
+import { radius } from '@/theme/tokens';
 
 export interface ToastOptions {
-  /** Emoji rendered before the title (e.g. an achievement icon). */
+  /** Emoji rendered before the title. Ignored when `achievementKey` is set. */
   icon?: string;
+  /** Renders the achievement's medal before the title. */
+  achievementKey?: string;
   title: string;
   description?: string;
   /** How long the toast stays on screen before auto-dismissing. */
@@ -142,15 +147,19 @@ export function ToastProvider({ children }: { children: ReactNode }) {
             style={[
               styles.toast,
               {
-                backgroundColor: colors.surface,
-                borderColor: colors.primary,
-                shadowColor: '#000000',
+                backgroundColor: colors.surfaceElevated,
+                borderColor: withAlpha(colors.primary, 0.45),
+                shadowColor: colors.primary,
                 opacity,
                 transform: [{ translateY }],
               },
             ]}
           >
-            {current.icon ? <Text style={styles.icon}>{current.icon}</Text> : null}
+            {current.achievementKey ? (
+              <AchievementBadge achievementKey={current.achievementKey} size={42} />
+            ) : current.icon ? (
+              <Text style={styles.icon}>{current.icon}</Text>
+            ) : null}
             <View style={styles.body}>
               <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
                 {current.title}
@@ -188,16 +197,17 @@ const styles = StyleSheet.create({
   toast: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
+    gap: 12,
     maxWidth: '92%',
-    borderRadius: 14,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    paddingHorizontal: 16,
+    paddingLeft: 12,
+    paddingRight: 18,
     paddingVertical: 12,
-    shadowOpacity: 0.2,
-    shadowRadius: 12,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 6,
+    shadowOpacity: 0.3,
+    shadowRadius: 18,
+    shadowOffset: { width: 0, height: 6 },
+    elevation: 8,
   },
   icon: {
     fontSize: 26,
@@ -208,7 +218,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   description: {
     fontSize: 12,

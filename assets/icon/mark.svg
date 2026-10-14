@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="118 376 1019 466">
+  <!--
+    Anvil master mark: faceted anvil over a dumbbell, forge-orange rims on both
+    waists. Transparent background. Every icon, splash and favicon is rendered
+    from this file by scripts/generate-icons.mjs (npm run icons).
+  -->
+  <defs>
+    <path id="anvil" d="M284 409 H503 C512 409 518 404 524 397 L538 382 H1003 L925 468 L820 514 C765 540 748 580 748 615 C748 670 785 722 855 742 L903 836 H748 L740 827 H508 L500 836 H350 L396 747 C460 720 502 670 504 620 C506 605 500 580 480 553 C445 525 390 505 360 483 Z"/>
+    <clipPath id="anvil-clip"><use href="#anvil"/></clipPath>
+    <!-- Cuts a gap into the bar around the anvil's silhouette. -->
+    <mask id="bar-gap" maskUnits="userSpaceOnUse" x="0" y="0" width="1254" height="1254">
+      <rect width="1254" height="1254" fill="#fff"/>
+      <use href="#anvil" fill="#000" stroke="#000" stroke-width="30"/>
+    </mask>
+  </defs>
+
+  <!-- Bar -->
+  <rect x="292" y="583" width="670" height="52" fill="#5F7690" mask="url(#bar-gap)"/>
+
+  <!-- Plates -->
+  <g fill="#6581A0">
+    <rect x="123" y="509" width="55" height="200" rx="10"/>
+    <rect x="196" y="458" width="79" height="299" rx="14"/>
+    <rect x="980" y="458" width="79" height="299" rx="14"/>
+    <rect x="1076" y="509" width="55" height="200" rx="10"/>
+  </g>
+
+  <!-- Anvil: body, lit top face, two shadow facets forming the Z, orange rims -->
+  <use href="#anvil" fill="#575D65"/>
+  <g clip-path="url(#anvil-clip)">
+    <rect x="500" y="370" width="520" height="35" fill="#6D7178"/>
+    <path d="M440 521 L625 590 L478 728 L440 640 Z" fill="#252B33"/>
+    <path d="M789 500 L494 836 H695 L896 600 L880 500 Z" fill="#252B33"/>
+    <g fill="none" stroke="#FE6A20" stroke-width="42" stroke-linejoin="round">
+      <path d="M1003 382 L925 468 L820 514 C765 540 748 580 748 615 C748 670 785 722 855 742 L903 836"/>
+      <path d="M480 553 C500 580 506 605 504 620 C502 670 460 720 396 747 L350 836"/>
+    </g>
+    <path d="M918 382 H1003 L985 402 L952 409 Z" fill="#FE6A20"/>
+  </g>
+</svg>

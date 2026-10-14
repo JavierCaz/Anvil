@@ -5,6 +5,8 @@ import { useTranslation } from 'react-i18next';
 import { AppState, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useWorkoutToolsStore } from '@/store/workout-tools';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
+import { radius, typography } from '@/theme/tokens';
 import {
   ALARM_SOUND,
   cancelAlarmNotification,
@@ -145,11 +147,20 @@ export function RestTimer() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    <View
+      style={[
+        styles.container,
+        { backgroundColor: colors.primarySoft, borderColor: withAlpha(colors.primary, 0.35) },
+      ]}
+    >
       <View style={styles.info}>
-        <Ionicons name="timer-outline" size={20} color={colors.primary} />
-        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('workout.rest')}</Text>
-        <Text style={[styles.time, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
+        <View style={[styles.iconWell, { backgroundColor: colors.primary }]}>
+          <Ionicons name="timer" size={18} color={colors.onPrimary} />
+        </View>
+        <View>
+          <Text style={[typography.overline, { color: colors.primary }]}>{t('workout.rest')}</Text>
+          <Text style={[styles.time, { color: colors.text }]}>{formatCountdown(remaining)}</Text>
+        </View>
       </View>
       <View style={styles.actions}>
         <Pressable
@@ -157,9 +168,12 @@ export function RestTimer() {
           accessibilityLabel={t('workout.extendRest')}
           hitSlop={6}
           onPress={handleExtend}
-          style={({ pressed }) => [styles.actionButton, { opacity: pressed ? 0.6 : 1 }]}
+          style={({ pressed }) => [
+            styles.actionButton,
+            { backgroundColor: colors.surface, opacity: pressed ? 0.6 : 1 },
+          ]}
         >
-          <Ionicons name="add" size={18} color={colors.primary} />
+          <Ionicons name="add" size={16} color={colors.primary} />
           <Text style={[styles.actionLabel, { color: colors.primary }]}>30s</Text>
         </Pressable>
         <Pressable
@@ -167,9 +181,13 @@ export function RestTimer() {
           accessibilityLabel={t('workout.skip')}
           hitSlop={6}
           onPress={handleSkip}
-          style={({ pressed }) => [styles.actionButton, { opacity: pressed ? 0.6 : 1 }]}
+          style={({ pressed }) => [
+            styles.actionButton,
+            { backgroundColor: colors.surface, opacity: pressed ? 0.6 : 1 },
+          ]}
         >
-          <Text style={[styles.actionLabel, { color: colors.textSecondary }]}>{t('workout.skip')}</Text>
+          <Text style={[styles.actionLabel, { color: colors.text }]}>{t('workout.skip')}</Text>
+          <Ionicons name="play-skip-forward" size={13} color={colors.text} />
         </Pressable>
       </View>
     </View>
@@ -181,36 +199,44 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderRadius: 14,
+    borderRadius: radius.lg,
     borderWidth: 1,
-    paddingHorizontal: 16,
+    paddingHorizontal: 14,
     paddingVertical: 12,
   },
   info: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 12,
   },
-  label: {
-    fontSize: 13,
+  iconWell: {
+    width: 38,
+    height: 38,
+    borderRadius: radius.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   time: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
+    letterSpacing: -0.5,
     fontVariant: ['tabular-nums'],
   },
   actions: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 8,
   },
   actionButton: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    gap: 3,
+    borderRadius: radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 8,
   },
   actionLabel: {
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '800',
   },
 });

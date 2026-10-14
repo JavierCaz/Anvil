@@ -2,6 +2,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
+import { AchievementBadge } from '@/components/AchievementBadge';
 import { DetailModal } from '@/components/DetailModal';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
 import {
@@ -107,27 +108,32 @@ export function AchievementDetailModal({
 
   return (
     <DetailModal onClose={onClose}>
-      {/* Icon */}
-      <View style={[styles.iconCircle, { backgroundColor: colors.background }]}>
-        <Text style={styles.icon}>{definition.icon}</Text>
+      {/* Medal, with a soft forge halo once earned */}
+      <View style={styles.badgeStage}>
+        {unlocked && (
+          <View style={[styles.halo, { backgroundColor: tierColor ?? colors.primary }]} />
+        )}
+        <AchievementBadge achievementKey={definition.key} size={104} locked={!unlocked} />
       </View>
 
       {/* Name + badges */}
       <Text style={[styles.name, { color: colors.text }]}>{t(definition.nameKey)}</Text>
       <View style={styles.badgeRow}>
-        <View style={[styles.badge, { backgroundColor: colors.background }]}>
+        <View style={[styles.badge, { borderColor: colors.border, borderWidth: StyleSheet.hairlineWidth }]}>
           <Text style={[styles.badgeLabel, { color: colors.textSecondary }]}>
             {t(`achievements.categories.${definition.category}`)}
           </Text>
         </View>
         {milestoneWeight && (
-          <View style={[styles.weightBadge, { backgroundColor: colors.background }]}>
-            <Text style={[styles.weightLabel, { color: colors.textSecondary }]}>{milestoneWeight}</Text>
+          <View style={[styles.weightBadge, { backgroundColor: colors.primarySoft }]}>
+            <Text style={[styles.weightLabel, { color: colors.primary }]}>{milestoneWeight}</Text>
           </View>
         )}
         {tierColor && (
-          <View style={[styles.badge, { backgroundColor: tierColor }]}>
-            <Text style={styles.tierLabel}>{t(`achievements.tiers.${definition.tier}`)}</Text>
+          <View style={[styles.badge, styles.tierBadge, { borderColor: tierColor }]}>
+            <Text style={[styles.tierLabel, { color: tierColor }]}>
+              {t(`achievements.tiers.${definition.tier}`)}
+            </Text>
           </View>
         )}
       </View>
@@ -139,7 +145,7 @@ export function AchievementDetailModal({
       {/* Progress */}
       {hasProgress && progressLine && (
         <View style={styles.progressBlock}>
-          <View style={[styles.track, { backgroundColor: colors.border }]}>
+          <View style={[styles.track, { backgroundColor: colors.surfaceElevated }]}>
             <View
               style={[
                 styles.fill,
@@ -165,7 +171,10 @@ export function AchievementDetailModal({
                 ? dayjs(exercise.unlockedAt).locale(i18n.language).format('MMM D, YYYY')
                 : null;
               return (
-                <View key={exercise.id} style={styles.exerciseChip}>
+                <View
+                  key={exercise.id}
+                  style={[styles.exerciseChip, { borderColor: colors.border, backgroundColor: colors.background }]}
+                >
                   <ExerciseThumbnail slug={exercise.slug} size={28} borderRadius={6} />
                   <View style={styles.exerciseChipBody}>
                     <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={1}>
@@ -205,20 +214,24 @@ export function AchievementDetailModal({
 }
 
 const styles = StyleSheet.create({
-  iconCircle: {
-    width: 64,
-    height: 64,
-    borderRadius: 32,
+  badgeStage: {
+    width: 132,
+    height: 124,
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 10,
+    marginBottom: 6,
   },
-  icon: {
-    fontSize: 32,
+  halo: {
+    position: 'absolute',
+    width: 120,
+    height: 120,
+    borderRadius: 60,
+    opacity: 0.14,
   },
   name: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.3,
     textAlign: 'center',
     marginBottom: 8,
   },
@@ -229,7 +242,7 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   badge: {
-    borderRadius: 8,
+    borderRadius: 999,
     paddingHorizontal: 8,
     paddingVertical: 3,
   },
@@ -239,15 +252,19 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     letterSpacing: 0.4,
   },
+  tierBadge: {
+    borderWidth: 1,
+    borderRadius: 999,
+    backgroundColor: 'transparent',
+  },
   tierLabel: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 1,
   },
   weightBadge: {
-    borderRadius: 8,
+    borderRadius: 999,
     paddingHorizontal: 10,
     paddingVertical: 3,
   },
@@ -268,13 +285,13 @@ const styles = StyleSheet.create({
     marginBottom: 14,
   },
   track: {
-    height: 8,
-    borderRadius: 4,
+    height: 6,
+    borderRadius: 3,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    borderRadius: 4,
+    borderRadius: 3,
   },
   progressLine: {
     fontSize: 13,
@@ -301,7 +318,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: StyleSheet.hairlineWidth,
     paddingHorizontal: 6,
     paddingVertical: 4,

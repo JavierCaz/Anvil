@@ -17,8 +17,8 @@ interface WeekStripProps {
 }
 
 /**
- * A Mon–Sun row of day circles. Days with a logged workout are filled with
- * the primary color; today is outlined.
+ * A Mon–Sun row of day tiles. Days with a logged workout are filled with
+ * forge orange; today is outlined; the rest sit quietly on the surface.
  */
 export function WeekStrip({ days }: WeekStripProps) {
   const { colors } = useAppTheme();
@@ -27,19 +27,24 @@ export function WeekStrip({ days }: WeekStripProps) {
     <View style={styles.row}>
       {days.map((day) => (
         <View key={day.iso} style={styles.column}>
-          <Text style={[styles.label, { color: colors.textSecondary }]}>{day.label}</Text>
+          <Text
+            style={[styles.label, { color: day.isToday ? colors.primary : colors.textSecondary }]}
+          >
+            {day.label}
+          </Text>
           <View
             style={[
               styles.circle,
-              { borderColor: day.isToday || day.workedOut ? colors.primary : colors.border },
-              day.workedOut && { backgroundColor: colors.primary },
-              day.isToday && !day.workedOut && styles.todayRing,
+              {
+                backgroundColor: day.workedOut ? colors.primary : colors.surfaceElevated,
+                borderColor: day.isToday ? colors.primary : 'transparent',
+              },
             ]}
           >
             <Text
               style={[
                 styles.dayNumber,
-                { color: day.workedOut ? colors.background : colors.text },
+                { color: day.workedOut ? colors.onPrimary : colors.text },
               ]}
             >
               {day.dayOfMonth}
@@ -61,22 +66,22 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   label: {
-    fontSize: 12,
-    textTransform: 'capitalize',
+    fontSize: 11,
+    fontWeight: '600',
+    textTransform: 'uppercase',
+    letterSpacing: 0.6,
   },
   circle: {
     width: 38,
     height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
+    borderRadius: 12,
+    borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  todayRing: {
-    borderWidth: 2,
-  },
   dayNumber: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
 });

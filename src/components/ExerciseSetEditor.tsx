@@ -3,7 +3,9 @@ import * as Haptics from 'expo-haptics';
 import { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
+import { AchievementBadge } from '@/components/AchievementBadge';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
+import { StepIcon } from '@/components/StepIcon';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import {
   clampIncline,
@@ -23,6 +25,8 @@ import { useUnitsStore } from '@/store/units';
 import { formatWeightStep, useWeightStepStore } from '@/store/weight-step';
 import { getSetTimerElapsedSeconds, useWorkoutToolsStore } from '@/store/workout-tools';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 import {
   displayToMeters,
   distanceUnitLabel,
@@ -104,8 +108,8 @@ interface ExerciseSetEditorProps {
   onUndoSet?: (setNumber: number) => void;
   /** When provided, the exercise header card is tappable (opens the exercise info card). */
   onHeaderPress?: () => void;
-  /** Icons of achievements unlocked for this exercise (shown under the header, workout mode). */
-  achievementIcons?: string[];
+  /** Keys of achievements unlocked for this exercise (medals under the header, workout mode). */
+  achievementKeys?: string[];
   /** Controlled accordion state (the workout screen drives auto-advance). */
   expanded?: number | null;
   onExpandedChange?: (next: number | null) => void;
@@ -140,7 +144,7 @@ export function ExerciseSetEditor({
   onCompleteSet,
   onUndoSet,
   onHeaderPress,
-  achievementIcons,
+  achievementKeys,
   expanded: expandedProp,
   onExpandedChange,
 }: ExerciseSetEditorProps) {
@@ -200,7 +204,7 @@ export function ExerciseSetEditor({
         ]}
       >
         <View style={[styles.infoCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <ExerciseThumbnail slug={slug} />
+          <ExerciseThumbnail slug={slug} size={60} borderRadius={radius.md} />
           <View style={styles.infoBody}>
             <Text style={[styles.infoTitle, { color: colors.text }]} numberOfLines={1}>
               {exerciseName}
@@ -210,16 +214,14 @@ export function ExerciseSetEditor({
                 ? t('workout.setsDone', { done: doneCount, total: totalSets || sets.length })
                 : t('routines.setsEditor.setCount', { count: sets.length })}
             </Text>
-            {achievementIcons && achievementIcons.length > 0 && (
+            {achievementKeys && achievementKeys.length > 0 && (
               <View style={styles.achievementRow}>
-                {achievementIcons.slice(0, 5).map((icon, index) => (
-                  <Text key={`${icon}-${index}`} style={styles.achievementIcon}>
-                    {icon}
-                  </Text>
+                {achievementKeys.slice(0, 5).map((key) => (
+                  <AchievementBadge key={key} achievementKey={key} size={22} />
                 ))}
-                {achievementIcons.length > 5 && (
+                {achievementKeys.length > 5 && (
                   <Text style={[styles.achievementMore, { color: colors.textSecondary }]}>
-                    +{achievementIcons.length - 5}
+                    +{achievementKeys.length - 5}
                   </Text>
                 )}
               </View>
@@ -269,12 +271,13 @@ export function ExerciseSetEditor({
         accessibilityRole="button"
         onPress={onAddSet}
         style={({ pressed }) => [
+          shape.secondaryButton,
           styles.addSetButton,
-          { borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+          { borderColor: colors.primary, backgroundColor: pressed ? colors.primarySoft : 'transparent' },
         ]}
       >
-        <Ionicons name="add" size={18} color={colors.textSecondary} />
-        <Text style={[styles.addSetLabel, { color: colors.textSecondary }]}>
+        <Ionicons name="add" size={18} color={colors.primary} />
+        <Text style={[styles.addSetLabel, { color: colors.primary }]}>
           {t('workout.addSet')}
         </Text>
       </Pressable>
@@ -426,12 +429,19 @@ function SetCard({
 
   if (mode === 'workout' && item.done) {
     return (
-      <View style={[styles.setCard, { backgroundColor: colors.surface, borderColor: colors.success }]}>
+      <View
+        style={[
+          styles.setCard,
+          { backgroundColor: withAlpha(colors.success, 0.08), borderColor: withAlpha(colors.success, 0.45) },
+        ]}
+      >
         <View style={styles.setHeader}>
           <Text style={[styles.setTitle, { color: colors.text }]}>
             {t('workout.set', { number: item.setNumber })}
           </Text>
-          <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+          <View style={[styles.doneCheck, { backgroundColor: colors.success }]}>
+            <Ionicons name="checkmark" size={14} color={colors.onPrimary} />
+          </View>
         </View>
         <Text style={[styles.setSummary, { color: colors.text }]}>
           {summary}
@@ -440,8 +450,12 @@ function SetCard({
         <Pressable
           accessibilityRole="button"
           onPress={onUndo}
-          style={({ pressed }) => [styles.undoButton, { opacity: pressed ? 0.6 : 1 }]}
+          style={({ pressed }) => [
+            styles.undoButton,
+            { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
+          ]}
         >
+          <Ionicons name="arrow-undo" size={13} color={colors.textSecondary} />
           <Text style={[styles.undoLabel, { color: colors.textSecondary }]}>{t('workout.undo')}</Text>
         </Pressable>
       </View>
@@ -485,13 +499,9 @@ function SetCard({
                   disabled={weightMinusDisabled}
                   onPress={() => stepWeight(-weightStep)}
                 >
-                  <Ionicons
-                    name="remove-circle-outline"
-                    size={26}
-                    color={weightMinusDisabled ? colors.border : colors.primary}
-                  />
+                  <StepIcon kind="minus" disabled={weightMinusDisabled} />
                 </Pressable>
-                <View style={[styles.inputField, { borderColor: colors.border }]}>
+                <View style={[styles.inputField, { borderColor: colors.border, backgroundColor: colors.background }]}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
                     {metrics.weight
                       ? t('workout.weight', { unit: unitLabel })
@@ -512,7 +522,7 @@ function SetCard({
                   hitSlop={8}
                   onPress={() => stepWeight(weightStep)}
                 >
-                  <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+                  <StepIcon kind="plus" />
                 </Pressable>
               </View>
             )}
@@ -525,13 +535,9 @@ function SetCard({
                   disabled={repsMinusDisabled}
                   onPress={() => stepReps(-1)}
                 >
-                  <Ionicons
-                    name="remove-circle-outline"
-                    size={26}
-                    color={repsMinusDisabled ? colors.border : colors.primary}
-                  />
+                  <StepIcon kind="minus" disabled={repsMinusDisabled} />
                 </Pressable>
-                <View style={[styles.inputField, { borderColor: colors.border }]}>
+                <View style={[styles.inputField, { borderColor: colors.border, backgroundColor: colors.background }]}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
                     {t('workout.reps')}
                   </Text>
@@ -550,7 +556,7 @@ function SetCard({
                   hitSlop={8}
                   onPress={() => stepReps(1)}
                 >
-                  <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+                  <StepIcon kind="plus" />
                 </Pressable>
               </View>
             )}
@@ -563,13 +569,9 @@ function SetCard({
                   disabled={distanceMinusDisabled}
                   onPress={() => stepDistance(-kmStep)}
                 >
-                  <Ionicons
-                    name="remove-circle-outline"
-                    size={26}
-                    color={distanceMinusDisabled ? colors.border : colors.primary}
-                  />
+                  <StepIcon kind="minus" disabled={distanceMinusDisabled} />
                 </Pressable>
-                <View style={[styles.inputField, { borderColor: colors.border }]}>
+                <View style={[styles.inputField, { borderColor: colors.border, backgroundColor: colors.background }]}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
                     {t('workout.distance', { unit: distanceUnitLabel(unit, scale) })}
                   </Text>
@@ -588,7 +590,7 @@ function SetCard({
                   hitSlop={8}
                   onPress={() => stepDistance(kmStep)}
                 >
-                  <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+                  <StepIcon kind="plus" />
                 </Pressable>
               </View>
             )}
@@ -601,11 +603,7 @@ function SetCard({
                   disabled={durationMinusDisabled}
                   onPress={() => stepDuration(-durationStep)}
                 >
-                  <Ionicons
-                    name="remove-circle-outline"
-                    size={26}
-                    color={durationMinusDisabled ? colors.border : colors.primary}
-                  />
+                  <StepIcon kind="minus" disabled={durationMinusDisabled} />
                 </Pressable>
                 <DurationInput seconds={item.durationSeconds} onChange={onDurationChange} />
                 <Pressable
@@ -614,7 +612,7 @@ function SetCard({
                   hitSlop={8}
                   onPress={() => stepDuration(durationStep)}
                 >
-                  <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+                  <StepIcon kind="plus" />
                 </Pressable>
               </View>
             )}
@@ -627,13 +625,9 @@ function SetCard({
                   disabled={inclineValue <= 0}
                   onPress={() => stepIncline(-INCLINE_STEP)}
                 >
-                  <Ionicons
-                    name="remove-circle-outline"
-                    size={26}
-                    color={inclineValue <= 0 ? colors.border : colors.primary}
-                  />
+                  <StepIcon kind="minus" disabled={inclineValue <= 0} />
                 </Pressable>
-                <View style={[styles.inputField, { borderColor: colors.border }]}>
+                <View style={[styles.inputField, { borderColor: colors.border, backgroundColor: colors.background }]}>
                   <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
                     {t('workout.incline')}
                   </Text>
@@ -652,7 +646,7 @@ function SetCard({
                   hitSlop={8}
                   onPress={() => stepIncline(INCLINE_STEP)}
                 >
-                  <Ionicons name="add-circle-outline" size={26} color={colors.primary} />
+                  <StepIcon kind="plus" />
                 </Pressable>
               </View>
             )}
@@ -662,7 +656,10 @@ function SetCard({
                   <Pressable
                     accessibilityRole="button"
                     onPress={onAddLoad}
-                    style={({ pressed }) => [styles.addLoadButton, { opacity: pressed ? 0.6 : 1 }]}
+                    style={({ pressed }) => [
+                      styles.addLoadButton,
+                      { backgroundColor: colors.primarySoft, opacity: pressed ? 0.6 : 1 },
+                    ]}
                   >
                     <Ionicons name="barbell-outline" size={16} color={colors.primary} />
                     <Text style={[styles.addLoadLabel, { color: colors.primary }]}>
@@ -674,7 +671,10 @@ function SetCard({
                   <Pressable
                     accessibilityRole="button"
                     onPress={onAddIncline}
-                    style={({ pressed }) => [styles.addLoadButton, { opacity: pressed ? 0.6 : 1 }]}
+                    style={({ pressed }) => [
+                      styles.addLoadButton,
+                      { backgroundColor: colors.primarySoft, opacity: pressed ? 0.6 : 1 },
+                    ]}
                   >
                     <Ionicons name="trending-up-outline" size={16} color={colors.primary} />
                     <Text style={[styles.addLoadLabel, { color: colors.primary }]}>
@@ -694,7 +694,7 @@ function SetCard({
             )}
           </View>
 
-          <View style={styles.restRow}>
+          <View style={[styles.restRow, { borderTopColor: colors.border }]}>
             <Text style={[styles.restLabel, { color: colors.textSecondary }]}>
               {t('workout.restAfterSet')}
             </Text>
@@ -705,13 +705,9 @@ function SetCard({
                 disabled={item.restSeconds <= 0}
                 onPress={() => onRestChange(item.restSeconds - REST_STEP_SECONDS)}
               >
-                <Ionicons
-                  name="remove-circle-outline"
-                  size={26}
-                  color={item.restSeconds <= 0 ? colors.border : colors.primary}
-                />
+                <StepIcon kind="minus" disabled={item.restSeconds <= 0} />
               </Pressable>
-              <View style={[styles.restInputField, { borderColor: colors.border }]}>
+              <View style={[styles.restInputField, { borderColor: colors.border, backgroundColor: colors.background }]}>
                 <TextInput
                   value={String(item.restSeconds)}
                   onChangeText={onRestInputChange}
@@ -728,11 +724,7 @@ function SetCard({
                 disabled={item.restSeconds >= REST_MAX_SECONDS}
                 onPress={() => onRestChange(item.restSeconds + REST_STEP_SECONDS)}
               >
-                <Ionicons
-                  name="add-circle-outline"
-                  size={26}
-                  color={item.restSeconds >= REST_MAX_SECONDS ? colors.border : colors.primary}
-                />
+                <StepIcon kind="plus" disabled={item.restSeconds >= REST_MAX_SECONDS} />
               </Pressable>
             </View>
           </View>
@@ -742,8 +734,9 @@ function SetCard({
               accessibilityRole="button"
               onPress={onApplyToAll}
               style={({ pressed }) => [
+                shape.secondaryButton,
                 styles.applyButton,
-                { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 },
+                { borderColor: colors.border, backgroundColor: pressed ? colors.primarySoft : 'transparent' },
               ]}
             >
               <Ionicons name="copy-outline" size={16} color={colors.primary} />
@@ -759,12 +752,13 @@ function SetCard({
               accessibilityLabel={t('workout.markDone')}
               onPress={onComplete}
               style={({ pressed }) => [
+                shape.primaryButton,
                 styles.doneButton,
                 { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
               ]}
             >
-              <Ionicons name="checkmark" size={18} color="#FFFFFF" />
-              <Text style={styles.doneLabel}>{t('workout.markDone')}</Text>
+              <Ionicons name="checkmark" size={20} color={colors.onPrimary} />
+              <Text style={[typography.button, { color: colors.onPrimary }]}>{t('workout.markDone')}</Text>
             </Pressable>
           )}
         </>
@@ -794,7 +788,7 @@ function DurationInput({
   };
 
   return (
-    <View style={[styles.inputField, { borderColor: colors.border }]}>
+    <View style={[styles.inputField, { borderColor: colors.border, backgroundColor: colors.background }]}>
       <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
         {t('workout.duration')}
       </Text>
@@ -890,13 +884,13 @@ function SetTimerButton({
         styles.timerButton,
         {
           borderColor: colors.primary,
-          backgroundColor: running ? colors.primary : 'transparent',
+          backgroundColor: running ? colors.primary : colors.primarySoft,
           opacity: pressed ? 0.8 : 1,
         },
       ]}
     >
-      <Ionicons name={running ? 'stop' : 'play'} size={16} color={running ? '#FFFFFF' : colors.primary} />
-      <Text style={[styles.timerLabel, { color: running ? '#FFFFFF' : colors.primary }]}>
+      <Ionicons name={running ? 'stop' : 'play'} size={16} color={running ? colors.onPrimary : colors.primary} />
+      <Text style={[styles.timerLabel, { color: running ? colors.onPrimary : colors.primary }]}>
         {running
           ? `${t('workout.stopSetTimer')} · ${formatDuration(elapsed)}`
           : t('workout.startSetTimer')}
@@ -910,11 +904,10 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   infoCard: {
+    ...shape.card,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    borderRadius: 14,
-    borderWidth: 1,
+    gap: 14,
     padding: 12,
   },
   infoBody: {
@@ -922,8 +915,7 @@ const styles = StyleSheet.create({
     gap: 2,
   },
   infoTitle: {
-    fontSize: 17,
-    fontWeight: '800',
+    ...typography.heading,
   },
   infoMeta: {
     fontSize: 13,
@@ -935,18 +927,14 @@ const styles = StyleSheet.create({
     gap: 4,
     marginTop: 4,
   },
-  achievementIcon: {
-    fontSize: 15,
-  },
   achievementMore: {
     fontSize: 12,
     fontWeight: '600',
   },
   setCard: {
-    borderRadius: 14,
-    borderWidth: 1,
-    padding: 14,
-    gap: 12,
+    ...shape.card,
+    padding: 16,
+    gap: 14,
   },
   setHeader: {
     flexDirection: 'row',
@@ -955,7 +943,8 @@ const styles = StyleSheet.create({
   },
   setTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '800',
+    letterSpacing: -0.1,
   },
   collapsedSummary: {
     flex: 1,
@@ -963,8 +952,9 @@ const styles = StyleSheet.create({
     textAlign: 'right',
   },
   setSummary: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 17,
+    fontWeight: '700',
+    fontVariant: ['tabular-nums'],
   },
   inputColumn: {
     flexDirection: 'column',
@@ -977,22 +967,23 @@ const styles = StyleSheet.create({
   },
   inputField: {
     flex: 1,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 12,
+    borderWidth: hairline,
+    borderRadius: radius.md,
+    paddingHorizontal: 14,
     paddingVertical: 8,
     gap: 2,
   },
   inputLabel: {
-    fontSize: 11,
-    fontWeight: '600',
+    fontSize: 10,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.4,
+    letterSpacing: 1,
   },
   inputValue: {
-    fontSize: 18,
-    fontWeight: '700',
+    fontSize: 20,
+    fontWeight: '800',
     paddingVertical: 2,
+    fontVariant: ['tabular-nums'],
   },
   durationRow: {
     flexDirection: 'row',
@@ -1013,20 +1004,22 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     alignSelf: 'flex-start',
     gap: 6,
-    paddingVertical: 4,
+    borderRadius: radius.pill,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   addLoadLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   timerButton: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     gap: 6,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 10,
+    borderWidth: hairline,
+    borderRadius: radius.md,
+    paddingVertical: 12,
   },
   timerLabel: {
     fontSize: 14,
@@ -1037,9 +1030,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    paddingTop: 12,
+    borderTopWidth: hairline,
   },
   restLabel: {
     fontSize: 13,
+    fontWeight: '600',
   },
   restStepper: {
     flexDirection: 'row',
@@ -1047,11 +1043,11 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   restInputField: {
-    width: 56,
-    borderWidth: 1,
-    borderRadius: 10,
+    width: 60,
+    borderWidth: hairline,
+    borderRadius: radius.sm,
     paddingHorizontal: 8,
-    paddingVertical: 6,
+    paddingVertical: 8,
   },
   restInputValue: {
     fontSize: 16,
@@ -1061,50 +1057,42 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
   },
   applyButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingVertical: 10,
+    minHeight: 44,
   },
   applyLabel: {
     fontSize: 13,
     fontWeight: '700',
   },
   doneButton: {
-    flexDirection: 'row',
+    minHeight: 50,
+  },
+  doneCheck: {
+    width: 22,
+    height: 22,
+    borderRadius: 11,
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 6,
-    borderRadius: 12,
-    paddingVertical: 12,
-  },
-  doneLabel: {
-    color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '700',
   },
   undoButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
     alignSelf: 'flex-start',
-    paddingVertical: 4,
+    gap: 5,
+    borderRadius: radius.pill,
+    borderWidth: hairline,
+    paddingHorizontal: 12,
+    paddingVertical: 5,
   },
   undoLabel: {
     fontSize: 13,
     fontWeight: '600',
   },
   addSetButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingVertical: 12,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
   },
   addSetLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '800',
   },
 });

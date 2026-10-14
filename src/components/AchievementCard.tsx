@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AchievementBadge } from '@/components/AchievementBadge';
 import { ACHIEVEMENT_TIER_COLORS } from '@/constants/achievements';
 import type { AchievementDefinition } from '@/constants/achievements';
 import { useUnitsStore } from '@/store/units';
@@ -15,7 +16,7 @@ interface AchievementCardProps {
   onPress?: () => void;
 }
 
-/** Achievement card: icon, translated name/description, tier badge, progress bar. */
+/** Achievement card: metal badge, translated name/description, tier tag, progress bar. */
 export function AchievementCard({ definition, progress, unlocked, onPress }: AchievementCardProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
@@ -37,22 +38,25 @@ export function AchievementCard({ definition, progress, unlocked, onPress }: Ach
         styles.card,
         {
           backgroundColor: colors.surface,
-          borderColor: unlocked ? colors.primary : colors.border,
+          borderColor: colors.border,
         },
       ]}
     >
-      <View style={[styles.iconCircle, { backgroundColor: colors.background }]}>
-        <Text style={styles.icon}>{definition.icon}</Text>
-      </View>
+      <AchievementBadge achievementKey={definition.key} size={54} locked={!unlocked} />
 
       <View style={styles.body}>
         <View style={styles.titleRow}>
-          <Text style={[styles.name, { color: colors.text }]} numberOfLines={1}>
+          <Text
+            style={[styles.name, { color: unlocked ? colors.text : colors.textSecondary }]}
+            numberOfLines={1}
+          >
             {t(definition.nameKey)}
           </Text>
           {tierColor && (
-            <View style={[styles.tierBadge, { backgroundColor: tierColor }]}>
-              <Text style={styles.tierLabel}>{t(`achievements.tiers.${definition.tier}`)}</Text>
+            <View style={[styles.tierBadge, { borderColor: tierColor }]}>
+              <Text style={[styles.tierLabel, { color: tierColor }]}>
+                {t(`achievements.tiers.${definition.tier}`)}
+              </Text>
             </View>
           )}
           {unlocked && <Ionicons name="checkmark-circle" size={18} color={colors.primary} />}
@@ -63,7 +67,7 @@ export function AchievementCard({ definition, progress, unlocked, onPress }: Ach
 
         {showProgress && (
           <View style={styles.progressRow}>
-            <View style={[styles.track, { backgroundColor: colors.border }]}>
+            <View style={[styles.track, { backgroundColor: colors.surfaceElevated }]}>
               <View
                 style={[
                   styles.fill,
@@ -99,19 +103,9 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     padding: 14,
-    borderRadius: 14,
-    borderWidth: 1,
-    gap: 12,
-  },
-  iconCircle: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  icon: {
-    fontSize: 24,
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    gap: 14,
   },
   body: {
     flex: 1,
@@ -128,16 +122,16 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   tierBadge: {
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: 999,
+    borderWidth: 1,
+    paddingHorizontal: 7,
+    paddingVertical: 1,
   },
   tierLabel: {
-    color: '#FFFFFF',
-    fontSize: 10,
-    fontWeight: '700',
+    fontSize: 9,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    letterSpacing: 0.8,
   },
   description: {
     fontSize: 13,
@@ -150,13 +144,13 @@ const styles = StyleSheet.create({
   },
   track: {
     flex: 1,
-    height: 6,
-    borderRadius: 3,
+    height: 4,
+    borderRadius: 2,
     overflow: 'hidden',
   },
   fill: {
     height: '100%',
-    borderRadius: 3,
+    borderRadius: 2,
   },
   percent: {
     fontSize: 12,

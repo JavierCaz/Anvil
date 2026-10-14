@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, radius, typography } from '@/theme/tokens';
 
 /** `hh:mm:ss` session duration. */
 export function formatElapsed(totalSeconds: number): string {
@@ -38,8 +39,10 @@ export function WorkoutElapsedBar({ startedAt }: WorkoutElapsedBarProps) {
 
   return (
     <View style={[styles.bar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-      <Ionicons name="time-outline" size={18} color={colors.textSecondary} />
-      <Text style={[styles.label, { color: colors.textSecondary }]}>{t('workout.elapsed')}</Text>
+      <Ionicons name="time" size={16} color={colors.primary} />
+      <Text style={[typography.overline, styles.label, { color: colors.textSecondary }]}>
+        {t('workout.elapsed')}
+      </Text>
       <Text style={[styles.value, { color: colors.text }]}>{formatElapsed(elapsedSeconds)}</Text>
     </View>
   );
@@ -50,22 +53,19 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    borderRadius: 14,
-    borderWidth: 1,
+    borderRadius: radius.lg,
+    borderWidth: hairline,
     paddingHorizontal: 16,
-    paddingVertical: 10,
+    paddingVertical: 12,
     marginBottom: 12,
   },
   label: {
     flex: 1,
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   value: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.4,
     fontVariant: ['tabular-nums'],
   },
 });

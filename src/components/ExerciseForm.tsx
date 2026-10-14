@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { EXERCISE_TYPE_I18N_KEYS, MUSCLE_I18N_KEYS } from '@/constants/exercises';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { shape, typography } from '@/theme/tokens';
 
 interface ExerciseFormProps {
   initialName?: string;
@@ -54,19 +55,22 @@ export function ExerciseForm({
       keyboardShouldPersistTaps="handled"
       showsVerticalScrollIndicator={false}
     >
-      <View style={[styles.field, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('common.name')}</Text>
+      <View style={styles.fieldGroup}>
+        <Text style={[typography.overline, { color: colors.textSecondary }]}>{t('common.name')}</Text>
         <TextInput
           value={name}
           onChangeText={setName}
           placeholder={t('exercises.form.namePlaceholder')}
           placeholderTextColor={colors.textSecondary}
-          style={[styles.input, { color: colors.text }]}
+          style={[
+            shape.input,
+            { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
           autoFocus
         />
       </View>
 
-      <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+      <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
         {t('exercises.form.muscleGroup')}
       </Text>
       <View style={styles.chipWrap}>
@@ -80,8 +84,8 @@ export function ExerciseForm({
         ))}
       </View>
 
-      <View style={[styles.field, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>
+      <View style={styles.fieldGroup}>
+        <Text style={[typography.overline, { color: colors.textSecondary }]}>
           {t('exercises.form.equipment')}
         </Text>
         <TextInput
@@ -89,12 +93,15 @@ export function ExerciseForm({
           onChangeText={setEquipment}
           placeholder={t('exercises.form.equipmentPlaceholder')}
           placeholderTextColor={colors.textSecondary}
-          style={[styles.input, { color: colors.text }]}
+          style={[
+            shape.input,
+            { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
           autoCorrect={false}
         />
       </View>
 
-      <Text style={[styles.sectionLabel, { color: colors.textSecondary }]}>
+      <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
         {t('exercises.form.type')}
       </Text>
       <View style={styles.chipWrap}>
@@ -114,14 +121,17 @@ export function ExerciseForm({
         disabled={!canSave}
         onPress={handleSave}
         style={({ pressed }) => [
+          shape.primaryButton,
           styles.saveButton,
           {
-            backgroundColor: canSave ? colors.primary : colors.border,
+            backgroundColor: canSave ? colors.primary : colors.surfaceElevated,
             opacity: pressed ? 0.85 : 1,
           },
         ]}
       >
-        <Text style={styles.saveLabel}>{submitLabel}</Text>
+        <Text style={[typography.button, { color: canSave ? colors.onPrimary : colors.textSecondary }]}>
+          {submitLabel}
+        </Text>
       </Pressable>
     </ScrollView>
   );
@@ -144,12 +154,18 @@ function Chip({
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? colors.primary : colors.surface,
+          backgroundColor: selected ? colors.primarySoft : colors.surface,
           borderColor: selected ? colors.primary : colors.border,
         },
       ]}
     >
-      <Text style={[styles.chipLabel, { color: selected ? '#FFFFFF' : colors.textSecondary }]}>
+      <Text
+        style={[
+          styles.chipLabel,
+          { color: selected ? colors.primary : colors.textSecondary },
+          selected && styles.chipLabelSelected,
+        ]}
+      >
         {label}
       </Text>
     </Pressable>
@@ -160,29 +176,13 @@ const styles = StyleSheet.create({
   content: {
     padding: 20,
     paddingBottom: 40,
-    gap: 10,
+    gap: 12,
   },
-  field: {
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    gap: 2,
-  },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  input: {
-    fontSize: 16,
-    paddingVertical: 6,
+  fieldGroup: {
+    gap: 8,
   },
   sectionLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 8,
+    marginTop: 10,
   },
   chipWrap: {
     flexDirection: 'row',
@@ -190,24 +190,16 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   chip: {
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    ...shape.chip,
   },
   chipLabel: {
     fontSize: 13,
     fontWeight: '600',
   },
-  saveButton: {
-    marginTop: 12,
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
+  chipLabelSelected: {
+    fontWeight: '800',
   },
-  saveLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+  saveButton: {
+    marginTop: 16,
   },
 });

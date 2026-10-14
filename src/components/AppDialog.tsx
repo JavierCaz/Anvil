@@ -18,7 +18,8 @@ import {
 } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { ThemeColors } from '@/theme/colors';
+import { withAlpha, type ThemeColors } from '@/theme/colors';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 import { useAppTheme } from '@/theme/app-theme-provider';
 
 export type DialogButtonStyle = 'default' | 'cancel' | 'destructive';
@@ -61,14 +62,24 @@ function toneColor(tone: DialogTone, colors: ThemeColors): string {
   }
 }
 
-function buttonColor(button: DialogButton, colors: ThemeColors): string {
+/**
+ * Button treatment by role: the first default action is the filled forge CTA,
+ * further defaults are tinted, destructive is error-tinted, cancel is outlined.
+ */
+function buttonAppearance(
+  button: DialogButton,
+  isFirstDefault: boolean,
+  colors: ThemeColors
+): { background: string; border: string; label: string } {
   switch (button.style) {
     case 'destructive':
-      return colors.error;
+      return { background: withAlpha(colors.error, 0.14), border: 'transparent', label: colors.error };
     case 'cancel':
-      return colors.textSecondary;
+      return { background: 'transparent', border: colors.border, label: colors.text };
     default:
-      return colors.primary;
+      return isFirstDefault
+        ? { background: colors.primary, border: 'transparent', label: colors.onPrimary }
+        : { background: colors.primarySoft, border: 'transparent', label: colors.primary };
   }
 }
 
@@ -131,8 +142,8 @@ export function AppDialogProvider({ children }: { children: ReactNode }) {
             ]}
           >
             {options?.icon ? (
-              <View style={styles.iconWrap}>
-                <Ionicons name={options.icon} size={30} color={toneColor(tone, colors)} />
+              <View style={[styles.iconWrap, { backgroundColor: withAlpha(toneColor(tone, colors), 0.14) }]}>
+                <Ionicons name={options.icon} size={28} color={toneColor(tone, colors)} />
               </View>
             ) : null}
             {options?.title ? (
@@ -144,22 +155,29 @@ export function AppDialogProvider({ children }: { children: ReactNode }) {
               </Text>
             ) : null}
             <View style={styles.buttonGroup}>
-              {buttons.map((button, index) => (
-                <View key={index}>
-                  {index > 0 ? (
-                    <View style={[styles.separator, { backgroundColor: colors.border }]} />
-                  ) : null}
+              {buttons.map((button, index) => {
+                const firstDefaultIndex = buttons.findIndex(
+                  (candidate) => (candidate.style ?? 'default') === 'default'
+                );
+                const look = buttonAppearance(button, index === firstDefaultIndex, colors);
+                return (
                   <Pressable
+                    key={index}
                     accessibilityRole="button"
                     onPress={() => handlePress(button)}
-                    style={({ pressed }) => [styles.button, pressed && styles.buttonPressed]}
+                    style={({ pressed }) => [
+                      shape.secondaryButton,
+                      {
+                        backgroundColor: look.background,
+                        borderColor: look.border,
+                        opacity: pressed ? 0.75 : 1,
+                      },
+                    ]}
                   >
-                    <Text style={[styles.buttonLabel, { color: buttonColor(button, colors) }]}>
-                      {button.text}
-                    </Text>
+                    <Text style={[styles.buttonLabel, { color: look.label }]}>{button.text}</Text>
                   </Pressable>
-                </View>
-              ))}
+                );
+              })}
             </View>
           </Animated.View>
         </View>
@@ -179,27 +197,31 @@ export function useDialog(): DialogApi {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
-    padding: 32,
+    padding: 28,
   },
   card: {
     width: '100%',
-    maxWidth: 340,
-    borderRadius: 18,
-    borderWidth: 1,
-    paddingHorizontal: 20,
-    paddingTop: 24,
-    paddingBottom: 8,
+    maxWidth: 350,
+    borderRadius: radius.xl,
+    borderWidth: hairline,
+    padding: 22,
+    paddingTop: 26,
     alignItems: 'center',
   },
   iconWrap: {
-    marginBottom: 10,
+    width: 56,
+    height: 56,
+    borderRadius: radius.lg,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 14,
   },
   title: {
-    fontSize: 17,
-    fontWeight: '800',
+    ...typography.heading,
+    fontSize: 19,
     textAlign: 'center',
     marginBottom: 6,
   },
@@ -207,24 +229,14 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 20,
     textAlign: 'center',
-    marginBottom: 14,
+    marginBottom: 18,
   },
   buttonGroup: {
     alignSelf: 'stretch',
-    marginTop: 4,
-  },
-  separator: {
-    height: StyleSheet.hairlineWidth,
-  },
-  button: {
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  buttonPressed: {
-    opacity: 0.5,
+    gap: 8,
   },
   buttonLabel: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 15,
+    fontWeight: '800',
   },
 });

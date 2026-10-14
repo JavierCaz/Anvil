@@ -3,6 +3,7 @@ import { Image } from 'expo-image';
 import { StyleSheet, View } from 'react-native';
 import { exerciseFrameSource } from '@/constants/exercises';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, radius } from '@/theme/tokens';
 
 /** Fixed backdrop for pose frames — the artwork is a light silhouette. */
 const FRAME_BACKGROUND = '#2C2C2C';
@@ -21,7 +22,7 @@ interface ExerciseThumbnailProps {
 export function ExerciseThumbnail({
   slug,
   size = 48,
-  borderRadius = 10,
+  borderRadius = radius.sm,
 }: ExerciseThumbnailProps) {
   const { colors } = useAppTheme();
   const frame = exerciseFrameSource(slug);
@@ -55,7 +56,7 @@ export function ExerciseThumbnail({
           width: size,
           height: size,
           borderRadius,
-          backgroundColor: colors.background,
+          backgroundColor: colors.surfaceElevated,
           borderColor: colors.border,
         },
       ]}
@@ -69,6 +70,6 @@ const styles = StyleSheet.create({
   placeholder: {
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 1,
+    borderWidth: hairline,
   },
 });

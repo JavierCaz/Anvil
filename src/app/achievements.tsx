@@ -4,6 +4,8 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AchievementCard } from '@/components/AchievementCard';
 import { AchievementDetailModal } from '@/components/AchievementDetailModal';
+import { HeroGlow } from '@/components/HeroGlow';
+import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
 import {
   ACHIEVEMENT_CATEGORY_ORDER,
@@ -20,6 +22,7 @@ import { getAllExerciseStats, getWorkoutStats } from '@/db/workouts';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { radius, shape, typography } from '@/theme/tokens';
 
 /** Full achievements catalog, grouped by category. */
 export default function AchievementsScreen() {
@@ -61,9 +64,26 @@ export default function AchievementsScreen() {
         </View>
       ) : (
         <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-          <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
-            {t('achievements.unlockedCount', { unlocked: unlockedCount, total: items.length })}
-          </Text>
+          <View style={[shape.card, styles.summaryCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <HeroGlow color={colors.primary} />
+            <View style={styles.summaryCopy}>
+              <Text style={[typography.overline, { color: colors.primary }]}>
+                {t('achievements.title')}
+              </Text>
+              <Text style={[styles.summaryFigure, { color: colors.text }]}>
+                {unlockedCount}
+                <Text style={[styles.summaryTotal, { color: colors.textSecondary }]}>/{items.length}</Text>
+              </Text>
+              <Text style={[styles.summaryText, { color: colors.textSecondary }]}>
+                {t('achievements.unlockedCount', { unlocked: unlockedCount, total: items.length })}
+              </Text>
+            </View>
+            <ProgressRing progress={items.length > 0 ? unlockedCount / items.length : 0} size={84} strokeWidth={8}>
+              <Text style={[styles.ringPercent, { color: colors.text }]}>
+                {items.length > 0 ? Math.round((unlockedCount / items.length) * 100) : 0}%
+              </Text>
+            </ProgressRing>
+          </View>
 
           {ACHIEVEMENT_CATEGORY_ORDER.map((category) => {
             const categoryItems = items.filter((item) => item.category === category);
@@ -72,9 +92,14 @@ export default function AchievementsScreen() {
             }
             return (
               <View key={category} style={styles.categoryGroup}>
-                <Text style={[styles.categoryLabel, { color: colors.textSecondary }]}>
-                  {t(`achievements.categories.${category}`)}
-                </Text>
+                <View style={styles.categoryHeader}>
+                  <Text style={[typography.overline, { color: colors.textSecondary }]}>
+                    {t(`achievements.categories.${category}`)}
+                  </Text>
+                  <Text style={[styles.categoryCount, { color: colors.textSecondary }]}>
+                    {categoryItems.filter((item) => item.unlocked).length}/{categoryItems.length}
+                  </Text>
+                </View>
                 {categoryItems.map((item) => {
                   const definition = getAchievementByKey(item.definitionKey);
                   if (!definition) {
@@ -121,22 +146,54 @@ const styles = StyleSheet.create({
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
+    paddingTop: 8,
+    paddingBottom: 32,
     gap: 12,
   },
+  summaryCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    padding: 20,
+    borderRadius: radius.xl,
+    overflow: 'hidden',
+  },
+  summaryCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  summaryFigure: {
+    fontSize: 40,
+    fontWeight: '800',
+    letterSpacing: -1.2,
+    fontVariant: ['tabular-nums'],
+  },
+  summaryTotal: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
   summaryText: {
-    fontSize: 13,
-    marginTop: 4,
+    ...typography.caption,
+  },
+  ringPercent: {
+    fontSize: 16,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
   },
   categoryGroup: {
     gap: 8,
   },
-  categoryLabel: {
+  categoryHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 14,
+    marginBottom: 2,
+    paddingHorizontal: 4,
+  },
+  categoryCount: {
     fontSize: 12,
     fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginTop: 8,
-    marginBottom: 2,
+    fontVariant: ['tabular-nums'],
   },
 });

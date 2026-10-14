@@ -1,3 +1,4 @@
+import { Ionicons } from '@expo/vector-icons';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import * as Haptics from 'expo-haptics';
@@ -40,6 +41,7 @@ import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { useWorkoutToolsStore } from '@/store/workout-tools';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, shape, typography } from '@/theme/tokens';
 import { displayToMeters, formatDistance, formatDistanceWithUnit } from '@/utils/distance';
 import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
@@ -88,7 +90,7 @@ export default function WorkoutExerciseScreen() {
   const [expandedSet, setExpandedSet] = useState<number | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
   const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
-  const [achievementIcons, setAchievementIcons] = useState<string[]>([]);
+  const [achievementKeys, setAchievementKeys] = useState<string[]>([]);
   const [toastAchievement, setToastAchievement] = useState<AchievementDefinition | null>(null);
 
   const showExerciseInfo = () => {
@@ -221,7 +223,7 @@ export default function WorkoutExerciseScreen() {
   };
   const loadAchievementIcons = useCallback(() => {
     void getExerciseAchievements(db, exerciseIdNum).then((definitions) => {
-      setAchievementIcons(definitions.map((definition) => definition.icon));
+      setAchievementKeys(definitions.map((definition) => definition.key));
     });
   }, [db, exerciseIdNum]);
 
@@ -353,7 +355,7 @@ export default function WorkoutExerciseScreen() {
               { distance, exercise: exercise?.exercise_name ?? '' }
             );
             toast.show({
-              icon: top.definition.icon,
+              achievementKey: top.definition.key,
               title:
                 top.definition.kind === 'effort'
                   ? t('notifications.distanceEffort', { name: t(top.definition.nameKey) })
@@ -393,7 +395,7 @@ export default function WorkoutExerciseScreen() {
             exercise: exercise?.exercise_name ?? '',
           });
           toast.show({
-            icon: top.icon,
+            achievementKey: top.key,
             title: t('notifications.comparativeLifted', { object: t(top.nameKey) }),
             description:
               extras > 0
@@ -476,7 +478,7 @@ export default function WorkoutExerciseScreen() {
               onRemoveSet={handleRemoveSet}
               onCompleteSet={handleComplete}
               onUndoSet={handleUndo}
-              achievementIcons={achievementIcons}
+              achievementKeys={achievementKeys}
             />
           </ScrollView>
 
@@ -506,7 +508,7 @@ export default function WorkoutExerciseScreen() {
             />
           )}
 
-          <View style={styles.footer}>
+          <View style={[styles.footer, { borderTopColor: colors.border }]}>
             <RestTimer />
             <Pressable
               accessibilityRole="button"
@@ -514,14 +516,21 @@ export default function WorkoutExerciseScreen() {
               disabled={!allDone}
               onPress={() => router.back()}
               style={({ pressed }) => [
-                styles.finishButton,
+                shape.primaryButton,
                 {
-                  backgroundColor: allDone ? colors.primary : colors.border,
+                  backgroundColor: allDone ? colors.primary : colors.surfaceElevated,
                   opacity: pressed ? 0.85 : 1,
                 },
               ]}
             >
-              <Text style={styles.finishLabel}>{t('workout.finishExercise')}</Text>
+              <Ionicons
+                name="checkmark-done"
+                size={20}
+                color={allDone ? colors.onPrimary : colors.textSecondary}
+              />
+              <Text style={[typography.button, { color: allDone ? colors.onPrimary : colors.textSecondary }]}>
+                {t('workout.finishExercise')}
+              </Text>
             </Pressable>
           </View>
         </>
@@ -541,18 +550,10 @@ const styles = StyleSheet.create({
   },
   footer: {
     paddingHorizontal: 20,
+    paddingTop: 12,
     paddingBottom: 16,
     gap: 10,
-  },
-  finishButton: {
-    alignItems: 'center',
-    borderRadius: 14,
-    paddingVertical: 15,
-  },
-  finishLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    borderTopWidth: hairline,
   },
 });
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { radius, shape, typography } from '@/theme/tokens';
 
 interface RoutineFormProps {
   initialName?: string;
@@ -26,21 +27,25 @@ export function RoutineForm({
 
   return (
     <View style={styles.content}>
-      <View style={[styles.field, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>{t('common.name')}</Text>
+      <View style={styles.fieldGroup}>
+        <Text style={[typography.overline, { color: colors.textSecondary }]}>{t('common.name')}</Text>
         <TextInput
           value={name}
           onChangeText={setName}
           placeholder={t('routines.form.namePlaceholder')}
           placeholderTextColor={colors.textSecondary}
-          style={[styles.input, { color: colors.text }]}
+          style={[
+            shape.input,
+            styles.nameInput,
+            { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
           autoFocus
           returnKeyType="done"
         />
       </View>
 
-      <View style={[styles.field, { borderColor: colors.border, backgroundColor: colors.surface }]}>
-        <Text style={[styles.label, { color: colors.textSecondary }]}>
+      <View style={styles.fieldGroup}>
+        <Text style={[typography.overline, { color: colors.textSecondary }]}>
           {t('common.description')}
         </Text>
         <TextInput
@@ -48,7 +53,11 @@ export function RoutineForm({
           onChangeText={setDescription}
           placeholder={t('routines.form.descriptionPlaceholder')}
           placeholderTextColor={colors.textSecondary}
-          style={[styles.input, { color: colors.text }]}
+          style={[
+            shape.input,
+            styles.descriptionInput,
+            { color: colors.text, backgroundColor: colors.surface, borderColor: colors.border },
+          ]}
           multiline
         />
       </View>
@@ -59,14 +68,17 @@ export function RoutineForm({
         disabled={!canSave}
         onPress={() => onSave(name, description)}
         style={({ pressed }) => [
+          shape.primaryButton,
           styles.saveButton,
           {
-            backgroundColor: canSave ? colors.primary : colors.border,
+            backgroundColor: canSave ? colors.primary : colors.surfaceElevated,
             opacity: pressed ? 0.85 : 1,
           },
         ]}
       >
-        <Text style={styles.saveLabel}>{submitLabel}</Text>
+        <Text style={[typography.button, { color: canSave ? colors.onPrimary : colors.textSecondary }]}>
+          {submitLabel}
+        </Text>
       </Pressable>
     </View>
   );
@@ -75,32 +87,21 @@ export function RoutineForm({
 const styles = StyleSheet.create({
   content: {
     padding: 20,
-    gap: 12,
+    gap: 18,
   },
-  field: {
-    borderRadius: 14,
-    borderWidth: 1,
-    paddingHorizontal: 16,
-    paddingVertical: 6,
-    gap: 2,
+  fieldGroup: {
+    gap: 8,
   },
-  label: {
-    fontSize: 12,
-    fontWeight: '600',
+  nameInput: {
+    fontSize: 17,
+    fontWeight: '700',
   },
-  input: {
-    fontSize: 16,
-    paddingVertical: 6,
+  descriptionInput: {
+    minHeight: 88,
+    textAlignVertical: 'top',
+    borderRadius: radius.md,
   },
   saveButton: {
-    marginTop: 8,
-    borderRadius: 14,
-    paddingVertical: 14,
-    alignItems: 'center',
-  },
-  saveLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    marginTop: 6,
   },
 });

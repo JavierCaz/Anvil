@@ -22,6 +22,7 @@ import { addExerciseToRoutine } from '@/db/routines';
 import type { Exercise } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 
 export default function AddExerciseScreen() {
   const db = useSQLiteContext();
@@ -64,63 +65,66 @@ export default function AddExerciseScreen() {
     <Screen edges={['left', 'right', 'bottom']}>
       <Stack.Screen options={{ headerShown: true, title: t('routines.addExercise.title') }} />
 
-      <View style={styles.searchWrap}>
-        <View style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          <Ionicons name="search" size={18} color={colors.textSecondary} />
-          <TextInput
-            value={search}
-            onChangeText={setSearch}
-            placeholder={t('routines.addExercise.searchPlaceholder')}
-            placeholderTextColor={colors.textSecondary}
-            style={[styles.searchInput, { color: colors.text }]}
-            autoCorrect={false}
-            returnKeyType="search"
-          />
-          {search.length > 0 && (
-            <Pressable accessibilityRole="button" hitSlop={8} onPress={() => setSearch('')}>
-              <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
-            </Pressable>
-          )}
+      {/* Fixed filter header: search + chips, divided from the scrolling list. */}
+      <View style={[styles.filters, { borderBottomColor: colors.border }]}>
+        <View style={styles.searchWrap}>
+          <View style={[styles.searchBar, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+            <Ionicons name="search" size={18} color={colors.textSecondary} />
+            <TextInput
+              value={search}
+              onChangeText={setSearch}
+              placeholder={t('routines.addExercise.searchPlaceholder')}
+              placeholderTextColor={colors.textSecondary}
+              style={[styles.searchInput, { color: colors.text }]}
+              autoCorrect={false}
+              returnKeyType="search"
+            />
+            {search.length > 0 && (
+              <Pressable accessibilityRole="button" hitSlop={8} onPress={() => setSearch('')}>
+                <Ionicons name="close-circle" size={18} color={colors.textSecondary} />
+              </Pressable>
+            )}
+          </View>
         </View>
+
+        <FilterSection label={t('routines.addExercise.muscleGroup')}>
+          <FilterChip
+            label={t('routines.addExercise.allMuscles')}
+            selected={muscle === null}
+            onPress={() => setMuscle(null)}
+          />
+          {muscles.map((item) => {
+            const key = muscleI18nKey(item);
+            return (
+              <FilterChip
+                key={item}
+                label={key ? t(key) : item}
+                selected={muscle === item}
+                onPress={() => setMuscle(item)}
+              />
+            );
+          })}
+        </FilterSection>
+
+        <FilterSection label={t('routines.addExercise.equipment')}>
+          <FilterChip
+            label={t('routines.addExercise.allMuscles')}
+            selected={equipment === null}
+            onPress={() => setEquipment(null)}
+          />
+          {equipmentOptions.map((item) => {
+            const key = equipmentI18nKey(item);
+            return (
+              <FilterChip
+                key={item}
+                label={key ? t(key) : item}
+                selected={equipment === item}
+                onPress={() => setEquipment(item)}
+              />
+            );
+          })}
+        </FilterSection>
       </View>
-
-      <FilterSection label={t('routines.addExercise.muscleGroup')}>
-        <FilterChip
-          label={t('routines.addExercise.allMuscles')}
-          selected={muscle === null}
-          onPress={() => setMuscle(null)}
-        />
-        {muscles.map((item) => {
-          const key = muscleI18nKey(item);
-          return (
-            <FilterChip
-              key={item}
-              label={key ? t(key) : item}
-              selected={muscle === item}
-              onPress={() => setMuscle(item)}
-            />
-          );
-        })}
-      </FilterSection>
-
-      <FilterSection label={t('routines.addExercise.equipment')}>
-        <FilterChip
-          label={t('routines.addExercise.allMuscles')}
-          selected={equipment === null}
-          onPress={() => setEquipment(null)}
-        />
-        {equipmentOptions.map((item) => {
-          const key = equipmentI18nKey(item);
-          return (
-            <FilterChip
-              key={item}
-              label={key ? t(key) : item}
-              selected={equipment === item}
-              onPress={() => setEquipment(item)}
-            />
-          );
-        })}
-      </FilterSection>
 
       {loading ? (
         <View style={styles.center}>
@@ -135,7 +139,9 @@ export default function AddExerciseScreen() {
           showsVerticalScrollIndicator={false}
           ListEmptyComponent={
             <View style={styles.empty}>
-              <Ionicons name="search-outline" size={44} color={colors.textSecondary} />
+              <View style={[shape.iconWell, styles.emptyIcon, { backgroundColor: colors.surfaceElevated }]}>
+                <Ionicons name="search" size={30} color={colors.textSecondary} />
+              </View>
               <Text style={[styles.emptyTitle, { color: colors.text }]}>
                 {t('routines.addExercise.emptyTitle')}
               </Text>
@@ -150,7 +156,10 @@ export default function AddExerciseScreen() {
                   }
                   style={({ pressed }) => [
                     styles.createButton,
-                    { borderColor: colors.primary, opacity: pressed ? 0.7 : 1 },
+                    {
+                      borderColor: colors.primary,
+                      backgroundColor: pressed ? colors.primarySoft : 'transparent',
+                    },
                   ]}
                 >
                   <Ionicons name="add-circle-outline" size={18} color={colors.primary} />
@@ -178,14 +187,14 @@ export default function AddExerciseScreen() {
                   { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
                 ]}
               >
-                <ExerciseThumbnail slug={item.slug} />
+                <ExerciseThumbnail slug={item.slug} size={52} borderRadius={radius.md} />
                 <View style={styles.rowBody}>
                   <View style={styles.rowTitleLine}>
                     <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={1}>
                       {item.name}
                     </Text>
                     {item.source === 'custom' && (
-                      <View style={[styles.badge, { backgroundColor: colors.background }]}>
+                      <View style={[styles.badge, { borderColor: colors.border }]}>
                         <Text style={[styles.badgeText, { color: colors.textSecondary }]}>
                           {t('routines.detail.customBadge')}
                         </Text>
@@ -213,7 +222,9 @@ export default function AddExerciseScreen() {
                   hitSlop={8}
                   onPress={() => handlePick(item)}
                 >
-                  <Ionicons name="add-circle" size={22} color={colors.primary} />
+                  <View style={[styles.addWell, { backgroundColor: colors.primary }]}>
+                    <Ionicons name="add" size={20} color={colors.onPrimary} />
+                  </View>
                 </Pressable>
               </Pressable>
             );
@@ -264,13 +275,17 @@ function FilterChip({
       style={[
         styles.chip,
         {
-          backgroundColor: selected ? colors.primary : colors.surface,
+          backgroundColor: selected ? colors.primarySoft : colors.surface,
           borderColor: selected ? colors.primary : colors.border,
         },
       ]}
     >
       <Text
-        style={[styles.chipLabel, { color: selected ? '#FFFFFF' : colors.textSecondary }]}
+        style={[
+          styles.chipLabel,
+          { color: selected ? colors.primary : colors.textSecondary },
+          selected && styles.chipLabelSelected,
+        ]}
       >
         {label}
       </Text>
@@ -279,6 +294,10 @@ function FilterChip({
 }
 
 const styles = StyleSheet.create({
+  filters: {
+    paddingBottom: 14,
+    borderBottomWidth: hairline,
+  },
   searchWrap: {
     paddingHorizontal: 20,
     paddingTop: 8,
@@ -287,39 +306,36 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 12,
+    borderRadius: radius.md,
+    borderWidth: hairline,
+    paddingHorizontal: 14,
   },
   searchInput: {
     flex: 1,
     fontSize: 15,
-    paddingVertical: 10,
+    paddingVertical: 12,
   },
   filterSection: {
-    paddingTop: 10,
-    gap: 6,
+    paddingTop: 14,
+    gap: 8,
   },
   filterLabel: {
+    ...typography.overline,
     paddingHorizontal: 20,
-    fontSize: 11,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
   },
   chips: {
     paddingHorizontal: 20,
     gap: 8,
   },
   chip: {
-    borderRadius: 999,
-    borderWidth: 1,
-    paddingHorizontal: 14,
-    paddingVertical: 7,
+    ...shape.chip,
   },
   chipLabel: {
     fontSize: 13,
     fontWeight: '600',
+  },
+  chipLabelSelected: {
+    fontWeight: '800',
   },
   center: {
     flex: 1,
@@ -328,8 +344,8 @@ const styles = StyleSheet.create({
   },
   listContent: {
     paddingHorizontal: 20,
-    paddingTop: 12,
-    paddingBottom: 24,
+    paddingTop: 16,
+    paddingBottom: 28,
     gap: 10,
   },
   empty: {
@@ -338,45 +354,46 @@ const styles = StyleSheet.create({
     paddingTop: 48,
     paddingHorizontal: 24,
   },
+  emptyIcon: {
+    width: 68,
+    height: 68,
+    borderRadius: radius.xl,
+    marginBottom: 6,
+  },
   emptyTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    ...typography.heading,
   },
   emptyHint: {
-    fontSize: 13,
+    ...typography.caption,
     textAlign: 'center',
   },
   createButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 12,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    marginTop: 8,
+    ...shape.secondaryButton,
+    borderWidth: 1.5,
+    borderStyle: 'dashed',
+    marginTop: 10,
   },
   createLabel: {
     fontSize: 14,
-    fontWeight: '700',
+    fontWeight: '800',
   },
   attribution: {
     fontSize: 11,
     textAlign: 'center',
-    marginTop: 16,
+    marginTop: 18,
     paddingHorizontal: 12,
+    opacity: 0.8,
   },
   row: {
+    ...shape.card,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
-    borderRadius: 14,
-    borderWidth: 1,
+    gap: 14,
     padding: 12,
   },
   rowBody: {
     flex: 1,
-    gap: 2,
+    gap: 3,
   },
   rowTitleLine: {
     flexDirection: 'row',
@@ -384,22 +401,30 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   rowTitle: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: '700',
+    ...typography.rowTitle,
+    flexShrink: 1,
   },
   badge: {
-    borderRadius: 6,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+    borderRadius: radius.pill,
+    borderWidth: hairline,
+    paddingHorizontal: 7,
+    paddingVertical: 1,
   },
   badgeText: {
-    fontSize: 10,
-    fontWeight: '600',
+    fontSize: 9,
+    fontWeight: '800',
     textTransform: 'uppercase',
-    letterSpacing: 0.3,
+    letterSpacing: 0.8,
   },
   rowSubtitle: {
     fontSize: 12,
+    textTransform: 'capitalize',
+  },
+  addWell: {
+    width: 32,
+    height: 32,
+    borderRadius: 16,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

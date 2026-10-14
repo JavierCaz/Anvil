@@ -5,7 +5,11 @@ import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AchievementBadge } from '@/components/AchievementBadge';
 import { AchievementDetailModal } from '@/components/AchievementDetailModal';
+import { AnvilLogo } from '@/components/AnvilLogo';
+import { HeroGlow } from '@/components/HeroGlow';
+import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
 import { WeekStrip, type WeekDayItem } from '@/components/WeekStrip';
 import { getAchievementByKey } from '@/constants/achievements';
@@ -98,89 +102,137 @@ export default function HomeScreen() {
     return [...unlocked, ...inProgress].slice(0, 3);
   }, [data]);
 
+  const done = Math.min(data?.workoutCountThisWeek ?? 0, weeklyGoal);
+  const remaining = Math.max(0, weeklyGoal - done);
+  const goalProgress = weeklyGoal > 0 ? done / weeklyGoal : 0;
+  const unlockedTotal = data?.achievements.filter((item) => item.unlocked).length ?? 0;
+
   return (
     <Screen>
       <View style={styles.header}>
-        <Text style={[styles.title, { color: colors.text }]}>{t('common.appName')}</Text>
+        <AnvilLogo markWidth={52} />
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t('settings.title')}
           hitSlop={8}
           onPress={() => router.push('/settings')}
+          style={({ pressed }) => [
+            styles.iconButton,
+            { backgroundColor: colors.surface, borderColor: colors.border, opacity: pressed ? 0.7 : 1 },
+          ]}
         >
-          <Ionicons name="settings-outline" size={24} color={colors.text} />
+          <Ionicons name="settings-outline" size={20} color={colors.text} />
         </Pressable>
       </View>
 
       <ScrollView contentContainerStyle={styles.content} showsVerticalScrollIndicator={false}>
-        <View style={styles.sectionHeader}>
-          <Text style={[styles.sectionTitle, { color: colors.text }]}>{t('home.thisWeek')}</Text>
-          <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
-            {t('home.workoutsOf', {
-              done: Math.min(data?.workoutCountThisWeek ?? 0, weeklyGoal),
-              goal: weeklyGoal,
-            })}
-          </Text>
-        </View>
-        {data && <WeekStrip days={data.weekDays} />}
+        <Text style={[styles.tagline, { color: colors.textSecondary }]}>{t('home.tagline')}</Text>
 
-        <View style={styles.achievementsHeader}>
-          <View style={styles.achievementsTitleRow}>
+        {/* Weekly hero */}
+        <View style={[styles.heroCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          <HeroGlow color={colors.primary} />
+          <View style={styles.heroTop}>
+            <View style={styles.heroCopy}>
+              <Text style={[styles.overline, { color: colors.primary }]}>{t('home.thisWeek')}</Text>
+              <View style={styles.heroFigureRow}>
+                <Text style={[styles.heroFigure, { color: colors.text }]}>{done}</Text>
+                <Text style={[styles.heroFigureGoal, { color: colors.textSecondary }]}>
+                  /{weeklyGoal}
+                </Text>
+              </View>
+              <Text style={[styles.heroCaption, { color: colors.textSecondary }]}>
+                {remaining === 0
+                  ? t('home.goalReached')
+                  : t('home.goalRemaining', { count: remaining })}
+              </Text>
+            </View>
+            <ProgressRing progress={goalProgress} size={84} strokeWidth={8}>
+              <Ionicons
+                name={remaining === 0 ? 'flame' : 'barbell'}
+                size={26}
+                color={remaining === 0 ? colors.primary : colors.textSecondary}
+              />
+            </ProgressRing>
+          </View>
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          {data && <WeekStrip days={data.weekDays} />}
+        </View>
+
+        {/* Achievements */}
+        <View style={styles.sectionHeader}>
+          <View style={styles.sectionTitleBlock}>
             <Text style={[styles.sectionTitle, { color: colors.text }]}>
               {t('home.achievements')}
             </Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('home.seeAll')}
-              hitSlop={8}
-              onPress={() => router.push('/achievements')}
-              style={({ pressed }) => [styles.seeAllButton, { opacity: pressed ? 0.6 : 1 }]}
-            >
-              <Text style={[styles.seeAllLabel, { color: colors.primary }]}>
-                {t('home.seeAll')}
-              </Text>
-              <Ionicons name="chevron-forward" size={14} color={colors.primary} />
-            </Pressable>
+            <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
+              {data
+                ? t('home.unlockedOf', { unlocked: unlockedTotal, total: data.achievements.length })
+                : t('home.achievementsHint')}
+            </Text>
           </View>
-          <Text style={[styles.sectionMeta, { color: colors.textSecondary }]}>
-            {t('home.achievementsHint')}
-          </Text>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={t('home.seeAll')}
+            hitSlop={8}
+            onPress={() => router.push('/achievements')}
+            style={({ pressed }) => [
+              styles.seeAllButton,
+              { backgroundColor: colors.primarySoft, opacity: pressed ? 0.6 : 1 },
+            ]}
+          >
+            <Text style={[styles.seeAllLabel, { color: colors.primary }]}>{t('home.seeAll')}</Text>
+            <Ionicons name="chevron-forward" size={14} color={colors.primary} />
+          </Pressable>
         </View>
 
-        {summaryItems.map((item) => {
-          const definition = getAchievementByKey(item.definitionKey);
-          if (!definition) {
-            return null;
-          }
-          return (
-            <Pressable
-              key={definition.key}
-              accessibilityRole="button"
-              onPress={() => setSelectedAchievement(item)}
-              style={({ pressed }) => [
-                styles.summaryRow,
-                {
-                  backgroundColor: colors.surface,
-                  borderColor: item.unlocked ? colors.primary : colors.border,
-                  opacity: pressed ? 0.7 : 1,
-                },
-              ]}
-            >
-              <Text style={styles.summaryIcon}>{definition.icon}</Text>
-              <Text style={[styles.summaryName, { color: colors.text }]} numberOfLines={1}>
-                {t(definition.nameKey)}
-              </Text>
-              <Text
-                style={[
-                  styles.summaryPercent,
-                  { color: item.unlocked ? colors.primary : colors.textSecondary },
+        <View style={[styles.listCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+          {summaryItems.map((item, index) => {
+            const definition = getAchievementByKey(item.definitionKey);
+            if (!definition) {
+              return null;
+            }
+            const percent = Math.round(item.progress * 100);
+            return (
+              <Pressable
+                key={definition.key}
+                accessibilityRole="button"
+                onPress={() => setSelectedAchievement(item)}
+                style={({ pressed }) => [
+                  styles.summaryRow,
+                  index > 0 && { borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth },
+                  { opacity: pressed ? 0.7 : 1 },
                 ]}
               >
-                {item.unlocked ? t('achievements.unlocked') : `${Math.round(item.progress * 100)}%`}
-              </Text>
-            </Pressable>
-          );
-        })}
+                <AchievementBadge achievementKey={definition.key} size={44} locked={!item.unlocked} />
+                <View style={styles.summaryBody}>
+                  <Text style={[styles.summaryName, { color: colors.text }]} numberOfLines={1}>
+                    {t(definition.nameKey)}
+                  </Text>
+                  {item.unlocked ? (
+                    <Text style={[styles.summaryStatus, { color: colors.primary }]}>
+                      {t('achievements.unlocked')}
+                    </Text>
+                  ) : (
+                    <View style={styles.summaryProgressRow}>
+                      <View style={[styles.summaryTrack, { backgroundColor: colors.surfaceElevated }]}>
+                        <View
+                          style={[
+                            styles.summaryFill,
+                            { backgroundColor: colors.primary, width: `${percent}%` },
+                          ]}
+                        />
+                      </View>
+                      <Text style={[styles.summaryPercent, { color: colors.textSecondary }]}>
+                        {percent}%
+                      </Text>
+                    </View>
+                  )}
+                </View>
+                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+              </Pressable>
+            );
+          })}
+        </View>
       </ScrollView>
 
       {selectedAchievement && (() => {
@@ -206,68 +258,147 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     paddingHorizontal: 20,
-    paddingVertical: 12,
+    paddingTop: 8,
+    paddingBottom: 4,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '800',
+  iconButton: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   content: {
     paddingHorizontal: 20,
-    paddingBottom: 24,
-    gap: 12,
+    paddingBottom: 32,
+    gap: 14,
   },
-  sectionHeader: {
-    flexDirection: 'row',
-    alignItems: 'baseline',
-    justifyContent: 'space-between',
-    marginTop: 8,
+  tagline: {
+    fontSize: 13,
+    letterSpacing: 0.2,
+    marginBottom: 4,
   },
-  achievementsHeader: {
-    marginTop: 16,
-    gap: 2,
+  heroCard: {
+    borderRadius: 24,
+    borderWidth: StyleSheet.hairlineWidth,
+    padding: 20,
+    gap: 16,
+    overflow: 'hidden',
   },
-  achievementsTitleRow: {
+  heroTop: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
+    gap: 12,
+  },
+  heroCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  overline: {
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1.4,
+  },
+  heroFigureRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+  },
+  heroFigure: {
+    fontSize: 48,
+    fontWeight: '800',
+    letterSpacing: -1.5,
+    fontVariant: ['tabular-nums'],
+  },
+  heroFigureGoal: {
+    fontSize: 22,
+    fontWeight: '700',
+    marginLeft: 2,
+    fontVariant: ['tabular-nums'],
+  },
+  heroCaption: {
+    fontSize: 13,
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+  },
+  sectionHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 10,
+  },
+  sectionTitleBlock: {
+    flex: 1,
+    gap: 2,
+  },
+  sectionTitle: {
+    fontSize: 20,
+    fontWeight: '800',
+    letterSpacing: -0.3,
+  },
+  sectionMeta: {
+    fontSize: 13,
   },
   seeAllButton: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 2,
+    borderRadius: 999,
+    paddingHorizontal: 12,
+    paddingVertical: 6,
   },
   seeAllLabel: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
+  },
+  listCard: {
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+    paddingHorizontal: 14,
   },
   summaryRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
-    borderRadius: 12,
-    borderWidth: 1,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
+    gap: 12,
+    paddingVertical: 12,
   },
-  summaryIcon: {
-    fontSize: 20,
+  summaryBody: {
+    flex: 1,
+    gap: 6,
   },
   summaryName: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-  },
-  summaryPercent: {
-    fontSize: 13,
-    fontWeight: '600',
-    fontVariant: ['tabular-nums'],
-  },
-  sectionTitle: {
-    fontSize: 17,
+    fontSize: 15,
     fontWeight: '700',
   },
-  sectionMeta: {
-    fontSize: 13,
+  summaryStatus: {
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+    letterSpacing: 0.8,
+  },
+  summaryProgressRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  summaryTrack: {
+    flex: 1,
+    height: 4,
+    borderRadius: 2,
+    overflow: 'hidden',
+  },
+  summaryFill: {
+    height: '100%',
+    borderRadius: 2,
+  },
+  summaryPercent: {
+    width: 36,
+    fontSize: 12,
+    fontWeight: '600',
+    textAlign: 'right',
+    fontVariant: ['tabular-nums'],
   },
 });

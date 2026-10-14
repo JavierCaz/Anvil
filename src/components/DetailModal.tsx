@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Animated, Modal, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 
 interface DetailModalProps {
   onClose: () => void;
@@ -58,11 +59,12 @@ export function DetailModal({ onClose, children }: DetailModalProps) {
             accessibilityRole="button"
             onPress={onClose}
             style={({ pressed }) => [
+              shape.primaryButton,
               styles.closeButton,
               { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
             ]}
           >
-            <Text style={styles.closeLabel}>{t('common.ok')}</Text>
+            <Text style={[typography.button, { color: colors.onPrimary }]}>{t('common.ok')}</Text>
           </Pressable>
         </Animated.View>
       </View>
@@ -73,29 +75,22 @@ export function DetailModal({ onClose, children }: DetailModalProps) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 28,
   },
   card: {
     width: '100%',
-    maxWidth: 340,
-    borderRadius: 18,
-    borderWidth: 1,
-    paddingHorizontal: 20,
+    maxWidth: 350,
+    borderRadius: radius.xl + 4,
+    borderWidth: hairline,
+    paddingHorizontal: 22,
     paddingTop: 24,
     alignItems: 'center',
   },
   closeButton: {
     alignSelf: 'stretch',
-    alignItems: 'center',
-    borderRadius: 14,
-    paddingVertical: 14,
-  },
-  closeLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+    minHeight: 50,
   },
 });

@@ -7,7 +7,11 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { useAnimatedRef } from 'react-native-reanimated';
 import Sortable, { type SortableGridRenderItem } from 'react-native-sortables';
+import { AchievementBadge } from '@/components/AchievementBadge';
+import { DangerButton } from '@/components/DangerButton';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
+import { HeroGlow } from '@/components/HeroGlow';
+import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
@@ -37,6 +41,8 @@ import {
 import type { ActiveWorkoutExercise } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 
 export default function WorkoutSessionScreen() {
   const db = useSQLiteContext();
@@ -157,13 +163,13 @@ export default function WorkoutSessionScreen() {
           style={[
             styles.row,
             {
-              backgroundColor: colors.surface,
-              borderColor: done ? colors.success : colors.border,
+              backgroundColor: done ? withAlpha(colors.success, 0.07) : colors.surface,
+              borderColor: done ? withAlpha(colors.success, 0.45) : colors.border,
             },
           ]}
           onTap={() => router.push(`/workout/${logId}/exercise/${item.exercise_id}`)}
         >
-          <ExerciseThumbnail slug={item.exercise_slug} />
+          <ExerciseThumbnail slug={item.exercise_slug} size={52} borderRadius={radius.md} />
           <View style={styles.rowBody}>
             <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={1}>
               {item.exercise_name}
@@ -174,9 +180,7 @@ export default function WorkoutSessionScreen() {
             {achievements.length > 0 && (
               <View style={styles.achievementRow}>
                 {achievements.slice(0, 5).map((achievement) => (
-                  <Text key={achievement.key} style={styles.achievementIcon}>
-                    {achievement.icon}
-                  </Text>
+                  <AchievementBadge key={achievement.key} achievementKey={achievement.key} size={20} />
                 ))}
                 {achievements.length > 5 && (
                   <Text style={[styles.achievementMore, { color: colors.textSecondary }]}>
@@ -186,11 +190,13 @@ export default function WorkoutSessionScreen() {
               </View>
             )}
           </View>
-          <Ionicons
-            name={done ? 'checkmark-circle' : 'chevron-forward'}
-            size={22}
-            color={done ? colors.success : colors.textSecondary}
-          />
+          {done ? (
+            <View style={[styles.doneCheck, { backgroundColor: colors.success }]}>
+              <Ionicons name="checkmark" size={16} color={colors.onPrimary} />
+            </View>
+          ) : (
+            <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
+          )}
         </Sortable.Touchable>
       );
     },
@@ -383,31 +389,35 @@ export default function WorkoutSessionScreen() {
                 { backgroundColor: colors.surface, borderColor: colors.border },
               ]}
             >
-              <Text style={[styles.timerLabel, { color: colors.textSecondary }]}>
-                {t('workout.elapsed')}
-              </Text>
-              <Text style={[styles.timerValue, { color: colors.text }]}>
-                {formatElapsed(elapsedSeconds)}
-              </Text>
-              <View style={[styles.progressRow, { backgroundColor: colors.background }]}>
-                <View
-                  style={[
-                    styles.progressFill,
-                    {
-                      backgroundColor: colors.primary,
-                      width: `${exercises.length > 0 ? (doneCount / exercises.length) * 100 : 0}%`,
-                    },
-                  ]}
-                />
+              <HeroGlow color={colors.primary} />
+              <View style={styles.timerCopy}>
+                <Text style={[typography.overline, { color: colors.primary }]}>
+                  {t('workout.elapsed')}
+                </Text>
+                <Text style={[styles.timerValue, { color: colors.text }]}>
+                  {formatElapsed(elapsedSeconds)}
+                </Text>
+                <Text style={[styles.progressText, { color: colors.textSecondary }]}>
+                  {t('workout.exercisesDone', { done: doneCount, total: exercises.length })}
+                </Text>
               </View>
-              <Text style={[styles.progressText, { color: colors.textSecondary }]}>
-                {t('workout.exercisesDone', { done: doneCount, total: exercises.length })}
-              </Text>
+              <ProgressRing
+                progress={exercises.length > 0 ? doneCount / exercises.length : 0}
+                size={78}
+                strokeWidth={7}
+              >
+                <Text style={[styles.ringValue, { color: colors.text }]}>
+                  {doneCount}
+                  <Text style={{ color: colors.textSecondary }}>/{exercises.length}</Text>
+                </Text>
+              </ProgressRing>
             </View>
 
             {exercises.length === 0 ? (
               <View style={styles.empty}>
-                <Ionicons name="fitness-outline" size={48} color={colors.textSecondary} />
+                <View style={[shape.iconWell, styles.emptyIcon, { backgroundColor: colors.primarySoft }]}>
+                  <Ionicons name="fitness" size={34} color={colors.primary} />
+                </View>
                 <Text style={[styles.emptyTitle, { color: colors.text }]}>
                   {t('routines.detail.emptyTitle')}
                 </Text>
@@ -425,34 +435,24 @@ export default function WorkoutSessionScreen() {
             )}
           </Animated.ScrollView>
 
-          <View style={styles.footer}>
+          <View style={[styles.footer, { borderTopColor: colors.border }]}>
             <RestTimer />
             <Pressable
               accessibilityRole="button"
               accessibilityLabel={t('workout.finishWorkout')}
               onPress={handleFinish}
               style={({ pressed }) => [
+                shape.primaryButton,
                 styles.finishButton,
-                { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
+                { backgroundColor: colors.primary, shadowColor: colors.primary, opacity: pressed ? 0.85 : 1 },
               ]}
             >
-              <Ionicons name="checkmark" size={20} color="#FFFFFF" />
-              <Text style={styles.finishLabel}>{t('workout.finishWorkout')}</Text>
-            </Pressable>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t('workout.discardWorkout')}
-              onPress={handleCancel}
-              style={({ pressed }) => [
-                styles.discardButton,
-                { borderColor: colors.border, opacity: pressed ? 0.6 : 1 },
-              ]}
-            >
-              <Ionicons name="trash-outline" size={18} color={colors.error} />
-              <Text style={[styles.discardLabel, { color: colors.error }]}>
-                {t('workout.discardWorkout')}
+              <Ionicons name="flag" size={18} color={colors.onPrimary} />
+              <Text style={[typography.button, { color: colors.onPrimary }]}>
+                {t('workout.finishWorkout')}
               </Text>
             </Pressable>
+            <DangerButton label={t('workout.discardWorkout')} onPress={handleCancel} />
           </View>
         </>
       )}
@@ -480,57 +480,58 @@ const styles = StyleSheet.create({
     gap: 12,
   },
   timerCard: {
-    borderRadius: 16,
-    borderWidth: 1,
+    borderRadius: radius.xl,
+    borderWidth: hairline,
     padding: 20,
-    alignItems: 'center',
-    gap: 8,
-    marginBottom: 4,
-  },
-  timerLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-  },
-  timerValue: {
-    fontSize: 40,
-    fontWeight: '800',
-    fontVariant: ['tabular-nums'],
-  },
-  progressRow: {
-    width: '100%',
-    height: 8,
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginTop: 8,
-  },
-  progressFill: {
-    height: '100%',
-    borderRadius: 4,
-  },
-  progressText: {
-    fontSize: 13,
-    marginTop: 2,
-  },
-  row: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
-    borderRadius: 14,
-    borderWidth: 1,
+    marginBottom: 6,
+    overflow: 'hidden',
+  },
+  timerCopy: {
+    flex: 1,
+    gap: 2,
+  },
+  timerValue: {
+    fontSize: 44,
+    fontWeight: '800',
+    letterSpacing: -1.2,
+    fontVariant: ['tabular-nums'],
+  },
+  progressText: {
+    ...typography.caption,
+  },
+  ringValue: {
+    fontSize: 18,
+    fontWeight: '800',
+    fontVariant: ['tabular-nums'],
+  },
+  row: {
+    ...shape.card,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 14,
     padding: 12,
   },
   rowBody: {
     flex: 1,
-    gap: 2,
+    gap: 3,
   },
   rowTitle: {
-    fontSize: 15,
-    fontWeight: '700',
+    ...typography.rowTitle,
   },
   rowMeta: {
     fontSize: 12,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  doneCheck: {
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   achievementRow: {
     flexDirection: 'row',
@@ -538,9 +539,6 @@ const styles = StyleSheet.create({
     flexWrap: 'wrap',
     gap: 4,
     marginTop: 4,
-  },
-  achievementIcon: {
-    fontSize: 15,
   },
   achievementMore: {
     fontSize: 12,
@@ -552,39 +550,26 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
     paddingTop: 40,
   },
+  emptyIcon: {
+    width: 72,
+    height: 72,
+    borderRadius: radius.xl,
+    marginBottom: 6,
+  },
   emptyTitle: {
-    fontSize: 17,
-    fontWeight: '700',
+    ...typography.heading,
   },
   footer: {
     paddingHorizontal: 20,
+    paddingTop: 12,
     paddingBottom: 16,
     gap: 10,
+    borderTopWidth: hairline,
   },
   finishButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 8,
-    borderRadius: 14,
-    paddingVertical: 15,
-  },
-  finishLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  discardButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: 6,
-    borderWidth: 1,
-    borderRadius: 14,
-    paddingVertical: 12,
-  },
-  discardLabel: {
-    fontSize: 14,
-    fontWeight: '600',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.35,
+    shadowRadius: 18,
+    elevation: 4,
   },
 });

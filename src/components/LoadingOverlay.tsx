@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, Modal, StyleSheet, Text, View } from 'react-native';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { hairline, radius } from '@/theme/tokens';
 
 interface LoadingOverlayProps {
   visible: boolean;
@@ -46,7 +47,7 @@ export function LoadingOverlay({ visible, label }: LoadingOverlayProps) {
 const styles = StyleSheet.create({
   backdrop: {
     flex: 1,
-    backgroundColor: 'rgba(0, 0, 0, 0.55)',
+    backgroundColor: 'rgba(0, 0, 0, 0.6)',
     alignItems: 'center',
     justifyContent: 'center',
     padding: 32,
@@ -55,8 +56,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 14,
-    borderRadius: 18,
-    borderWidth: 1,
+    borderRadius: radius.xl,
+    borderWidth: hairline,
     paddingHorizontal: 28,
     paddingVertical: 24,
   },

@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useCallback } from 'react';
@@ -70,6 +70,9 @@ export default function RoutinesScreen() {
           ]}
           onTap={() => router.push(`/routine/${item.id}`)}
         >
+          <View style={[styles.cardIcon, { backgroundColor: colors.primarySoft }]}>
+            <MaterialCommunityIcons name="dumbbell" size={22} color={colors.primary} />
+          </View>
           <View style={styles.cardBody}>
             <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>
               {item.name}
@@ -79,10 +82,11 @@ export default function RoutinesScreen() {
                 {item.description}
               </Text>
             ) : null}
-            <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>
+            <Text style={[styles.cardMeta, { color: colors.primary }]}>
               {t('routines.exerciseCount', { count: item.exercise_count })}
             </Text>
           </View>
+          <Ionicons name="chevron-forward" size={18} color={colors.textSecondary} />
         </Sortable.Touchable>
       </SwipeToDelete>
     ),
@@ -100,15 +104,19 @@ export default function RoutinesScreen() {
           onPress={() => router.push('/routine/new')}
           style={[styles.newButton, { backgroundColor: colors.primary }]}
         >
-          <Ionicons name="add" size={22} color="#FFFFFF" />
-          <Text style={styles.newButtonLabel}>{t('routines.newRoutine')}</Text>
+          <Ionicons name="add" size={20} color={colors.onPrimary} />
+          <Text style={[styles.newButtonLabel, { color: colors.onPrimary }]}>
+            {t('routines.newRoutine')}
+          </Text>
         </Pressable>
       </View>
 
       {loaded && routines.length === 0 ? (
         <View style={[styles.listContent, styles.listContentEmpty]}>
           <View style={styles.empty}>
-            <Ionicons name="barbell-outline" size={48} color={colors.textSecondary} />
+            <View style={[styles.emptyIcon, { backgroundColor: colors.primarySoft }]}>
+              <MaterialCommunityIcons name="anvil" size={40} color={colors.primary} />
+            </View>
             <Text style={[styles.emptyTitle, { color: colors.text }]}>
               {t('routines.emptyTitle')}
             </Text>
@@ -149,8 +157,9 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
   },
   title: {
-    fontSize: 24,
+    fontSize: 30,
     fontWeight: '800',
+    letterSpacing: -0.6,
   },
   newButton: {
     flexDirection: 'row',
@@ -161,7 +170,6 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   newButtonLabel: {
-    color: '#FFFFFF',
     fontSize: 14,
     fontWeight: '700',
   },
@@ -179,6 +187,14 @@ const styles = StyleSheet.create({
     gap: 8,
     paddingHorizontal: 24,
   },
+  emptyIcon: {
+    width: 84,
+    height: 84,
+    borderRadius: 28,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
   emptyTitle: {
     fontSize: 17,
     fontWeight: '700',
@@ -190,24 +206,33 @@ const styles = StyleSheet.create({
   card: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 14,
     padding: 16,
+    borderRadius: 20,
+    borderWidth: StyleSheet.hairlineWidth,
+  },
+  cardIcon: {
+    width: 46,
+    height: 46,
     borderRadius: 14,
-    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   cardBody: {
     flex: 1,
     gap: 2,
   },
   cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 17,
+    fontWeight: '800',
+    letterSpacing: -0.2,
   },
   cardDescription: {
     fontSize: 13,
   },
   cardMeta: {
     fontSize: 12,
-    marginTop: 2,
+    fontWeight: '700',
+    marginTop: 4,
   },
 });

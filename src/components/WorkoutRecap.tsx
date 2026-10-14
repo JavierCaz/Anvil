@@ -2,10 +2,15 @@ import { Ionicons } from '@expo/vector-icons';
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { AchievementBadge } from '@/components/AchievementBadge';
+import { AnvilMark } from '@/components/AnvilLogo';
+import { HeroGlow } from '@/components/HeroGlow';
 import { getAchievementByKey } from '@/constants/achievements';
 import type { DetectedPR, WorkoutRecap as RecapData } from '@/db/gamification';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import { withAlpha } from '@/theme/colors';
+import { hairline, radius, shape, typography } from '@/theme/tokens';
 import { distanceUnitLabel, formatDistance, formatDistanceWithUnit, formatPace } from '@/utils/distance';
 import { formatDuration as formatSetDuration } from '@/utils/duration';
 import { formatWeight, formatWeightWithUnit, weightUnitLabel } from '@/utils/weight';
@@ -85,7 +90,9 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
     const label = prLabel(pr);
     return (
       <View key={`${pr.exerciseId}-${pr.type}`} style={styles.prRow}>
-        <Ionicons name="trophy" size={16} color={colors.primary} />
+        <View style={[styles.prIcon, { backgroundColor: withAlpha(colors.gold, 0.16) }]}>
+          <Ionicons name="trophy" size={16} color={colors.gold} />
+        </View>
         <View style={styles.prBody}>
           <Text style={[styles.prName, { color: colors.text }]} numberOfLines={1}>
             {pr.exerciseName}
@@ -94,8 +101,8 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {prDetail(pr)}
           </Text>
         </View>
-        <View style={[styles.prBadge, { backgroundColor: colors.primary }]}>
-          <Text style={styles.prBadgeLabel}>{label}</Text>
+        <View style={[styles.prBadge, { backgroundColor: colors.primarySoft }]}>
+          <Text style={[styles.prBadgeLabel, { color: colors.primary }]}>{label}</Text>
         </View>
       </View>
     );
@@ -114,12 +121,11 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             },
           ]}
         >
+          <HeroGlow color={colors.primary} intensity={0.18} />
           <ScrollView showsVerticalScrollIndicator={false}>
             {/* Header */}
             <View style={styles.header}>
-              <View style={[styles.headerIcon, { backgroundColor: colors.background }]}>
-                <Ionicons name="hammer" size={28} color={colors.primary} />
-              </View>
+              <AnvilMark width={84} style={styles.headerMark} />
               <Text style={[styles.title, { color: colors.text }]}>{t('recap.title')}</Text>
               <Text style={[styles.subtitle, { color: colors.textSecondary }]} numberOfLines={1}>
                 {recap.routineName ? `${recap.routineName} · ${formatDuration(summary.durationSeconds)}` : formatDuration(summary.durationSeconds)}
@@ -128,12 +134,12 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
 
             {/* Stats */}
             <View style={styles.statsRow}>
-              <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+              <View style={[styles.statCell, { backgroundColor: colors.background, borderColor: colors.border }]}>
                 <Text style={[styles.statValue, { color: colors.text }]}>{summary.setsCompleted}</Text>
                 <Text style={[styles.statLabel, { color: colors.textSecondary }]}>{t('recap.sets', { count: summary.setsCompleted })}</Text>
               </View>
               {showVolume && (
-                <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+                <View style={[styles.statCell, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <Text style={[styles.statValue, { color: colors.text }]}>
                     {formatWeight(summary.totalVolumeKg, unit)}
                   </Text>
@@ -143,7 +149,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                 </View>
               )}
               {showVolume && recap.volumeDeltaPct !== null && (
-                <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+                <View style={[styles.statCell, { backgroundColor: colors.background, borderColor: colors.border }]}>
                   <Text style={[styles.statValue, { color: recap.volumeDeltaPct >= 0 ? colors.success : colors.textSecondary }]}>
                     {recap.volumeDeltaPct >= 0 ? '+' : ''}
                     {recap.volumeDeltaPct}%
@@ -157,7 +163,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {hasCardio && (
               <View style={styles.statsRow}>
                 {summary.totalDistanceM > 0 && (
-                  <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+                  <View style={[styles.statCell, { backgroundColor: colors.background, borderColor: colors.border }]}>
                     <Text style={[styles.statValue, { color: colors.text }]}>
                       {formatDistance(summary.totalDistanceM, unit)}
                     </Text>
@@ -167,7 +173,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                   </View>
                 )}
                 {summary.timedSeconds > 0 && (
-                  <View style={[styles.statCell, { backgroundColor: colors.background }]}>
+                  <View style={[styles.statCell, { backgroundColor: colors.background, borderColor: colors.border }]}>
                     <Text style={[styles.statValue, { color: colors.text }]}>
                       {formatSetDuration(summary.timedSeconds)}
                     </Text>
@@ -182,7 +188,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {/* PRs */}
             {prs.length > 0 && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+                <Text style={[typography.overline, styles.sectionTitle, { color: colors.primary }]}>
                   {t('recap.recordsForged', { count: prs.length })}
                 </Text>
                 {prs.map(renderPR)}
@@ -192,12 +198,12 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {/* Milestones */}
             {showMilestones && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+                <Text style={[typography.overline, styles.sectionTitle, { color: colors.primary }]}>
                   {t('recap.milestoneUnlocked')}
                 </Text>
                 {milestonesUnlocked.map((milestone) => (
                   <View key={`${milestone.key}-${milestone.exerciseName}`} style={styles.milestoneRow}>
-                    <Text style={styles.milestoneIcon}>{milestone.icon}</Text>
+                    <AchievementBadge achievementKey={milestone.key} size={36} />
                     <View style={styles.milestoneBody}>
                       <Text style={[styles.milestoneName, { color: colors.text }]} numberOfLines={1}>
                         {t(milestone.nameKey)}
@@ -218,9 +224,12 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                     <Text style={[styles.nextLabel, { color: colors.textSecondary }]}>
                       {t('recap.nextMilestone')}
                     </Text>
-                    <Text style={[styles.nextValue, { color: colors.text }]} numberOfLines={1}>
-                      {nextMilestone.icon} {t(nextMilestone.nameKey)} — {formatWeightWithUnit(nextMilestone.thresholdKg, unit)}
-                    </Text>
+                    <View style={styles.nextValueRow}>
+                      <AchievementBadge achievementKey={nextMilestone.key} size={24} locked />
+                      <Text style={[styles.nextValue, { color: colors.text }]} numberOfLines={1}>
+                        {t(nextMilestone.nameKey)} — {formatWeightWithUnit(nextMilestone.thresholdKg, unit)}
+                      </Text>
+                    </View>
                     <Text style={[styles.nextToGo, { color: colors.textSecondary }]}>
                       {t('recap.nextMilestoneToGo', {
                         weight: formatWeight(Math.max(0, nextMilestone.thresholdKg - recap.maxWeightKg), unit),
@@ -235,7 +244,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {/* Consistency */}
             {showConsistency && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+                <Text style={[typography.overline, styles.sectionTitle, { color: colors.primary }]}>
                   {t('recap.consistency')}
                 </Text>
                 <View style={styles.consistencyRow}>
@@ -244,8 +253,8 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                     {t('recap.workoutsThisWeek', { done: consistency.weeklyDays, goal: consistency.weeklyGoal })}
                   </Text>
                   {consistency.hitThisWeek && (
-                    <View style={[styles.perfectBadge, { backgroundColor: colors.success }]}>
-                      <Text style={styles.perfectLabel}>{t('recap.perfectWeek')}</Text>
+                    <View style={[styles.perfectBadge, { backgroundColor: withAlpha(colors.success, 0.16) }]}>
+                      <Text style={[styles.perfectLabel, { color: colors.success }]}>{t('recap.perfectWeek')}</Text>
                     </View>
                   )}
                 </View>
@@ -260,14 +269,14 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             {/* Newly unlocked achievements (global + per-exercise) */}
             {(globalUnlocked.length > 0 || exerciseUnlocked.length > 0) && (
               <View style={styles.section}>
-                <Text style={[styles.sectionTitle, { color: colors.primary }]}>
+                <Text style={[typography.overline, styles.sectionTitle, { color: colors.primary }]}>
                   {t('recap.achievementsUnlocked')}
                 </Text>
                 {globalUnlocked.map(({ key }) => {
                   const definition = getAchievementByKey(key);
                   return definition ? (
                     <View key={key} style={styles.specialRow}>
-                      <Text style={styles.specialIcon}>{definition.icon}</Text>
+                      <AchievementBadge achievementKey={definition.key} size={36} />
                       <Text style={[styles.specialName, { color: colors.text }]} numberOfLines={1}>
                         {t(definition.nameKey)}
                       </Text>
@@ -278,7 +287,7 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
                   const definition = getAchievementByKey(key);
                   return definition ? (
                     <View key={`${key}-${exerciseName}`} style={styles.specialRow}>
-                      <Text style={styles.specialIcon}>{definition.icon}</Text>
+                      <AchievementBadge achievementKey={definition.key} size={36} />
                       <View style={styles.specialBody}>
                         <Text style={[styles.specialName, { color: colors.text }]} numberOfLines={1}>
                           {t(definition.nameKey)}
@@ -298,11 +307,12 @@ export function WorkoutRecapModal({ recap, onClose }: WorkoutRecapModalProps) {
             accessibilityRole="button"
             onPress={onClose}
             style={({ pressed }) => [
+              shape.primaryButton,
               styles.closeButton,
               { backgroundColor: colors.primary, opacity: pressed ? 0.85 : 1 },
             ]}
           >
-            <Text style={styles.closeLabel}>{t('common.confirm')}</Text>
+            <Text style={[typography.button, { color: colors.onPrimary }]}>{t('common.confirm')}</Text>
           </Pressable>
         </View>
       </View>
@@ -320,29 +330,24 @@ const styles = StyleSheet.create({
   },
   card: {
     width: '100%',
-    maxWidth: 380,
-    maxHeight: '85%',
-    borderRadius: 20,
-    borderWidth: 1,
-    paddingTop: 24,
+    maxWidth: 390,
+    maxHeight: '86%',
+    borderRadius: radius.xl + 4,
+    borderWidth: hairline,
+    paddingTop: 26,
     paddingHorizontal: 20,
+    overflow: 'hidden',
   },
   header: {
     alignItems: 'center',
     gap: 4,
     marginBottom: 16,
   },
-  headerIcon: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
-    alignItems: 'center',
-    justifyContent: 'center',
+  headerMark: {
     marginBottom: 6,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '800',
+    ...typography.title,
   },
   subtitle: {
     fontSize: 14,
@@ -354,14 +359,16 @@ const styles = StyleSheet.create({
   },
   statCell: {
     flex: 1,
-    borderRadius: 12,
-    paddingVertical: 12,
+    borderRadius: radius.md,
+    borderWidth: hairline,
+    paddingVertical: 14,
     alignItems: 'center',
     gap: 2,
   },
   statValue: {
-    fontSize: 18,
+    fontSize: 20,
     fontWeight: '800',
+    letterSpacing: -0.4,
     fontVariant: ['tabular-nums'],
   },
   statLabel: {
@@ -373,11 +380,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-    letterSpacing: 0.5,
-    marginBottom: 2,
+    marginBottom: 4,
   },
   prRow: {
     flexDirection: 'row',
@@ -397,22 +400,19 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   prBadge: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
+    borderRadius: radius.pill,
+    paddingHorizontal: 9,
     paddingVertical: 3,
   },
   prBadgeLabel: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   milestoneRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  milestoneIcon: {
-    fontSize: 22,
   },
   milestoneBody: {
     flex: 1,
@@ -430,15 +430,21 @@ const styles = StyleSheet.create({
     fontVariant: ['tabular-nums'],
   },
   nextMilestone: {
-    borderTopWidth: StyleSheet.hairlineWidth,
-    paddingTop: 10,
-    marginTop: 2,
-    gap: 2,
+    borderTopWidth: hairline,
+    paddingTop: 12,
+    marginTop: 4,
+    gap: 4,
   },
   nextLabel: {
-    fontSize: 12,
+    ...typography.overline,
+  },
+  nextValueRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
   },
   nextValue: {
+    flexShrink: 1,
     fontSize: 14,
     fontWeight: '600',
   },
@@ -455,14 +461,14 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   perfectBadge: {
-    borderRadius: 8,
-    paddingHorizontal: 8,
+    borderRadius: radius.pill,
+    paddingHorizontal: 9,
     paddingVertical: 3,
   },
   perfectLabel: {
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
+    fontSize: 10,
+    fontWeight: '800',
+    letterSpacing: 0.3,
   },
   consistencyStreak: {
     fontSize: 13,
@@ -470,10 +476,7 @@ const styles = StyleSheet.create({
   specialRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-  },
-  specialIcon: {
-    fontSize: 20,
+    gap: 10,
   },
   specialBody: {
     flex: 1,
@@ -481,20 +484,19 @@ const styles = StyleSheet.create({
   },
   specialName: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   specialExercise: {
     fontSize: 12,
   },
   closeButton: {
-    alignItems: 'center',
-    borderRadius: 14,
-    paddingVertical: 14,
     marginTop: 18,
   },
-  closeLabel: {
-    color: '#FFFFFF',
-    fontSize: 16,
-    fontWeight: '700',
+  prIcon: {
+    width: 32,
+    height: 32,
+    borderRadius: radius.sm,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });
