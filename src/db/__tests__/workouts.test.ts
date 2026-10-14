@@ -4,6 +4,7 @@ import {
   cancelWorkout,
   deleteOrphanedSets,
   getRoutineSetValueChanges,
+  getWorkoutRoutineIdentity,
   getWorkoutOrderDiffersFromRoutine,
   setDiffersFromTarget,
   setWorkoutExerciseOrder,
@@ -524,5 +525,18 @@ describe('deleteOrphanedSets', () => {
     const { db, runAsync } = makeDb();
     await expect(deleteOrphanedSets(db)).resolves.toEqual([]);
     expect(runAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('getWorkoutRoutineIdentity', () => {
+  it("returns the session routine's name and icon", async () => {
+    const { db, getFirstQueue } = makeDb();
+    getFirstQueue.push({ name: 'Leg Day', icon: 'legs' });
+    await expect(getWorkoutRoutineIdentity(db, 5)).resolves.toEqual({ name: 'Leg Day', icon: 'legs' });
+  });
+
+  it('returns nulls when the session has no routine', async () => {
+    const { db } = makeDb();
+    await expect(getWorkoutRoutineIdentity(db, 5)).resolves.toEqual({ name: null, icon: null });
   });
 });

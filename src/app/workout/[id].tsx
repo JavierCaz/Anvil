@@ -16,6 +16,7 @@ import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { RestTimer, RestTimerAlarm } from '@/components/RestTimer';
+import { RoutineHeaderTitle } from '@/components/RoutineHeaderTitle';
 import { formatElapsed, useElapsedSeconds } from '@/components/WorkoutElapsed';
 import { WorkoutRecapModal } from '@/components/WorkoutRecap';
 import { WorkoutTimerAlarm, WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
@@ -31,7 +32,7 @@ import {
   getRoutineSetValueChanges,
   getWorkoutLog,
   getWorkoutOrderDiffersFromRoutine,
-  getWorkoutRoutineName,
+  getWorkoutRoutineIdentity,
   setWorkoutExerciseOrder,
   syncRoutineOrderFromWorkout,
   syncRoutineSetCountFromWorkout,
@@ -72,9 +73,9 @@ export default function WorkoutSessionScreen() {
 
   const { data, loaded, setData } = useFocusQuery(
     async (queryDb) => {
-      const [logRow, name, exerciseRows] = await Promise.all([
+      const [logRow, routine, exerciseRows] = await Promise.all([
         getWorkoutLog(queryDb, logId),
-        getWorkoutRoutineName(queryDb, logId),
+        getWorkoutRoutineIdentity(queryDb, logId),
         getActiveWorkoutExercises(queryDb, logId),
       ]);
       const achievements = await getExercisesAchievements(
@@ -83,7 +84,8 @@ export default function WorkoutSessionScreen() {
       );
       return {
         log: logRow,
-        routineName: name ?? '',
+        routineName: routine.name ?? '',
+        routineIcon: routine.icon,
         exercises: exerciseRows,
         exerciseAchievements: achievements,
       };
@@ -93,6 +95,7 @@ export default function WorkoutSessionScreen() {
   );
   const log = data?.log ?? null;
   const routineName = data?.routineName ?? '';
+  const routineIcon = data?.routineIcon ?? null;
   const exercises = data?.exercises ?? [];
   const exerciseAchievements = useMemo(
     () => data?.exerciseAchievements ?? new Map<number, AchievementDefinition[]>(),
@@ -360,6 +363,7 @@ export default function WorkoutSessionScreen() {
           headerShown: true,
           gestureEnabled: false,
           title: routineName,
+          headerTitle: () => <RoutineHeaderTitle name={routineName} icon={routineIcon} />,
           headerRight: () => (
             <View style={styles.headerActions}>
               <WorkoutToolsButton onPress={() => setToolsOpen(true)} />

@@ -303,7 +303,8 @@
       "newTitle": "Nueva rutina",
       "editTitle": "Editar rutina",
       "namePlaceholder": "p. ej. Día de empuje",
-      "descriptionPlaceholder": "p. ej. Pecho, hombros y tríceps"
+      "descriptionPlaceholder": "p. ej. Pecho, hombros y tríceps",
+      "icon": "Icono"
     },
     "detail": {
       "exercises": "Ejercicios",
@@ -342,6 +343,26 @@
       "emptyHint": "Nada coincide con tu búsqueda. Crea un ejercicio personalizado.",
       "attribution": "Ilustraciones: Everkinetic, ampliadas por Bryl Lim (CC BY-SA 4.0)",
       "addToRoutine": "Añadir “{{name}}” a la rutina"
+    },
+    "icons": {
+      "strength": "Fuerza",
+      "push": "Empuje",
+      "pull": "Tirón",
+      "legs": "Pierna",
+      "upper": "Torso",
+      "lower": "Tren inferior",
+      "fullBody": "Cuerpo completo",
+      "arms": "Brazos",
+      "chest": "Pecho",
+      "core": "Core",
+      "dumbbell": "Mancuernas",
+      "kettlebell": "Kettlebell",
+      "cardio": "Cardio",
+      "hiit": "HIIT",
+      "run": "Correr",
+      "cycling": "Ciclismo",
+      "swim": "Natación",
+      "mobility": "Movilidad"
     }
   },
   "exercises": {

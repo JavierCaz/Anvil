@@ -11,8 +11,8 @@ export default function NewRoutineScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const handleSave = (name: string, description: string) => {
-    void createRoutine(db, { name, description }).then(() => {
+  const handleSave = (name: string, description: string, icon: string | null) => {
+    void createRoutine(db, { name, description, icon }).then(() => {
       router.back();
     });
   };

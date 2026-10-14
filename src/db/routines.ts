@@ -15,6 +15,8 @@ export const DEFAULT_REST_SECONDS = 90;
 export interface RoutineInput {
   name: string;
   description?: string | null;
+  /** Preset icon key (see `ROUTINE_ICONS`); null/omitted = default. */
+  icon?: string | null;
 }
 
 /** All routines in the user's list order (drag-and-drop reorderable). */
@@ -146,16 +148,17 @@ export async function createRoutine(db: SQLiteDatabase, input: RoutineInput): Pr
   await db.withTransactionAsync(async () => {
     await db.runAsync('UPDATE routines SET order_index = order_index + 1');
     const result = await db.runAsync(
-      'INSERT INTO routines (name, description, order_index) VALUES (?, ?, 0)',
+      'INSERT INTO routines (name, description, icon, order_index) VALUES (?, ?, ?, 0)',
       name,
-      input.description?.trim() || null
+      input.description?.trim() || null,
+      input.icon ?? null
     );
     routineId = result.lastInsertRowId;
   });
   return routineId;
 }
 
-/** Update a routine's name/description. Returns false when the row is missing. */
+/** Update a routine's name/description/icon. Returns false when the row is missing. */
 export async function updateRoutine(
   db: SQLiteDatabase,
   id: number,
@@ -166,9 +169,10 @@ export async function updateRoutine(
     throw new Error('Routine name is required');
   }
   const result = await db.runAsync(
-    'UPDATE routines SET name = ?, description = ? WHERE id = ?',
+    'UPDATE routines SET name = ?, description = ?, icon = ? WHERE id = ?',
     name,
     input.description?.trim() || null,
+    input.icon ?? null,
     id
   );
   return result.changes > 0;

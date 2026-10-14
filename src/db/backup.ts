@@ -68,6 +68,7 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     description: 'text',
     created_at: 'text',
     order_index: 'integer',
+    icon: 'text',
   },
   exercises: {
     id: 'integer',

@@ -10,6 +10,7 @@ import Sortable, {
   type SortableGridRenderItem,
 } from 'react-native-sortables';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
+import { RoutineHeaderTitle } from '@/components/RoutineHeaderTitle';
 import { Screen } from '@/components/Screen';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
@@ -206,6 +207,7 @@ export default function RoutineDetailScreen() {
         options={{
           headerShown: true,
           title: routine?.name ?? '',
+          headerTitle: () => <RoutineHeaderTitle name={routine?.name ?? ''} icon={routine?.icon} />,
           headerRight: () => (
             <Pressable
               accessibilityRole="button"

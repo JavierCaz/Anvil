@@ -12,6 +12,8 @@ export interface Routine {
   created_at: string;
   /** User-defined position in the Routines list (0 = first). */
   order_index: number;
+  /** Preset icon key (see `ROUTINE_ICONS`); null = default dumbbell. */
+  icon: string | null;
 }
 
 /** A routine plus the number of exercises it contains. */

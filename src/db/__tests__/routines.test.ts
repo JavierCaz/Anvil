@@ -1,5 +1,5 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
-import { addExerciseToRoutine, createRoutine, reorderRoutines } from '@/db/routines';
+import { addExerciseToRoutine, createRoutine, reorderRoutines, updateRoutine } from '@/db/routines';
 
 /**
  * Queue-based mock DB: each `getAllAsync`/`getFirstAsync` call consumes the
@@ -67,9 +67,22 @@ describe('createRoutine', () => {
     // 1) shift existing rows, 2) insert at order_index 0
     expect(calls[0]).toEqual(['UPDATE routines SET order_index = order_index + 1']);
     expect(calls[1]).toEqual([
-      'INSERT INTO routines (name, description, order_index) VALUES (?, ?, 0)',
+      'INSERT INTO routines (name, description, icon, order_index) VALUES (?, ?, ?, 0)',
       'Push Day',
       null,
+      null,
+    ]);
+  });
+
+  it('stores the chosen preset icon', async () => {
+    const { db, runAsync } = makeDb();
+    await createRoutine(db, { name: 'Leg Day', icon: 'legs' });
+    const calls = runAsync.mock.calls as unknown[][];
+    expect(calls[1]).toEqual([
+      'INSERT INTO routines (name, description, icon, order_index) VALUES (?, ?, ?, 0)',
+      'Leg Day',
+      null,
+      'legs',
     ]);
   });
 
@@ -77,6 +90,20 @@ describe('createRoutine', () => {
     const { db, runAsync } = makeDb();
     await expect(createRoutine(db, { name: '  ' })).rejects.toThrow('Routine name is required');
     expect(runAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('updateRoutine', () => {
+  it('updates name, description and icon together', async () => {
+    const { db, runAsync } = makeDb();
+    await updateRoutine(db, 7, { name: ' Pull Day ', description: '', icon: 'pull' });
+    expect(runAsync.mock.calls[0]).toEqual([
+      'UPDATE routines SET name = ?, description = ?, icon = ? WHERE id = ?',
+      'Pull Day',
+      null,
+      'pull',
+      7,
+    ]);
   });
 });
 

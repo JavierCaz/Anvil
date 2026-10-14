@@ -1,7 +1,7 @@
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
 import { useTranslation } from 'react-i18next';
-import { KeyboardAvoidingView, Platform, StyleSheet } from 'react-native';
+import { KeyboardAvoidingView, Platform } from 'react-native';
 import { RoutineForm } from '@/components/RoutineForm';
 import { DangerButton } from '@/components/DangerButton';
 import { Screen } from '@/components/Screen';
@@ -23,8 +23,8 @@ export default function EditRoutineScreen() {
     { refetchOnFocus: false }
   );
 
-  const handleSave = (name: string, description: string) => {
-    void updateRoutine(db, routineId, { name, description }).then(() => {
+  const handleSave = (name: string, description: string, icon: string | null) => {
+    void updateRoutine(db, routineId, { name, description, icon }).then(() => {
       router.back();
     });
   };
@@ -58,23 +58,17 @@ export default function EditRoutineScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         {loaded && routine && (
-          <>
-            <RoutineForm
-              initialName={routine.name}
-              initialDescription={routine.description ?? ''}
-              submitLabel={t('common.save')}
-              onSave={handleSave}
-            />
-            <DangerButton label={t('common.delete')} onPress={confirmDelete} style={styles.deleteButton} />
-          </>
+          <RoutineForm
+            initialName={routine.name}
+            initialDescription={routine.description ?? ''}
+            initialIcon={routine.icon}
+            submitLabel={t('common.save')}
+            onSave={handleSave}
+            footer={<DangerButton label={t('common.delete')} onPress={confirmDelete} />}
+          />
         )}
       </KeyboardAvoidingView>
     </Screen>
   );
 }
 
-const styles = StyleSheet.create({
-  deleteButton: {
-    marginHorizontal: 20,
-  },
-});

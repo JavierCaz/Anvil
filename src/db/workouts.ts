@@ -303,6 +303,21 @@ export async function getWorkoutRoutineName(
   return row?.name ?? null;
 }
 
+/** Name and preset icon of the routine a session was started from (nulls when unlinked). */
+export async function getWorkoutRoutineIdentity(
+  db: SQLiteDatabase,
+  logId: number
+): Promise<{ name: string | null; icon: string | null }> {
+  const row = await db.getFirstAsync<{ name: string | null; icon: string | null }>(
+    `SELECT r.name AS name, r.icon AS icon
+     FROM workout_logs wl
+     LEFT JOIN routines r ON r.id = wl.routine_id
+     WHERE wl.id = ?`,
+    logId
+  );
+  return { name: row?.name ?? null, icon: row?.icon ?? null };
+}
+
 /**
  * The routine's exercises for an active session, each with its target volume,
  * its routine's per-set targets, and the number of sets already completed.

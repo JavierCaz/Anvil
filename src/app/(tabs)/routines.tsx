@@ -10,6 +10,7 @@ import { Screen } from '@/components/Screen';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
+import { getRoutineGlyph } from '@/constants/routine-icons';
 import { deleteRoutine, getRoutines, reorderRoutines } from '@/db/routines';
 import type { RoutineWithCount } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
@@ -71,7 +72,7 @@ export default function RoutinesScreen() {
           onTap={() => router.push(`/routine/${item.id}`)}
         >
           <View style={[styles.cardIcon, { backgroundColor: colors.primarySoft }]}>
-            <MaterialCommunityIcons name="dumbbell" size={22} color={colors.primary} />
+            <MaterialCommunityIcons name={getRoutineGlyph(item.icon)} size={24} color={colors.primary} />
           </View>
           <View style={styles.cardBody}>
             <Text style={[styles.cardTitle, { color: colors.text }]} numberOfLines={1}>

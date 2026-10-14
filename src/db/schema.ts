@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 13;
+export const DATABASE_VERSION = 14;
 
 /**
  * Migration 1 — initial tables.
@@ -325,6 +325,17 @@ ALTER TABLE sets ADD COLUMN incline_percent REAL;
 ALTER TABLE routine_exercise_sets ADD COLUMN incline_percent REAL;
 `;
 
+/**
+ * Migration 14 — routine icons.
+ *
+ * Optional preset icon per routine (a key from `ROUTINE_ICONS` in
+ * src/constants/routine-icons.ts, e.g. 'push', 'legs', 'cardio').
+ * NULL = no choice yet; the UI falls back to a generic dumbbell.
+ */
+export const SCHEMA_V14 = `
+ALTER TABLE routines ADD COLUMN icon TEXT;
+`;
+
 export const MIGRATIONS: readonly string[] = [
   SCHEMA_V1,
   SCHEMA_V2,
@@ -339,4 +350,5 @@ export const MIGRATIONS: readonly string[] = [
   SCHEMA_V11,
   SCHEMA_V12,
   SCHEMA_V13,
+  SCHEMA_V14,
 ];

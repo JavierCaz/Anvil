@@ -303,7 +303,8 @@
       "newTitle": "New routine",
       "editTitle": "Edit routine",
       "namePlaceholder": "e.g. Push Day",
-      "descriptionPlaceholder": "e.g. Chest, shoulders and triceps"
+      "descriptionPlaceholder": "e.g. Chest, shoulders and triceps",
+      "icon": "Icon"
     },
     "detail": {
       "exercises": "Exercises",
@@ -342,6 +343,26 @@
       "emptyHint": "Nothing matches your search. Create a custom exercise instead.",
       "attribution": "Artwork: Everkinetic, expanded by Bryl Lim (CC BY-SA 4.0)",
       "addToRoutine": "Add “{{name}}” to routine"
+    },
+    "icons": {
+      "strength": "Strength",
+      "push": "Push",
+      "pull": "Pull",
+      "legs": "Legs",
+      "upper": "Upper",
+      "lower": "Lower",
+      "fullBody": "Full body",
+      "arms": "Arms",
+      "chest": "Chest",
+      "core": "Core",
+      "dumbbell": "Dumbbells",
+      "kettlebell": "Kettlebell",
+      "cardio": "Cardio",
+      "hiit": "HIIT",
+      "run": "Running",
+      "cycling": "Cycling",
+      "swim": "Swimming",
+      "mobility": "Mobility"
     }
   },
   "exercises": {
