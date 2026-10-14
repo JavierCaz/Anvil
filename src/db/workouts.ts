@@ -492,13 +492,53 @@ export async function completeWorkout(db: SQLiteDatabase, logId: number): Promis
   return result.changes > 0;
 }
 
-/** Discard an unfinished session and its sets (FK CASCADE). */
-export async function cancelWorkout(db: SQLiteDatabase, logId: number): Promise<boolean> {
-  const result = await db.runAsync(
-    'DELETE FROM workout_logs WHERE id = ? AND completed_at IS NULL',
-    logId
+/**
+ * Discard an unfinished session and its sets. Returns the ids of exercises
+ * that had sets in the session (empty when nothing was discarded) so the
+ * caller can revoke achievements those sets unlocked.
+ *
+ * Sets are deleted explicitly: `PRAGMA foreign_keys` is per-connection and
+ * only enabled while the V1 migration runs, so ON DELETE CASCADE can't be
+ * relied on.
+ */
+export async function cancelWorkout(db: SQLiteDatabase, logId: number): Promise<number[]> {
+  let exerciseIds: number[] = [];
+  await db.withTransactionAsync(async () => {
+    const log = await db.getFirstAsync<{ id: number }>(
+      'SELECT id FROM workout_logs WHERE id = ? AND completed_at IS NULL',
+      logId
+    );
+    if (!log) {
+      return;
+    }
+    const rows = await db.getAllAsync<{ exercise_id: number }>(
+      'SELECT DISTINCT exercise_id FROM sets WHERE workout_log_id = ?',
+      logId
+    );
+    exerciseIds = rows.map((row) => row.exercise_id);
+    await db.runAsync('DELETE FROM sets WHERE workout_log_id = ?', logId);
+    await db.runAsync('DELETE FROM workout_logs WHERE id = ?', logId);
+  });
+  return exerciseIds;
+}
+
+/**
+ * Delete sets whose workout no longer exists (left behind by discards from
+ * before `cancelWorkout` removed sets explicitly). Returns the affected
+ * exercise ids so their achievements can be reconciled. Idempotent.
+ */
+export async function deleteOrphanedSets(db: SQLiteDatabase): Promise<number[]> {
+  const rows = await db.getAllAsync<{ exercise_id: number }>(
+    `SELECT DISTINCT exercise_id FROM sets
+     WHERE workout_log_id NOT IN (SELECT id FROM workout_logs)`
   );
-  return result.changes > 0;
+  if (rows.length === 0) {
+    return [];
+  }
+  await db.runAsync(
+    'DELETE FROM sets WHERE workout_log_id NOT IN (SELECT id FROM workout_logs)'
+  );
+  return rows.map((row) => row.exercise_id);
 }
 
 export async function getWorkoutSummary(

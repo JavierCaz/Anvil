@@ -1,7 +1,12 @@
 import * as SQLite from 'expo-sqlite';
-import { backfillPerExerciseAchievements, seedAchievements } from './achievements';
+import {
+  backfillPerExerciseAchievements,
+  reconcileExerciseAchievements,
+  seedAchievements,
+} from './achievements';
 import { seedExerciseCatalog } from './exercises';
 import { DATABASE_VERSION, MIGRATIONS } from './schema';
+import { deleteOrphanedSets } from './workouts';
 
 export const DATABASE_NAME = 'anvil.db';
 
@@ -39,4 +44,8 @@ export async function initializeDatabase(db: SQLite.SQLiteDatabase): Promise<voi
   await seedExerciseCatalog(db);
   await seedAchievements(db);
   await backfillPerExerciseAchievements(db);
+  // Revoke unlocks earned only by sets of previously discarded workouts.
+  for (const exerciseId of await deleteOrphanedSets(db)) {
+    await reconcileExerciseAchievements(db, exerciseId);
+  }
 }

@@ -1,6 +1,8 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import {
   applyWorkoutExerciseOrder,
+  cancelWorkout,
+  deleteOrphanedSets,
   getRoutineSetValueChanges,
   getWorkoutOrderDiffersFromRoutine,
   setDiffersFromTarget,
@@ -486,5 +488,41 @@ describe('cardio / timed sets', () => {
 
     const calls = runAsync.mock.calls as unknown[][];
     expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1800, 5000, 4.5]);
+  });
+});
+
+describe('cancelWorkout', () => {
+  it('deletes the session sets explicitly and returns the affected exercises', async () => {
+    const { db, getFirstQueue, getAllQueue, runAsync } = makeDb();
+    getFirstQueue.push({ id: 1 });
+    getAllQueue.push([{ exercise_id: 3 }, { exercise_id: 7 }]);
+
+    await expect(cancelWorkout(db, 1)).resolves.toEqual([3, 7]);
+    const statements = runAsync.mock.calls.map((call) => (call as unknown[])[0]);
+    expect(statements).toEqual([
+      'DELETE FROM sets WHERE workout_log_id = ?',
+      'DELETE FROM workout_logs WHERE id = ?',
+    ]);
+  });
+
+  it('does nothing for a finished or missing session', async () => {
+    const { db, runAsync } = makeDb();
+    await expect(cancelWorkout(db, 1)).resolves.toEqual([]);
+    expect(runAsync).not.toHaveBeenCalled();
+  });
+});
+
+describe('deleteOrphanedSets', () => {
+  it('removes sets of deleted workouts and returns their exercises', async () => {
+    const { db, getAllQueue, runAsync } = makeDb();
+    getAllQueue.push([{ exercise_id: 4 }]);
+    await expect(deleteOrphanedSets(db)).resolves.toEqual([4]);
+    expect(runAsync).toHaveBeenCalledTimes(1);
+  });
+
+  it('skips the delete when there are no orphans', async () => {
+    const { db, runAsync } = makeDb();
+    await expect(deleteOrphanedSets(db)).resolves.toEqual([]);
+    expect(runAsync).not.toHaveBeenCalled();
   });
 });

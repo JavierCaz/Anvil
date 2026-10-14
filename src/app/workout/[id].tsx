@@ -109,15 +109,14 @@ export default function WorkoutSessionScreen() {
           text: t('common.delete'),
           style: 'destructive',
           onPress: () => {
-            void cancelWorkout(db, logId).then(() => {
+            void cancelWorkout(db, logId).then(async (exerciseIds) => {
+              // Revoke achievements (weight comparatives, distance) unlocked by
+              // the discarded session's sets — a discarded workout never counts.
+              await Promise.all(
+                exerciseIds.map((exerciseId) => reconcileExerciseAchievements(db, exerciseId))
+              );
               // The session row is gone — let the pop below pass the guard.
               allowLeaveRef.current = true;
-              // Revoke weight comparatives unlocked by the discarded session's
-              // sets (a discarded workout never counts).
-              const ids = exercises.map((exercise) => exercise.exercise_id);
-              void Promise.all(
-                ids.map((exerciseId) => reconcileExerciseAchievements(db, exerciseId))
-              );
               router.dismissTo(backHref);
             });
           },
