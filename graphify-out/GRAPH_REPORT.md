@@ -1,23 +1,23 @@
 # Graph Report - anvil  (2026-10-15)
 
 ## Corpus Check
-- 124 files · ~139,175 words
+- 124 files · ~139,525 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
 ## Summary
-- 1315 nodes · 3330 edges · 46 communities (43 shown, 3 thin omitted)
+- 1316 nodes · 3332 edges · 44 communities (41 shown, 3 thin omitted)
 - Extraction: 99% EXTRACTED · 1% INFERRED · 0% AMBIGUOUS · INFERRED: 23 edges (avg confidence: 0.85)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `8e56eb38`
+- Built from commit: `bdca495a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - exercise-frames.ts
-- [exerciseId].tsx
+- ExerciseSetEditor.tsx
 - backup.ts
 - routines.ts
 - dependencies
@@ -26,20 +26,20 @@
 - package.json
 - statistics.tsx
 - Anvil
-- useAppTheme
+- WorkoutTools.tsx
 - scripts
 - constants/achievements.ts
 - index.tsx
-- stats.ts
+- workout/[id].tsx
 - AchievementBadge.tsx
 - index.ts
 - routine/[id].tsx
-- workout/[id].tsx
-- react-native
+- gamification.ts
+- [exerciseId].tsx
 - backup-file.ts
 - tsconfig.json
 - generate-icons.mjs
-- react
+- app-theme-provider.tsx
 - Strict TypeScript
 - Anvil Brand Mark — the recurring upward chevron/'A' glyph (blue/white) that identifies the Anvil app across platforms
 - eslint.config.js
@@ -48,23 +48,21 @@
 - app.config.js
 - README npm scripts
 - utils/body-weight.ts
-- ExerciseForm.tsx
-- LineTrendChart.tsx
+- useAppTheme
+- ProgressBar.tsx
 - schema.ts
-- ToastProvider.tsx
+- WorkoutRecap
 - WeeklyGoalEditor.tsx
-- AppDialog.tsx
 - AnvilLogo.tsx
 - devDependencies
-- app-theme-provider.tsx
-- useFocusQuery
+- react-native
 - add-exercise.tsx
 - WeekStrip.tsx
-- RoutineHeaderTitle.tsx
+- RoutineForm.tsx
 - ref_expo_sqlite_kv_store
 
 ## God Nodes (most connected - your core abstractions)
-1. `useAppTheme()` - 110 edges
+1. `useAppTheme()` - 111 edges
 2. `react-native` - 60 edges
 3. `react-i18next` - 42 edges
 4. `react` - 41 edges
@@ -96,31 +94,31 @@
 - **Quality gates enforced before completion** — agents_testing, agents_verification, agents_typescript [INFERRED 0.85]
 - **Anvil cross-platform app icon set sharing the blue/white chevron 'A' brand mark** — assets_images_icon_anvil_mark, assets_images_splash_icon_anvil_mark, assets_images_android_icon_monochrome_anvil_mark, assets_images_favicon_anvil_mark [INFERRED 0.85]
 
-## Communities (46 total, 3 thin omitted)
+## Communities (44 total, 3 thin omitted)
 
 ### Community 0 - "exercise-frames.ts"
 Cohesion: 0.01
-Nodes (302): frame_ab_wheel, frame_active_hang, frame_archer_push_up, frame_arm_circles, frame_arnold_press, frame_assault_bike, frame_assisted_chin_up, frame_assisted_dip (+294 more)
+Nodes (303): EXERCISE_FRAMES, frame_ab_wheel, frame_active_hang, frame_archer_push_up, frame_arm_circles, frame_arnold_press, frame_assault_bike, frame_assisted_chin_up (+295 more)
 
-### Community 1 - "[exerciseId].tsx"
+### Community 1 - "ExerciseSetEditor.tsx"
 Cohesion: 0.07
-Nodes (70): expo-haptics, RoutineSetEditorScreen(), SetDraft, styles, firstIncompleteSet(), SetDraft, shiftMapDown(), styles (+62 more)
+Nodes (65): RoutineSetEditorScreen(), firstIncompleteSet(), shiftMapDown(), WorkoutExerciseScreen(), DurationInput(), ExerciseSetEditor(), ExerciseSetEditorProps, formatReps() (+57 more)
 
 ### Community 2 - "backup.ts"
 Cohesion: 0.13
 Nodes (22): BACKUP_INSERT_ORDER, BACKUP_TABLES, BACKUP_VERSION, BackupErrorCode, BackupPreferences, BackupRow, BackupRowValue, BackupTableData (+14 more)
 
 ### Community 3 - "routines.ts"
-Cohesion: 0.13
-Nodes (20): expo-sqlite, NewRoutineScreen(), getDefaultSetTarget(), addExerciseToRoutine(), clampInt(), createRoutine(), DEFAULT_REST_SECONDS, DEFAULT_TARGET_REPS (+12 more)
+Cohesion: 0.12
+Nodes (24): getDefaultSetTarget(), addExerciseToRoutine(), clampInt(), DEFAULT_REST_SECONDS, DEFAULT_TARGET_REPS, DEFAULT_TARGET_SETS, getRoutineExercise(), isTimedTarget() (+16 more)
 
 ### Community 4 - "dependencies"
 Cohesion: 0.04
 Nodes (54): dependencies, @bryllim/workout-guide, dayjs, expo, expo-application, expo-audio, expo-clipboard, expo-constants (+46 more)
 
 ### Community 5 - "db/achievements.ts"
-Cohesion: 0.10
-Nodes (32): EXERCISE_STAT_ACHIEVEMENTS, ExerciseAchievementStats, DISTANCE_EFFORT_KEY_PREFIX, DISTANCE_EFFORTS, DISTANCE_LANDMARK_KEY_PREFIX, DISTANCE_LANDMARKS, DistanceAchievementDefinition, DistanceAchievementKind (+24 more)
+Cohesion: 0.11
+Nodes (31): EXERCISE_STAT_ACHIEVEMENTS, ExerciseAchievementStats, DISTANCE_EFFORT_KEY_PREFIX, DISTANCE_EFFORTS, DISTANCE_LANDMARK_KEY_PREFIX, DISTANCE_LANDMARKS, DistanceAchievementDefinition, DistanceAchievementKind (+23 more)
 
 ### Community 6 - "settings.tsx"
 Cohesion: 0.17
@@ -128,19 +126,19 @@ Nodes (18): SettingsScreen(), styles, SwitchRow(), SwitchRowProps, resetAppLangu
 
 ### Community 7 - "package.json"
 Cohesion: 0.05
-Nodes (38): main, name, private, version, @bryllim/workout-guide, eslint, eslint-config-expo, expo (+30 more)
+Nodes (40): main, name, private, version, @bryllim/workout-guide, eslint, eslint-config-expo, expo (+32 more)
 
 ### Community 8 - "statistics.tsx"
-Cohesion: 0.18
-Nodes (17): ChartCardProps, currentBucketIndex(), getRangeBounds(), GRANULARITY, mondayOf(), RANGE_KEYS, RangeKey, StatisticsScreen() (+9 more)
+Cohesion: 0.06
+Nodes (51): ref_dayjs_locale_es, @shopify/react-native-skia, victory-native, ChartCardProps, currentBucketIndex(), getRangeBounds(), GRANULARITY, mondayOf() (+43 more)
 
 ### Community 9 - "Anvil"
 Cohesion: 0.09
 Nodes (25): Anvil, app.json Expo configuration, Anvil brand identity and colors, Data Privacy & Ownership feature, expo-router file-based navigation, Expo SDK 57, expo-sqlite local database, Fun Comparisons USP (+17 more)
 
-### Community 10 - "useAppTheme"
-Cohesion: 0.07
-Nodes (58): assets_audio_rest_finished, expo-audio, expo-notifications, LegendItem(), SetTimerButton(), ProgressBar(), ProgressBarProps, styles (+50 more)
+### Community 10 - "WorkoutTools.tsx"
+Cohesion: 0.08
+Nodes (48): assets_audio_rest_finished, expo-audio, formatCountdown(), RestTimer(), RestTimerAlarm(), AdjustButton(), AdjustButtonProps, ControlRow() (+40 more)
 
 ### Community 11 - "scripts"
 Cohesion: 0.17
@@ -148,15 +146,15 @@ Nodes (12): scripts, android, build:all, build:android, build:ios, icons, ios, l
 
 ### Community 12 - "constants/achievements.ts"
 Cohesion: 0.15
-Nodes (18): ACHIEVEMENT_CATEGORY_ORDER, AchievementProgress, AchievementScope, AchievementTier, computeAchievementProgress(), computeExerciseAchievementProgress(), EXERCISE_METRIC_READERS, getAchievementByKey() (+10 more)
+Nodes (17): ACHIEVEMENT_CATEGORY_ORDER, AchievementProgress, AchievementScope, AchievementTier, BODY_ACHIEVEMENTS, BODY_GOAL_ACHIEVEMENT_KEYS, computeAchievementProgress(), EXERCISE_METRIC_READERS (+9 more)
 
 ### Community 13 - "index.tsx"
 Cohesion: 0.17
 Nodes (23): react-native-svg, AchievementsScreen(), styles, getMonday(), HomeScreen(), styles, HeroGlow(), HeroGlowProps (+15 more)
 
-### Community 14 - "stats.ts"
-Cohesion: 0.19
-Nodes (12): dayjs, addBucket(), BucketGranularity, bucketStart(), buildTimeSeries(), CardioStats, DayCount, mondayOf() (+4 more)
+### Community 14 - "workout/[id].tsx"
+Cohesion: 0.13
+Nodes (27): styles, WorkoutSessionScreen(), formatElapsed(), useElapsedSeconds(), getExercisesAchievements(), getRoutineExerciseSets(), applyWorkoutExerciseOrder(), cancelWorkout() (+19 more)
 
 ### Community 15 - "AchievementBadge.tsx"
 Cohesion: 0.10
@@ -168,15 +166,15 @@ Nodes (10): expo-localization, i18next, AppLanguage, detectInitialLanguage(), is
 
 ### Community 17 - "routine/[id].tsx"
 Cohesion: 0.13
-Nodes (21): expo-constants, expo-intent-launcher, ref_react_native_gesture_handler_reanimatedswipeable, react-native-reanimated, react-native-sortables, RoutineDetailScreen(), styles, RoutinesScreen() (+13 more)
+Nodes (21): ref_react_native_gesture_handler_reanimatedswipeable, react-native-reanimated, react-native-sortables, RoutineDetailScreen(), styles, RoutinesScreen(), styles, LoadingOverlay() (+13 more)
 
-### Community 18 - "workout/[id].tsx"
-Cohesion: 0.06
-Nodes (66): styles, WorkoutSessionScreen(), WorkoutRecapModalProps, METRIC_READERS, getNextWeightComparative(), getWeightComparativeByKey(), WeightComparativeDefinition, getExercisesAchievements() (+58 more)
-
-### Community 19 - "react-native"
+### Community 18 - "gamification.ts"
 Cohesion: 0.11
-Nodes (27): @expo/vector-icons, react-native, react-native-safe-area-context, DangerButton(), DangerButtonProps, styles, DetailModal(), DetailModalProps (+19 more)
+Nodes (31): computeExerciseAchievementProgress(), getNextWeightComparative(), getWeightComparativeByKey(), WeightComparativeDefinition, buildCardioBests(), buildHistoryBests(), buildSessionAggregates(), CardioBests (+23 more)
+
+### Community 19 - "[exerciseId].tsx"
+Cohesion: 0.12
+Nodes (22): @expo/vector-icons, react-i18next, react-native-safe-area-context, TabsLayout(), SetDraft, styles, DetailModal(), DetailModalProps (+14 more)
 
 ### Community 20 - "backup-file.ts"
 Cohesion: 0.15
@@ -190,9 +188,9 @@ Nodes (8): expo/tsconfig.base, compilerOptions, paths, strict, types, extends, i
 Cohesion: 0.10
 Nodes (18): ref_node_child_process, ref_node_fs, ref_node_os, ref_node_path, ref_node_url, entries, lines, manifest (+10 more)
 
-### Community 23 - "react"
-Cohesion: 0.14
-Nodes (12): expo-navigation-bar, expo-status-bar, expo-system-ui, react, react-native-gesture-handler, RootNavigator(), AndroidNavigationBar(), loadNavigationBar() (+4 more)
+### Community 23 - "app-theme-provider.tsx"
+Cohesion: 0.07
+Nodes (36): expo-constants, expo-intent-launcher, expo-navigation-bar, expo-notifications, expo-status-bar, expo-system-ui, react, react-native-gesture-handler (+28 more)
 
 ### Community 24 - "Strict TypeScript"
 Cohesion: 0.33
@@ -212,31 +210,27 @@ Nodes (3): jest, preset, transformIgnorePatterns
 
 ### Community 31 - "utils/body-weight.ts"
 Cohesion: 0.06
-Nodes (85): ref_dayjs_locale_es, react-i18next, zustand, ref_zustand_middleware, AchievementCard(), AchievementCardProps, styles, AchievementDetailModal() (+77 more)
+Nodes (85): dayjs, zustand, ref_zustand_middleware, AchievementCard(), AchievementCardProps, styles, AchievementDetailModal(), AchievementDetailModalProps (+77 more)
 
-### Community 32 - "ExerciseForm.tsx"
-Cohesion: 0.22
-Nodes (9): NewExerciseScreen(), Chip(), EXERCISE_TYPES, ExerciseForm(), ExerciseFormProps, styles, EXERCISE_TYPE_I18N_KEYS, MUSCLE_I18N_KEYS (+1 more)
+### Community 32 - "useAppTheme"
+Cohesion: 0.16
+Nodes (14): FilterChip(), FilterSection(), DangerButton(), DangerButtonProps, styles, Chip(), EXERCISE_TYPES, ExerciseForm() (+6 more)
 
-### Community 33 - "LineTrendChart.tsx"
-Cohesion: 0.12
-Nodes (14): @shopify/react-native-skia, victory-native, BarTrendChart(), BarTrendChartProps, BarTrendPoint, styles, LineTrendChart(), LineTrendChartProps (+6 more)
+### Community 33 - "ProgressBar.tsx"
+Cohesion: 0.50
+Nodes (3): ProgressBar(), ProgressBarProps, styles
 
 ### Community 34 - "schema.ts"
 Cohesion: 0.12
-Nodes (15): SCHEMA_V1, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_V13, SCHEMA_V14, SCHEMA_V15, SCHEMA_V2 (+7 more)
+Nodes (16): MIGRATIONS, SCHEMA_V1, SCHEMA_V10, SCHEMA_V11, SCHEMA_V12, SCHEMA_V13, SCHEMA_V14, SCHEMA_V15 (+8 more)
 
-### Community 35 - "ToastProvider.tsx"
-Cohesion: 0.29
-Nodes (7): AnimatedPressable, styles, ToastApi, ToastContext, ToastItem, ToastOptions, ToastProvider()
+### Community 35 - "WorkoutRecap"
+Cohesion: 0.50
+Nodes (4): WorkoutRecapModalProps, WorkoutRecap, WeeklyConsistency, WorkoutSummary
 
 ### Community 36 - "WeeklyGoalEditor.tsx"
 Cohesion: 0.32
 Nodes (6): StepIcon(), styles, WEEKLY_WORKOUTS_MAX, WEEKLY_WORKOUTS_MIN, WEEKLY_WORKOUTS_STORAGE_KEY, WeeklyGoalState
-
-### Community 37 - "AppDialog.tsx"
-Cohesion: 0.21
-Nodes (12): StatTile(), AppDialogProvider(), buttonAppearance(), DialogApi, DialogButton, DialogButtonStyle, DialogContext, DialogOptions (+4 more)
 
 ### Community 38 - "AnvilLogo.tsx"
 Cohesion: 0.25
@@ -246,25 +240,21 @@ Nodes (7): AnvilLogo(), AnvilLogoProps, AnvilMark(), AnvilMarkProps, MARK_COLORS
 Cohesion: 0.18
 Nodes (11): devDependencies, eslint, eslint-config-expo, expo-version, jest, jest-expo, test-renderer, @testing-library/react-native (+3 more)
 
-### Community 40 - "app-theme-provider.tsx"
-Cohesion: 0.33
-Nodes (7): AppColorScheme, AppTheme, AppThemeContext, darkColors, lightColors, palette, ThemeColors
-
-### Community 41 - "useFocusQuery"
-Cohesion: 0.16
-Nodes (17): expo-router, EditExerciseScreen(), styles, EditRoutineScreen(), TabsLayout(), Screen(), ScreenProps, styles (+9 more)
+### Community 41 - "react-native"
+Cohesion: 0.12
+Nodes (27): expo-router, expo-sqlite, react-native, EditExerciseScreen(), styles, NewExerciseScreen(), EditRoutineScreen(), SetDraft (+19 more)
 
 ### Community 42 - "add-exercise.tsx"
-Cohesion: 0.13
-Nodes (25): expo-image, AddExerciseScreen(), FilterChip(), FilterSection(), styles, ExerciseDetailModal(), ExerciseDetailModalProps, muscleLabel() (+17 more)
+Cohesion: 0.19
+Nodes (18): AddExerciseScreen(), styles, ExerciseDetailModal(), ExerciseDetailModalProps, muscleLabel(), styles, ExerciseThumbnail(), ExerciseThumbnailProps (+10 more)
 
 ### Community 43 - "WeekStrip.tsx"
 Cohesion: 0.25
 Nodes (7): HomeData, styles, WeekDayItem, WeekStrip(), WeekStripProps, AchievementCategory, AchievementProgressItem
 
-### Community 44 - "RoutineHeaderTitle.tsx"
-Cohesion: 0.22
-Nodes (9): RoutineForm(), RoutineHeaderTitle(), RoutineHeaderTitleProps, styles, DEFAULT_ROUTINE_GLYPH, getRoutineGlyph(), GlyphName, ROUTINE_ICONS (+1 more)
+### Community 44 - "RoutineForm.tsx"
+Cohesion: 0.18
+Nodes (11): CarouselArrow(), RoutineFormProps, styles, RoutineHeaderTitle(), RoutineHeaderTitleProps, styles, DEFAULT_ROUTINE_GLYPH, getRoutineGlyph() (+3 more)
 
 ### Community 45 - "ref_expo_sqlite_kv_store"
 Cohesion: 0.40
@@ -278,17 +268,17 @@ Nodes (4): ref_expo_sqlite_kv_store, THEME_STORAGE_KEY, ThemePreference, ThemeSt
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `react-native` connect `react-native` to `exercise-frames.ts`, `[exerciseId].tsx`, `routines.ts`, `settings.tsx`, `package.json`, `statistics.tsx`, `useAppTheme`, `index.tsx`, `AchievementBadge.tsx`, `routine/[id].tsx`, `workout/[id].tsx`, `backup-file.ts`, `react`, `utils/body-weight.ts`, `ExerciseForm.tsx`, `LineTrendChart.tsx`, `ToastProvider.tsx`, `WeeklyGoalEditor.tsx`, `AppDialog.tsx`, `AnvilLogo.tsx`, `app-theme-provider.tsx`, `useFocusQuery`, `add-exercise.tsx`, `WeekStrip.tsx`, `RoutineHeaderTitle.tsx`?**
-  _High betweenness centrality (0.363) - this node is a cross-community bridge._
+- **Why does `react-native` connect `react-native` to `exercise-frames.ts`, `ExerciseSetEditor.tsx`, `settings.tsx`, `package.json`, `statistics.tsx`, `WorkoutTools.tsx`, `index.tsx`, `workout/[id].tsx`, `AchievementBadge.tsx`, `routine/[id].tsx`, `[exerciseId].tsx`, `backup-file.ts`, `app-theme-provider.tsx`, `utils/body-weight.ts`, `useAppTheme`, `ProgressBar.tsx`, `WeeklyGoalEditor.tsx`, `AnvilLogo.tsx`, `add-exercise.tsx`, `WeekStrip.tsx`, `RoutineForm.tsx`?**
+  _High betweenness centrality (0.357) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
   _High betweenness centrality (0.065) - this node is a cross-community bridge._
-- **Why does `expo-sqlite` connect `routines.ts` to `ExerciseForm.tsx`, `[exerciseId].tsx`, `backup.ts`, `db/achievements.ts`, `settings.tsx`, `package.json`, `useFocusQuery`, `add-exercise.tsx`, `constants/achievements.ts`, `stats.ts`, `routine/[id].tsx`, `workout/[id].tsx`, `backup-file.ts`, `react`, `utils/body-weight.ts`?**
-  _High betweenness centrality (0.056) - this node is a cross-community bridge._
+- **Why does `expo-sqlite` connect `react-native` to `backup.ts`, `routines.ts`, `db/achievements.ts`, `settings.tsx`, `package.json`, `statistics.tsx`, `add-exercise.tsx`, `workout/[id].tsx`, `routine/[id].tsx`, `gamification.ts`, `[exerciseId].tsx`, `backup-file.ts`, `app-theme-provider.tsx`, `utils/body-weight.ts`?**
+  _High betweenness centrality (0.053) - this node is a cross-community bridge._
 - **What connects `VARIANTS`, `{ defineConfig }`, `expoConfig` to the rest of the system?**
   _673 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `exercise-frames.ts` be split into smaller, more focused modules?**
-  _Cohesion score 0.006600660066006601 - nodes in this community are weakly interconnected._
-- **Should `[exerciseId].tsx` be split into smaller, more focused modules?**
-  _Cohesion score 0.06993670886075949 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.006578947368421052 - nodes in this community are weakly interconnected._
+- **Should `ExerciseSetEditor.tsx` be split into smaller, more focused modules?**
+  _Cohesion score 0.07077625570776255 - nodes in this community are weakly interconnected._
 - **Should `backup.ts` be split into smaller, more focused modules?**
   _Cohesion score 0.13043478260869565 - nodes in this community are weakly interconnected._

@@ -423,7 +423,9 @@
       "editTitle": "Edit routine",
       "namePlaceholder": "e.g. Push Day",
       "descriptionPlaceholder": "e.g. Chest, shoulders and triceps",
-      "icon": "Icon"
+      "icon": "Icon",
+      "previousIcons": "Show previous icons",
+      "moreIcons": "Show more icons"
     },
     "detail": {
       "exercises": "Exercises",

@@ -1,7 +1,7 @@
 # Graph Report - anvil  (2026-10-15)
 
 ## Corpus Check
-- 124 files · ~139,101 words
+- 124 files · ~139,211 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `44fe258c`
+- Built from commit: `bdca495a`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

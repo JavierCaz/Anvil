@@ -423,7 +423,9 @@
       "editTitle": "Editar rutina",
       "namePlaceholder": "p. ej. Día de empuje",
       "descriptionPlaceholder": "p. ej. Pecho, hombros y tríceps",
-      "icon": "Icono"
+      "icon": "Icono",
+      "previousIcons": "Mostrar iconos anteriores",
+      "moreIcons": "Mostrar más iconos"
     },
     "detail": {
       "exercises": "Ejercicios",
