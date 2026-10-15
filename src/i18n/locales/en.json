@@ -574,7 +574,47 @@
     "newDurationPr": "Longest time",
     "newPacePr": "Best pace",
     "distance": "{{unit}} covered",
-    "timedTime": "Time logged"
+    "timedTime": "Time logged",
+    "share": {
+      "button": "Share",
+      "title": "Share your session",
+      "back": "Back to recap",
+      "layouts": {
+        "recap": "Recap",
+        "stats": "Stats",
+        "highlights": "Highlights",
+        "full": "Full session"
+      },
+      "tone": {
+        "light": "Light text",
+        "dark": "Dark text"
+      },
+      "copy": "Copy",
+      "save": "Save",
+      "share": "Share",
+      "tip": {
+        "ios": "Tap Copy, then paste it in your story to place it over your photo.",
+        "android": "Tap Save, then add it as a photo sticker in your story."
+      },
+      "copied": "Image copied",
+      "copiedHint": "Paste it in your story",
+      "saved": "Saved to Photos",
+      "permissionDenied": "Allow photo access to save the image",
+      "failed": "Couldn't create the image",
+      "labels": {
+        "time": "Time",
+        "volume": "Volume",
+        "sets": "Sets",
+        "distance": "Distance",
+        "prs": "PRs",
+        "exercises": "Exercises"
+      },
+      "comparison": "≈ {{count}} × {{name}}",
+      "comparisonCaption": "{{weight}} lifted",
+      "more": "+{{count}} more",
+      "prsCount_one": "{{count}} record forged",
+      "prsCount_other": "{{count}} records forged"
+    }
   },
   "workout": {
     "startWorkout": "Start Workout",

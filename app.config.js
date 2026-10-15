@@ -82,6 +82,16 @@ export default {
       'expo-font',
       'expo-image',
       'expo-localization',
+      [
+        'expo-media-library',
+        {
+          // Write-only: the workout share image is saved to Photos; the app
+          // never reads the library.
+          photosPermission: false,
+          savePhotosPermission: 'Allow $(PRODUCT_NAME) to save your workout images to Photos.',
+          granularPermissions: ['photo'],
+        },
+      ],
       'expo-sharing',
       'expo-sqlite',
       'expo-status-bar',

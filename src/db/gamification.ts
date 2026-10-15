@@ -70,6 +70,23 @@ export interface WorkoutRecap {
   consistency: WeeklyConsistency;
   /** Keys of achievements newly unlocked by this session (global + per-exercise). */
   achievementsUnlocked: UnlockedAchievement[];
+  /** When the session was completed (ISO string), or null if unknown. */
+  finishedAt: string | null;
+  /** Exercises with at least one completed set, in the order they were first logged. */
+  exercises: RecapExercise[];
+}
+
+/** Per-exercise totals for a finished session (drives the share image). */
+export interface RecapExercise {
+  exerciseId: number;
+  name: string;
+  setsCompleted: number;
+  /** Heaviest completed set (kg); 0 for bodyweight/cardio. */
+  bestWeightKg: number;
+  /** Reps of the heaviest completed set (0 for carries/holds/cardio). */
+  bestReps: number;
+  totalDistanceM: number;
+  totalDurationSeconds: number;
 }
 
 /** An achievement unlocked by a finished session. Exercise-scoped ones carry the exercise. */
@@ -671,6 +688,7 @@ export async function getWorkoutRecap(
   const maxWeightKg = maxWeightRow?.m ?? 0;
 
   const consistency = await getWeeklyConsistency(db, weeklyGoal);
+  const exercises = await getRecapExercises(db, logId);
 
   return {
     routineName,
@@ -682,5 +700,44 @@ export async function getWorkoutRecap(
     maxWeightKg,
     consistency,
     achievementsUnlocked,
+    finishedAt: log?.completed_at ?? null,
+    exercises,
   };
+}
+
+/** Completed-set totals per exercise for one session, in first-logged order. */
+export async function getRecapExercises(db: SQLiteDatabase, logId: number): Promise<RecapExercise[]> {
+  const rows = await db.getAllAsync<{
+    exercise_id: number;
+    name: string;
+    sets: number;
+    best_weight: number;
+    best_reps: number | null;
+    distance: number;
+    duration: number;
+  }>(
+    `SELECT s.exercise_id, e.name, COUNT(*) AS sets,
+            COALESCE(MAX(s.weight), 0) AS best_weight,
+            (SELECT s2.reps FROM sets s2
+              WHERE s2.workout_log_id = s.workout_log_id AND s2.exercise_id = s.exercise_id
+                AND s2.completed = 1
+              ORDER BY s2.weight DESC, s2.reps DESC LIMIT 1) AS best_reps,
+            COALESCE(SUM(s.distance_m), 0) AS distance,
+            COALESCE(SUM(s.duration_seconds), 0) AS duration
+     FROM sets s
+     JOIN exercises e ON e.id = s.exercise_id
+     WHERE s.workout_log_id = ? AND s.completed = 1
+     GROUP BY s.exercise_id
+     ORDER BY MIN(s.id) ASC`,
+    logId
+  );
+  return rows.map((row) => ({
+    exerciseId: row.exercise_id,
+    name: row.name,
+    setsCompleted: row.sets,
+    bestWeightKg: row.best_weight,
+    bestReps: row.best_reps ?? 0,
+    totalDistanceM: row.distance,
+    totalDurationSeconds: row.duration,
+  }));
 }

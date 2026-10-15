@@ -4,6 +4,7 @@ import {
   detectAndRecordPRs,
   epley1RM,
   type CardioSetRow,
+  getRecapExercises,
   getWorkoutRecap,
 } from '@/db/gamification';
 import { getWeeklyConsistency } from '@/db/stats';
@@ -186,6 +187,42 @@ describe('getWorkoutRecap', () => {
     expect(recap.consistency.weeklyGoal).toBe(3);
     expect(recap.achievementsUnlocked).toEqual([]);
     expect(recap.nextMilestone?.key).toBe('comparative_watermelon');
+    expect(recap.finishedAt).toBe('2026-08-01T10:40:00.000Z');
+    expect(recap.exercises).toEqual([]);
+  });
+});
+
+describe('getRecapExercises', () => {
+  it('maps per-exercise totals for the session', async () => {
+    const getAllAsync = jest.fn(async () => [
+      { exercise_id: 1, name: 'Bench Press', sets: 4, best_weight: 100, best_reps: 5, distance: 0, duration: 0 },
+      { exercise_id: 9, name: 'Running', sets: 1, best_weight: 0, best_reps: null, distance: 5000, duration: 1800 },
+    ]);
+    const db = { getAllAsync } as unknown as SQLiteDatabase;
+
+    const exercises = await getRecapExercises(db, 7);
+
+    expect(getAllAsync).toHaveBeenCalledWith(expect.stringContaining('s.completed = 1'), 7);
+    expect(exercises).toEqual([
+      {
+        exerciseId: 1,
+        name: 'Bench Press',
+        setsCompleted: 4,
+        bestWeightKg: 100,
+        bestReps: 5,
+        totalDistanceM: 0,
+        totalDurationSeconds: 0,
+      },
+      {
+        exerciseId: 9,
+        name: 'Running',
+        setsCompleted: 1,
+        bestWeightKg: 0,
+        bestReps: 0,
+        totalDistanceM: 5000,
+        totalDurationSeconds: 1800,
+      },
+    ]);
   });
 });
 

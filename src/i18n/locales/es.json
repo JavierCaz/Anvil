@@ -574,7 +574,47 @@
     "newDurationPr": "Mayor tiempo",
     "newPacePr": "Mejor ritmo",
     "distance": "{{unit}} recorridos",
-    "timedTime": "Tiempo registrado"
+    "timedTime": "Tiempo registrado",
+    "share": {
+      "button": "Compartir",
+      "title": "Comparte tu sesión",
+      "back": "Volver al resumen",
+      "layouts": {
+        "recap": "Resumen",
+        "stats": "Estadísticas",
+        "highlights": "Destacados",
+        "full": "Sesión completa"
+      },
+      "tone": {
+        "light": "Texto claro",
+        "dark": "Texto oscuro"
+      },
+      "copy": "Copiar",
+      "save": "Guardar",
+      "share": "Compartir",
+      "tip": {
+        "ios": "Pulsa Copiar y pégala en tu historia para colocarla sobre tu foto.",
+        "android": "Pulsa Guardar y añádela como sticker de foto en tu historia."
+      },
+      "copied": "Imagen copiada",
+      "copiedHint": "Pégala en tu historia",
+      "saved": "Guardada en Fotos",
+      "permissionDenied": "Permite el acceso a fotos para guardar la imagen",
+      "failed": "No se pudo crear la imagen",
+      "labels": {
+        "time": "Tiempo",
+        "volume": "Volumen",
+        "sets": "Series",
+        "distance": "Distancia",
+        "prs": "Récords",
+        "exercises": "Ejercicios"
+      },
+      "comparison": "≈ {{count}} × {{name}}",
+      "comparisonCaption": "{{weight}} levantados",
+      "more": "+{{count}} más",
+      "prsCount_one": "{{count}} récord forjado",
+      "prsCount_other": "{{count}} récords forjados"
+    }
   },
   "workout": {
     "startWorkout": "Iniciar Entrenamiento",

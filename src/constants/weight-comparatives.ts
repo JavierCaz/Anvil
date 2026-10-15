@@ -103,3 +103,23 @@ export function getNextWeightComparative(
 ): WeightComparativeDefinition | null {
   return WEIGHT_COMPARATIVES.find((comparative) => comparative.thresholdKg > weightKg) ?? null;
 }
+
+export interface VolumeComparison {
+  comparative: WeightComparativeDefinition;
+  /** How many of the object the volume equals, rounded to one decimal. */
+  count: number;
+}
+
+/**
+ * "You lifted 8.5 cars" — expresses a session's total volume as a multiple of
+ * the heaviest object it covers at least once. Null when the volume is below
+ * the lightest object.
+ */
+export function getVolumeComparison(totalVolumeKg: number): VolumeComparison | null {
+  const reached = getWeightComparativesAtOrBelow(totalVolumeKg);
+  const comparative = reached[reached.length - 1];
+  if (!comparative) {
+    return null;
+  }
+  return { comparative, count: Math.round((totalVolumeKg / comparative.thresholdKg) * 10) / 10 };
+}
