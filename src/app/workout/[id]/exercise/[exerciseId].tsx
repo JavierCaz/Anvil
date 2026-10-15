@@ -23,11 +23,11 @@ import { clampIncline, distanceScale, getExerciseMetrics } from '@/constants/exe
 import type { AchievementDefinition } from '@/constants/achievements';
 import {
   getExerciseAchievements,
+  getExerciseAchievementUnlockedAt,
   reconcileExerciseAchievements,
   unlockDistanceAchievements,
   unlockWeightComparatives,
 } from '@/db/achievements';
-import { getExerciseById } from '@/db/exercises';
 import {
   deleteSetAndShift,
   getActiveWorkoutExercise,
@@ -36,7 +36,8 @@ import {
   markWorkoutSetsEdited,
   upsertSet,
 } from '@/db/workouts';
-import type { Exercise, WorkoutSet } from '@/db/types';
+import type { WorkoutSet } from '@/db/types';
+import { useExerciseInfo } from '@/hooks/use-exercise-info';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { useWorkoutToolsStore } from '@/store/workout-tools';
@@ -89,19 +90,29 @@ export default function WorkoutExerciseScreen() {
   const [setCount, setSetCount] = useState(0);
   const [expandedSet, setExpandedSet] = useState<number | null>(null);
   const [toolsOpen, setToolsOpen] = useState(false);
-  const [infoExercise, setInfoExercise] = useState<Exercise | null>(null);
+  const exerciseInfo = useExerciseInfo();
   const [achievementKeys, setAchievementKeys] = useState<string[]>([]);
-  const [toastAchievement, setToastAchievement] = useState<AchievementDefinition | null>(null);
+  // Achievement detail card: opened from an unlock toast or from a medal in the exercise info modal.
+  const [detailAchievement, setDetailAchievement] = useState<{
+    definition: AchievementDefinition;
+    unlockedAt: string;
+  } | null>(null);
 
-  const showExerciseInfo = () => {
-    if (!exercise) {
+  const showAchievementDetail = (key: string) => {
+    const definition = getAchievementByKey(key);
+    if (!definition) {
       return;
     }
-    void getExerciseById(db, exercise.exercise_id).then((row) => {
-      if (row) {
-        setInfoExercise(row);
-      }
+    void getExerciseAchievementUnlockedAt(db, exerciseIdNum, key).then((unlockedAt) => {
+      exerciseInfo.close();
+      setDetailAchievement({ definition, unlockedAt: unlockedAt ?? new Date().toISOString() });
     });
+  };
+
+  const showExerciseInfo = () => {
+    if (exercise) {
+      exerciseInfo.open(exercise.exercise_id);
+    }
   };
 
   const scale = distanceScale(
@@ -369,7 +380,8 @@ export default function WorkoutExerciseScreen() {
                 setTimeout(() => {
                   const definition = getAchievementByKey(top.definition.key);
                   if (definition) {
-                    setToastAchievement(definition);
+                    exerciseInfo.close();
+                    setDetailAchievement({ definition, unlockedAt: new Date().toISOString() });
                   }
                 }, 0);
               },
@@ -408,7 +420,8 @@ export default function WorkoutExerciseScreen() {
               setTimeout(() => {
                 const definition = getAchievementByKey(top.key);
                 if (definition) {
-                  setToastAchievement(definition);
+                  exerciseInfo.close();
+                  setDetailAchievement({ definition, unlockedAt: new Date().toISOString() });
                 }
               }, 0);
             },
@@ -482,29 +495,35 @@ export default function WorkoutExerciseScreen() {
             />
           </ScrollView>
 
-          {infoExercise && (
+          {/* Only one detail modal at a time: opening one closes the other. */}
+          {exerciseInfo.info && (
             <ExerciseDetailModal
-              exercise={infoExercise}
-              onClose={() => setInfoExercise(null)}
+              exercise={exerciseInfo.info.exercise}
+              onClose={exerciseInfo.close}
+              achievementKeys={exerciseInfo.info.achievementKeys}
+              onAchievementPress={showAchievementDetail}
             />
           )}
-          {toastAchievement && (
+          {detailAchievement && (
             <AchievementDetailModal
-              definition={toastAchievement}
+              definition={detailAchievement.definition}
               progress={1}
               unlocked
-              unlockedAt={new Date().toISOString()}
+              unlockedAt={detailAchievement.unlockedAt}
               exercises={
                 exercise
                   ? [{
                       id: exercise.exercise_id,
                       name: exercise.exercise_name,
                       slug: exercise.exercise_slug,
-                      unlockedAt: new Date().toISOString(),
+                      unlockedAt: detailAchievement.unlockedAt,
                     }]
                   : undefined
               }
-              onClose={() => setToastAchievement(null)}
+              onExercisePress={(exerciseId) =>
+                exerciseInfo.open(exerciseId, () => setDetailAchievement(null))
+              }
+              onClose={() => setDetailAchievement(null)}
             />
           )}
 

@@ -490,7 +490,8 @@
     "detail": {
       "type": "Exercise type",
       "equipment": "Equipment",
-      "secondaryMuscles": "Secondary muscles"
+      "secondaryMuscles": "Secondary muscles",
+      "achievements": "Achievements"
     },
     "form": {
       "newTitle": "New exercise",

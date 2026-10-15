@@ -1,7 +1,7 @@
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { AchievementBadge } from '@/components/AchievementBadge';
 import { DetailModal } from '@/components/DetailModal';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
@@ -23,6 +23,8 @@ interface AchievementDetailModalProps {
   unlockedAt: string | null;
   /** Exercises that earned this achievement (exercise-scoped, unlocked only). */
   exercises?: { id: number; name: string; slug: string | null; unlockedAt: string | null }[];
+  /** Called when an earning exercise is tapped (e.g. to open its info card). */
+  onExercisePress?: (exerciseId: number) => void;
   onClose: () => void;
 }
 
@@ -65,6 +67,7 @@ export function AchievementDetailModal({
   unlocked,
   unlockedAt,
   exercises,
+  onExercisePress,
   onClose,
 }: AchievementDetailModalProps) {
   const { colors } = useAppTheme();
@@ -175,29 +178,25 @@ export function AchievementDetailModal({
             {t('achievements.details.earnedWith')}
           </Text>
           <View style={styles.exercisesRow}>
-            {exercises.map((exercise) => {
-              const exerciseDate = exercise.unlockedAt
-                ? dayjs(exercise.unlockedAt).locale(i18n.language).format('MMM D, YYYY')
-                : null;
-              return (
-                <View
-                  key={exercise.id}
-                  style={[styles.exerciseChip, { borderColor: colors.border, backgroundColor: colors.background }]}
-                >
-                  <ExerciseThumbnail slug={exercise.slug} size={28} borderRadius={6} />
-                  <View style={styles.exerciseChipBody}>
-                    <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={1}>
-                      {exercise.name}
-                    </Text>
-                    {exerciseDate && (
-                      <Text style={[styles.exerciseDate, { color: colors.textSecondary }]} numberOfLines={1}>
-                        {exerciseDate}
-                      </Text>
-                    )}
-                  </View>
-                </View>
-              );
-            })}
+            {exercises.map((exercise) => (
+              <Pressable
+                key={exercise.id}
+                accessibilityRole="button"
+                accessibilityLabel={exercise.name}
+                disabled={!onExercisePress}
+                onPress={() => onExercisePress?.(exercise.id)}
+                style={({ pressed }) => [
+                  styles.exerciseItem,
+                  onExercisePress && pressed && { opacity: 0.7 },
+                ]}
+              >
+                {/* Same 40px tile as the achievement grid in ExerciseDetailModal. */}
+                <ExerciseThumbnail slug={exercise.slug} size={40} borderRadius={8} />
+                <Text style={[styles.exerciseName, { color: colors.text }]} numberOfLines={2}>
+                  {exercise.name}
+                </Text>
+              </Pressable>
+            ))}
           </View>
         </View>
       )}
@@ -321,28 +320,18 @@ const styles = StyleSheet.create({
   exercisesRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    justifyContent: 'center',
+    rowGap: 12,
   },
-  exerciseChip: {
-    flexDirection: 'row',
+  exerciseItem: {
+    width: '25%',
     alignItems: 'center',
-    gap: 6,
-    borderRadius: 12,
-    borderWidth: StyleSheet.hairlineWidth,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
-    maxWidth: '48%',
-  },
-  exerciseChipBody: {
-    flexShrink: 1,
-    gap: 0,
+    gap: 4,
   },
   exerciseName: {
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  exerciseDate: {
     fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
   },
   status: {
     fontSize: 13,

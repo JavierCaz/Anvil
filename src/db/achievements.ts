@@ -293,6 +293,23 @@ export async function getExerciseAchievements(
 }
 
 /**
+ * When an exercise-scoped achievement was unlocked for one exercise, or null
+ * if it hasn't been.
+ */
+export async function getExerciseAchievementUnlockedAt(
+  db: SQLiteDatabase,
+  exerciseId: number,
+  key: string
+): Promise<string | null> {
+  const row = await db.getFirstAsync<{ unlocked_at: string }>(
+    'SELECT unlocked_at FROM exercise_achievements WHERE exercise_id = ? AND key = ?',
+    exerciseId,
+    key
+  );
+  return row?.unlocked_at ?? null;
+}
+
+/**
  * Exercise-scoped achievements unlocked for a set of exercises, keyed by
  * exercise id (batch — used by the workout session screen).
  */

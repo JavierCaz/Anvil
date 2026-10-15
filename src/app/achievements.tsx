@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next';
 import { ActivityIndicator, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AchievementCard } from '@/components/AchievementCard';
 import { AchievementDetailModal } from '@/components/AchievementDetailModal';
+import { ExerciseDetailModal } from '@/components/ExerciseDetailModal';
 import { HeroGlow } from '@/components/HeroGlow';
 import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
@@ -19,6 +20,7 @@ import {
   type AchievementProgressItem,
 } from '@/db/achievements';
 import { getAllExerciseStats, getWorkoutStats } from '@/db/workouts';
+import { useExerciseInfo } from '@/hooks/use-exercise-info';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useBodyWeightGoalStore } from '@/store/body-weight-goal';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
@@ -33,6 +35,7 @@ export default function AchievementsScreen() {
   const bodyWeightGoal = useBodyWeightGoalStore((state) => state.goal);
 
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementProgressItem | null>(null);
+  const exerciseInfo = useExerciseInfo();
 
   const { data, loaded } = useFocusQuery(
     async (db) => {
@@ -132,10 +135,32 @@ export default function AchievementsScreen() {
             unlocked={selectedAchievement.unlocked}
             unlockedAt={selectedAchievement.unlockedAt}
             exercises={selectedAchievement.exercises}
+            onExercisePress={(exerciseId) =>
+              exerciseInfo.open(exerciseId, () => setSelectedAchievement(null))
+            }
             onClose={() => setSelectedAchievement(null)}
           />
         ) : null;
       })()}
+      {exerciseInfo.info && (
+        <ExerciseDetailModal
+          exercise={exerciseInfo.info.exercise}
+          achievementKeys={exerciseInfo.info.achievementKeys}
+          onAchievementPress={(key) => {
+            const item = (items).find((candidate) => candidate.definitionKey === key);
+            if (!item) {
+              return;
+            }
+            // Defer mounting the next modal out of the touch handler, or the
+            // tap's touch-up lands on its backdrop and closes it instantly.
+            setTimeout(() => {
+              exerciseInfo.close();
+              setSelectedAchievement(item);
+            }, 0);
+          }}
+          onClose={exerciseInfo.close}
+        />
+      )}
     </Screen>
   );
 }

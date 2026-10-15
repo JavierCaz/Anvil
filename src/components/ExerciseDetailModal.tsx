@@ -1,7 +1,9 @@
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { AchievementBadge } from '@/components/AchievementBadge';
 import { DetailModal } from '@/components/DetailModal';
 import { ExerciseThumbnail } from '@/components/ExerciseThumbnail';
+import { getAchievementByKey } from '@/constants/achievements';
 import { equipmentI18nKey, exerciseTypeI18nKey, muscleI18nKey } from '@/constants/exercises';
 import type { Exercise } from '@/db/types';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -10,6 +12,10 @@ import { hairline, radius } from '@/theme/tokens';
 interface ExerciseDetailModalProps {
   exercise: Exercise;
   onClose: () => void;
+  /** Keys of achievements unlocked for this exercise, listed under the details. */
+  achievementKeys?: string[];
+  /** Called when a listed achievement is tapped (e.g. to open its detail card). */
+  onAchievementPress?: (key: string) => void;
 }
 
 /** Translates a catalog muscle value; falls back to the raw value. */
@@ -19,7 +25,12 @@ function muscleLabel(muscle: string | null, t: (key: string) => string): string 
 }
 
 /** Detail card for an exercise, shown as a modal when the user taps a row. */
-export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalProps) {
+export function ExerciseDetailModal({
+  exercise,
+  onClose,
+  achievementKeys,
+  onAchievementPress,
+}: ExerciseDetailModalProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
 
@@ -43,6 +54,10 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
     .map((m) => muscleLabel(m, t) ?? m)
     .filter((m): m is string => Boolean(m))
     .join(', ');
+
+  const achievements = (achievementKeys ?? [])
+    .map((key) => getAchievementByKey(key))
+    .filter((definition) => definition !== undefined);
 
   return (
     <DetailModal onClose={onClose}>
@@ -96,6 +111,38 @@ export function ExerciseDetailModal({ exercise, onClose }: ExerciseDetailModalPr
           </View>
         )}
       </View>
+
+      {/* Achievements unlocked for this exercise */}
+      {achievements.length > 0 && (
+        <View style={styles.achievements}>
+          <Text style={[styles.achievementsTitle, { color: colors.textSecondary }]}>
+            {t('exercises.detail.achievements')}
+          </Text>
+          <View style={styles.achievementGrid}>
+            {achievements.map((definition) => (
+              <Pressable
+                key={definition.key}
+                accessibilityRole="button"
+                accessibilityLabel={t(definition.nameKey)}
+                disabled={!onAchievementPress}
+                onPress={() => onAchievementPress?.(definition.key)}
+                style={({ pressed }) => [
+                  styles.achievementItem,
+                  onAchievementPress && pressed && { opacity: 0.7 },
+                ]}
+              >
+                <AchievementBadge achievementKey={definition.key} size={40} />
+                <Text
+                  style={[styles.achievementName, { color: colors.text }]}
+                  numberOfLines={2}
+                >
+                  {t(definition.nameKey)}
+                </Text>
+              </Pressable>
+            ))}
+          </View>
+        </View>
+      )}
     </DetailModal>
   );
 }
@@ -163,5 +210,34 @@ const styles = StyleSheet.create({
     fontSize: 13,
     fontWeight: '600',
     textAlign: 'right',
+  },
+  achievements: {
+    alignSelf: 'stretch',
+    marginTop: -4,
+    marginBottom: 18,
+  },
+  achievementsTitle: {
+    fontSize: 10,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
+    textAlign: 'center',
+    marginBottom: 10,
+  },
+  achievementGrid: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'center',
+    rowGap: 12,
+  },
+  achievementItem: {
+    width: '25%',
+    alignItems: 'center',
+    gap: 4,
+  },
+  achievementName: {
+    fontSize: 10,
+    fontWeight: '600',
+    textAlign: 'center',
   },
 });

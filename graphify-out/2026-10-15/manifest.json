@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/app/(tabs)/index.tsx": {
-    "mtime": 1792085533.7471597,
-    "seen": 1792085565.4995692,
-    "ast_hash": "0fd6dc16d03eb84e0f1ee7e34b8f685f",
+    "mtime": 1792093944.1196716,
+    "seen": 1792093982.4341354,
+    "ast_hash": "2381f57af6e2e62d79c1b6a315e11030",
     "semantic_hash": ""
   },
   "src/app/(tabs)/routines.tsx": {
@@ -78,9 +78,9 @@
     "semantic_hash": ""
   },
   "src/app/achievements.tsx": {
-    "mtime": 1792084344.0368745,
-    "seen": 1792084652.7270517,
-    "ast_hash": "7ce9404b6358d6f540a31ae8932504e1",
+    "mtime": 1792093944.1188283,
+    "seen": 1792093982.4341493,
+    "ast_hash": "3b14caaf583d102eabb88d08ad42b928",
     "semantic_hash": ""
   },
   "src/app/exercise/[id]/edit.tsx": {
@@ -138,9 +138,9 @@
     "semantic_hash": ""
   },
   "src/app/workout/[id]/exercise/[exerciseId].tsx": {
-    "mtime": 1791939343.240154,
-    "seen": 1791939730.6195173,
-    "ast_hash": "60e791c01ce11bde8351bec4b93e391c",
+    "mtime": 1792093944.1168923,
+    "seen": 1792093982.4341774,
+    "ast_hash": "45715166d54a23edd40e5b551a99c5fd",
     "semantic_hash": ""
   },
   "src/components/AchievementCard.tsx": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "src/components/AchievementDetailModal.tsx": {
-    "mtime": 1792084162.0042076,
-    "seen": 1792084652.7270913,
-    "ast_hash": "d4b619dbc73cb4fb77288c7756584f67",
+    "mtime": 1792093900.0608685,
+    "seen": 1792093982.4341865,
+    "ast_hash": "5403139092da56f7c6762173dc249cbf",
     "semantic_hash": ""
   },
   "src/components/AndroidExactAlarmPermissionPrompt.tsx": {
@@ -174,9 +174,9 @@
     "semantic_hash": ""
   },
   "src/components/ExerciseDetailModal.tsx": {
-    "mtime": 1791939486.5829513,
-    "seen": 1791939730.619538,
-    "ast_hash": "0c511b32535d644f29f5831b08015507",
+    "mtime": 1792093660.3757246,
+    "seen": 1792093690.2730517,
+    "ast_hash": "8ae9e408a3928e6ec90ec43b19f8eb89",
     "semantic_hash": ""
   },
   "src/components/ExerciseForm.tsx": {
@@ -216,9 +216,9 @@
     "semantic_hash": ""
   },
   "src/components/RoutineForm.tsx": {
-    "mtime": 1792092779.9468975,
-    "seen": 1792092790.690082,
-    "ast_hash": "c4b3bf547fb3c07ededb7926377a1c19",
+    "mtime": 1792093080.2396243,
+    "seen": 1792093089.0413976,
+    "ast_hash": "392dc5916e7294ac4b12a80d740383c4",
     "semantic_hash": ""
   },
   "src/components/Screen.tsx": {
@@ -318,9 +318,9 @@
     "semantic_hash": ""
   },
   "src/db/achievements.ts": {
-    "mtime": 1792084153.1487703,
-    "seen": 1792084652.7272575,
-    "ast_hash": "a42ff8fc2ba94a247422a3c5fd47de96",
+    "mtime": 1792093660.3749514,
+    "seen": 1792093690.273353,
+    "ast_hash": "7a5bc8842d384cdbb5c6f2ed82691d1b",
     "semantic_hash": ""
   },
   "src/db/backup-file.ts": {
@@ -396,15 +396,15 @@
     "semantic_hash": "8f6d6d5070a32407a48defe6d7867dee"
   },
   "src/i18n/locales/en.json": {
-    "mtime": 1792085513.9470158,
-    "seen": 1792085565.499799,
-    "ast_hash": "d05c31da69d6b2d1cd65f0b284deb543",
+    "mtime": 1792093297.5508816,
+    "seen": 1792093339.5417583,
+    "ast_hash": "45d3b8889b737595f31d1ace81c68b3c",
     "semantic_hash": ""
   },
   "src/i18n/locales/es.json": {
-    "mtime": 1792085513.9510424,
-    "seen": 1792085565.4998033,
-    "ast_hash": "193e8298bd97cf6bddbd83cdb3057998",
+    "mtime": 1792093297.5518346,
+    "seen": 1792093339.5417626,
+    "ast_hash": "3652803ac3bcdb472f18bb744d827ba0",
     "semantic_hash": ""
   },
   "src/store/units.ts": {
@@ -795,6 +795,12 @@
     "mtime": 1792085001.515319,
     "seen": 1792085070.7026248,
     "ast_hash": "d4a4a3386aefccefb158a78ec2914a50",
+    "semantic_hash": ""
+  },
+  "src/hooks/use-exercise-info.ts": {
+    "mtime": 1792093869.778272,
+    "seen": 1792093982.434374,
+    "ast_hash": "173bf77103ea14141a0d5e5dc5221e81",
     "semantic_hash": ""
   }
 }
