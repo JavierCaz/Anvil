@@ -20,6 +20,7 @@ function data(overrides: TableFixtures = {}): Record<string, unknown[]> {
     personal_records: [],
     achievements: [],
     exercise_achievements: [],
+    body_weights: [],
     ...overrides,
   };
 }
@@ -57,7 +58,32 @@ describe('parseBackupFile', () => {
     expect(parsed.type).toBe('anvil-backup');
     expect(parsed.version).toBe(BACKUP_VERSION);
     expect(parsed.databaseVersion).toBe(DATABASE_VERSION);
-    expect(Object.keys(parsed.data)).toHaveLength(9);
+    expect(Object.keys(parsed.data)).toHaveLength(10);
+  });
+
+  it('accepts backups exported before the bodyweight tracker', () => {
+    const legacyData: Record<string, unknown[]> = data();
+    delete legacyData.body_weights;
+    const parsed = parseBackupFile(JSON.stringify(validBackup({ data: legacyData })));
+    expect(parsed.data.body_weights).toEqual([]);
+  });
+
+  it('round-trips weigh-ins and the bodyweight goal', () => {
+    const goal = '{"state":{"goal":{"targetKg":75,"startKg":80,"startDay":"2026-10-01"}},"version":0}';
+    const parsed = parseBackupFile(
+      JSON.stringify(
+        validBackup({
+          data: data({
+            body_weights: [{ id: 1, measured_on: '2026-10-15', weight_kg: 80.4, created_at: 'x' }],
+          }),
+          preferences: { bodyWeightGoal: goal },
+        })
+      )
+    );
+    expect(parsed.data.body_weights).toEqual([
+      { id: 1, measured_on: '2026-10-15', weight_kg: 80.4, created_at: 'x' },
+    ]);
+    expect(parsed.preferences.bodyWeightGoal).toBe(goal);
   });
 
   it('preserves rows and preferences', () => {

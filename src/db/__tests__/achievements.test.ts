@@ -25,6 +25,10 @@ const STATS: WorkoutStats = {
   prsThisMonth: 2,
   maxWeightKg: 90,
   consistencyStreakWeeks: 3,
+  weighInCount: 0,
+  weighInStreakDays: 0,
+  bodyChangeKg: 0,
+  bodyGoalPercent: 0,
 };
 
 /** Minimal fake SQLiteDatabase exposing the queries `unlockWeightComparatives` uses. */

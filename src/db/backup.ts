@@ -26,7 +26,8 @@ export type BackupTableName =
   | 'sets'
   | 'personal_records'
   | 'achievements'
-  | 'exercise_achievements';
+  | 'exercise_achievements'
+  | 'body_weights';
 
 /** All tables included in a backup (in FK-safe order for deletion). */
 export const BACKUP_TABLES: readonly BackupTableName[] = [
@@ -39,6 +40,7 @@ export const BACKUP_TABLES: readonly BackupTableName[] = [
   'sets',
   'personal_records',
   'achievements',
+  'body_weights',
 ];
 
 /** Insert order respects foreign keys (parents before children). */
@@ -52,7 +54,14 @@ const BACKUP_INSERT_ORDER: readonly BackupTableName[] = [
   'personal_records',
   'achievements',
   'exercise_achievements',
+  'body_weights',
 ];
+
+/**
+ * Tables added after the first backup format. Backups exported before they
+ * existed simply lack them — treated as empty instead of `missingTable`.
+ */
+const OPTIONAL_BACKUP_TABLES: ReadonlySet<BackupTableName> = new Set(['body_weights']);
 
 
 type ColumnType = 'integer' | 'real' | 'text' | 'boolean';
@@ -150,6 +159,12 @@ const TABLE_COLUMNS: Record<BackupTableName, Record<string, ColumnType>> = {
     key: 'text',
     unlocked_at: 'text',
   },
+  body_weights: {
+    id: 'integer',
+    measured_on: 'text',
+    weight_kg: 'real',
+    created_at: 'text',
+  },
 };
 
 export type BackupTableData = Record<BackupTableName, BackupRow[]>;
@@ -161,6 +176,7 @@ export interface BackupPreferences {
   weeklyWorkouts?: string;
   units?: string;
   weightStep?: string;
+  bodyWeightGoal?: string;
 }
 
 export interface BackupFile {
@@ -240,6 +256,7 @@ function sanitizePreferences(value: unknown): BackupPreferences {
   if (typeof value.weeklyWorkouts === 'string') preferences.weeklyWorkouts = value.weeklyWorkouts;
   if (typeof value.units === 'string') preferences.units = value.units;
   if (typeof value.weightStep === 'string') preferences.weightStep = value.weightStep;
+  if (typeof value.bodyWeightGoal === 'string') preferences.bodyWeightGoal = value.bodyWeightGoal;
   return preferences;
 }
 
@@ -272,7 +289,8 @@ export function parseBackupFile(raw: string): BackupFile {
 
   const data = {} as BackupTableData;
   for (const table of BACKUP_TABLES) {
-    const rows = parsed.data[table];
+    const rows =
+      parsed.data[table] === undefined && OPTIONAL_BACKUP_TABLES.has(table) ? [] : parsed.data[table];
     if (!Array.isArray(rows)) throw new BackupError('missingTable');
     data[table] = rows.map((row) => sanitizeRow(table, row));
   }

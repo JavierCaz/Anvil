@@ -27,6 +27,7 @@ import {
 } from './backup';
 import { DATABASE_VERSION } from './schema';
 import { initializeDatabase } from './database';
+import { BODY_WEIGHT_GOAL_STORAGE_KEY } from '@/store/body-weight-goal';
 
 const PREFERENCE_KEYS = {
   theme: 'anvil.theme',
@@ -34,15 +35,17 @@ const PREFERENCE_KEYS = {
   weeklyWorkouts: 'anvil.goals.weeklyWorkouts',
   units: 'anvil.units',
   weightStep: 'anvil.settings.weightStep',
+  bodyWeightGoal: BODY_WEIGHT_GOAL_STORAGE_KEY,
 } as const;
 
 async function readPreferences(): Promise<BackupPreferences> {
-  const [theme, language, weeklyWorkouts, units, weightStep] = await Promise.all([
+  const [theme, language, weeklyWorkouts, units, weightStep, bodyWeightGoal] = await Promise.all([
     Storage.getItem(PREFERENCE_KEYS.theme),
     Storage.getItem(PREFERENCE_KEYS.language),
     Storage.getItem(PREFERENCE_KEYS.weeklyWorkouts),
     Storage.getItem(PREFERENCE_KEYS.units),
     Storage.getItem(PREFERENCE_KEYS.weightStep),
+    Storage.getItem(PREFERENCE_KEYS.bodyWeightGoal),
   ]);
   return {
     theme: theme ?? undefined,
@@ -50,6 +53,7 @@ async function readPreferences(): Promise<BackupPreferences> {
     weeklyWorkouts: weeklyWorkouts ?? undefined,
     units: units ?? undefined,
     weightStep: weightStep ?? undefined,
+    bodyWeightGoal: bodyWeightGoal ?? undefined,
   };
 }
 
@@ -68,6 +72,10 @@ async function writePreferences(preferences: BackupPreferences): Promise<void> {
     preferences.weightStep
       ? Storage.setItem(PREFERENCE_KEYS.weightStep, preferences.weightStep)
       : Promise.resolve(),
+    // Restoring a backup without a goal clears any current one.
+    preferences.bodyWeightGoal
+      ? Storage.setItem(PREFERENCE_KEYS.bodyWeightGoal, preferences.bodyWeightGoal)
+      : Storage.removeItem(PREFERENCE_KEYS.bodyWeightGoal),
   ]);
 }
 

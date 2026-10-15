@@ -13,11 +13,8 @@ import { useDialog } from '@/components/AppDialog';
 import { resetAppLanguage, setAppLanguage, type AppLanguage } from '@/i18n';
 import { type BackupPreferences } from '@/db/backup';
 import { eraseAllData, exportBackupFile, importBackupFile } from '@/db/backup-file';
-import {
-  useWeeklyGoalStore,
-  WEEKLY_WORKOUTS_MAX,
-  WEEKLY_WORKOUTS_MIN,
-} from '@/store/workout-goals';
+import { useWeeklyGoalStore } from '@/store/workout-goals';
+import { useBodyWeightGoalStore } from '@/store/body-weight-goal';
 import { useUnitsStore } from '@/store/units';
 import {
   formatWeightStep,
@@ -86,8 +83,6 @@ export default function SettingsScreen() {
 
   const preference = useThemeStore((state) => state.preference);
   const setPreference = useThemeStore((state) => state.setPreference);
-  const weeklyWorkouts = useWeeklyGoalStore((state) => state.weeklyWorkouts);
-  const setWeeklyWorkouts = useWeeklyGoalStore((state) => state.setWeeklyWorkouts);
   const unitSystem = useUnitsStore((state) => state.unitSystem);
   const setUnitSystem = useUnitsStore((state) => state.setUnitSystem);
   const stepKg = useWeightStepStore((state) => state.stepKg);
@@ -222,6 +217,8 @@ export default function SettingsScreen() {
     if (preferences.weeklyWorkouts) void useWeeklyGoalStore.persist.rehydrate();
     if (preferences.units) void useUnitsStore.persist.rehydrate();
     if (preferences.weightStep) void useWeightStepStore.persist.rehydrate();
+    // Always rehydrate: restoring a backup without a goal clears the current one.
+    void useBodyWeightGoalStore.persist.rehydrate();
     if (preferences.language === 'en' || preferences.language === 'es') {
       await setAppLanguage(preferences.language);
     }
@@ -239,6 +236,7 @@ export default function SettingsScreen() {
     useWeightStepStore
       .getState()
       .setStepLb(useWeightStepStore.getInitialState().stepLb);
+    useBodyWeightGoalStore.getState().clearGoal();
     void resetAppLanguage();
   };
 
@@ -319,41 +317,6 @@ export default function SettingsScreen() {
           </View>
         </View>
 
-        <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
-          {t('settings.weeklyGoal')}
-        </Text>
-        <View
-          style={[
-            styles.card,
-            styles.goalCard,
-            { backgroundColor: colors.surface, borderColor: colors.border },
-          ]}
-        >
-          <Text style={[styles.goalHint, { color: colors.textSecondary }]}>
-            {t('settings.weeklyGoalHint')}
-          </Text>
-          <View style={styles.stepper}>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="decrease"
-              disabled={weeklyWorkouts <= WEEKLY_WORKOUTS_MIN}
-              hitSlop={8}
-              onPress={() => setWeeklyWorkouts(weeklyWorkouts - 1)}
-            >
-              <StepIcon kind="minus" disabled={weeklyWorkouts <= WEEKLY_WORKOUTS_MIN} />
-            </Pressable>
-            <Text style={[styles.goalValue, { color: colors.text }]}>{weeklyWorkouts}</Text>
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="increase"
-              disabled={weeklyWorkouts >= WEEKLY_WORKOUTS_MAX}
-              hitSlop={8}
-              onPress={() => setWeeklyWorkouts(weeklyWorkouts + 1)}
-            >
-              <StepIcon kind="plus" disabled={weeklyWorkouts >= WEEKLY_WORKOUTS_MAX} />
-            </Pressable>
-          </View>
-        </View>
         <Text style={[typography.overline, styles.sectionLabel, { color: colors.textSecondary }]}>
           {t('settings.data')}
         </Text>
@@ -530,14 +493,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 28,
-  },
-  goalValue: {
-    fontSize: 34,
-    fontWeight: '800',
-    letterSpacing: -1,
-    minWidth: 48,
-    textAlign: 'center',
-    fontVariant: ['tabular-nums'],
   },
   weightStepValue: {
     fontSize: 24,

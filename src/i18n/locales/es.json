@@ -16,7 +16,8 @@
     "search": "Buscar",
     "moveUp": "Mover arriba",
     "moveDown": "Mover abajo",
-    "close": "Cerrar"
+    "close": "Cerrar",
+    "done": "Listo"
   },
   "tabs": {
     "home": "Inicio",
@@ -45,8 +46,6 @@
     "units": "Unidades",
     "weightIncrement": "Incremento de peso",
     "weightIncrementHint": "Cantidad que se suma o resta con los botones +/− de una serie.",
-    "weeklyGoal": "Meta semanal de entrenamiento",
-    "weeklyGoalHint": "¿Cuántos días a la semana planeas entrenar?",
     "data": "Datos",
     "exportData": "Exportar datos",
     "importData": "Importar datos",
@@ -96,6 +95,54 @@
     "setsUnit": "series",
     "peak": "Máximo {{value}}"
   },
+  "bodyWeight": {
+    "title": "Peso corporal",
+    "seeTrend": "Ver tendencia",
+    "emptyHint": "Registra tu peso para ver si estás subiendo o bajando.",
+    "emptyStatsHint": "Registra tu peso en Inicio para ver aquí tu tendencia.",
+    "since": "desde {{date}}",
+    "goalReached": "¡Objetivo alcanzado! 🏆",
+    "toGo": "Faltan {{weight}}",
+    "todayLabel": "Hoy ({{unit}})",
+    "log": "Registrar",
+    "loggedToday": "Registrado hoy: {{weight}} · registrar de nuevo lo reemplaza",
+    "saved": "Peso registrado: {{weight}}",
+    "invalidTitle": "Revisa el peso",
+    "invalidMessage": "Introduce un peso entre {{min}} y {{max}} {{unit}}.",
+    "confirmTitle": "¿Es correcto?",
+    "confirmMessage": "{{weight}} es un cambio grande respecto a tu último registro ({{previous}}). ¿Guardarlo de todos modos?",
+    "achievementUnlocked": "Desbloqueado: {{name}}",
+    "noDataInRange": "Sin registros de peso en este periodo",
+    "range": {
+      "week": "esta semana",
+      "month": "este mes",
+      "year": "este año",
+      "all": "en total"
+    },
+    "legend": {
+      "weighIns": "Registros",
+      "average": "Media de {{days}} días",
+      "goal": "Objetivo"
+    },
+    "comparison": {
+      "lost": "Has perdido {{icon}} {{object}} ({{weight}}) desde tu primer registro",
+      "gained": "Has ganado {{icon}} {{object}} ({{weight}}) desde tu primer registro",
+      "almost": "¡Casi {{icon}} {{object}}! Sigue así",
+      "next": "Siguiente: {{icon}} {{object}} · faltan {{weight}}"
+    },
+    "goalEditor": {
+      "title": "Objetivo de peso",
+      "hint": "Tu peso corporal objetivo. Escríbelo o usa − / +.",
+      "sameAsStart": "Elige un objetivo distinto de tu peso inicial.",
+      "summaryLose": "Bajar {{weight}} · desde {{start}} el {{date}}",
+      "summaryGain": "Subir {{weight}} · desde {{start}} el {{date}}",
+      "clear": "Quitar objetivo",
+      "clearTitle": "¿Quitar el objetivo de peso?",
+      "clearMessage": "Tus registros de peso se conservan y los logros de objetivo conseguidos siguen desbloqueados.",
+      "decrease": "Reducir objetivo de peso",
+      "increase": "Aumentar objetivo de peso"
+    }
+  },
   "home": {
     "tagline": "Forja tu fuerza. Sigue tu progreso.",
     "startWorkout": "Iniciar Entrenamiento",
@@ -108,7 +155,12 @@
     "goalRemaining_other": "Te faltan {{count}} entrenamientos para tu meta",
     "goalReached": "Meta semanal cumplida. Sigue forjando.",
     "workoutsLabel": "entrenamientos",
-    "unlockedOf": "{{unlocked}} de {{total}} desbloqueados"
+    "unlockedOf": "{{unlocked}} de {{total}} desbloqueados",
+    "setGoal": "Fijar objetivo",
+    "editGoal": "Editar objetivo",
+    "weeklyGoalHint": "¿Cuántos días por semana planeas entrenar?",
+    "weeklyGoalDecrease": "Reducir objetivo semanal",
+    "weeklyGoalIncrease": "Aumentar objetivo semanal"
   },
   "achievements": {
     "title": "Logros",
@@ -117,7 +169,9 @@
     "metrics": {
       "workouts": "entrenamientos",
       "weeks": "semanas",
-      "prs": "récords"
+      "prs": "récords",
+      "weighIns": "registros",
+      "days": "días"
     },
     "details": {
       "unlockedOn": "Desbloqueado el {{date}}",
@@ -130,6 +184,7 @@
       "endurance": "Resistencia",
       "consistency": "Constancia",
       "experience": "Experiencia",
+      "body": "Cuerpo",
       "special": "Especiales"
     },
     "tiers": {
@@ -288,6 +343,68 @@
       "greatWall": {
         "name": "Gran Muralla China",
         "description": "Recorre la longitud de la Gran Muralla China en un ejercicio"
+      }
+    },
+    "body": {
+      "firstWeighIn": {
+        "name": "Primer pesaje",
+        "description": "Registra tu peso corporal por primera vez"
+      },
+      "weighInStreak7": {
+        "name": "Una semana en la báscula",
+        "description": "Registra tu peso 7 días seguidos"
+      },
+      "weighIn30": {
+        "name": "Guiado por datos",
+        "description": "Registra tu peso 30 veces"
+      },
+      "weighIn100": {
+        "name": "Maestro de la báscula",
+        "description": "Registra tu peso 100 veces"
+      },
+      "goalSet": {
+        "name": "Objetivo fijado",
+        "description": "Fija un objetivo de peso corporal"
+      },
+      "goalHalfway": {
+        "name": "A mitad de camino",
+        "description": "Llega a la mitad de tu objetivo de peso"
+      },
+      "goalReached": {
+        "name": "Objetivo cumplido",
+        "description": "Alcanza tu objetivo de peso corporal"
+      },
+      "comparatives": {
+        "pineapple": {
+          "name": "Piña",
+          "description": "Pierde o gana el peso de una piña desde tu primer registro",
+          "object": "una piña"
+        },
+        "cat": {
+          "name": "Gato",
+          "description": "Pierde o gana el peso de un gato desde tu primer registro",
+          "object": "un gato"
+        },
+        "bowlingBall": {
+          "name": "Bola de bolos",
+          "description": "Pierde o gana el peso de una bola de bolos desde tu primer registro",
+          "object": "una bola de bolos"
+        },
+        "turkey": {
+          "name": "Pavo navideño",
+          "description": "Pierde o gana el peso de un pavo navideño desde tu primer registro",
+          "object": "un pavo navideño"
+        },
+        "suitcase": {
+          "name": "Maleta facturada",
+          "description": "Pierde o gana el peso de una maleta facturada desde tu primer registro",
+          "object": "una maleta facturada"
+        },
+        "labrador": {
+          "name": "Labrador",
+          "description": "Pierde o gana el peso de un labrador desde tu primer registro",
+          "object": "un labrador"
+        }
       }
     }
   },

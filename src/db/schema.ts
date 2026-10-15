@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 14;
+export const DATABASE_VERSION = 15;
 
 /**
  * Migration 1 — initial tables.
@@ -336,6 +336,22 @@ export const SCHEMA_V14 = `
 ALTER TABLE routines ADD COLUMN icon TEXT;
 `;
 
+/**
+ * Migration 15 — bodyweight tracker.
+ *
+ * One weigh-in per local calendar day (`measured_on` = 'YYYY-MM-DD'); logging
+ * again on the same day replaces that day's value. Weight is always stored in
+ * kg, like `sets.weight` — the unit preference only affects display/input.
+ */
+export const SCHEMA_V15 = `
+CREATE TABLE IF NOT EXISTS body_weights (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  measured_on TEXT NOT NULL UNIQUE,
+  weight_kg REAL NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+`;
+
 export const MIGRATIONS: readonly string[] = [
   SCHEMA_V1,
   SCHEMA_V2,
@@ -351,4 +367,5 @@ export const MIGRATIONS: readonly string[] = [
   SCHEMA_V12,
   SCHEMA_V13,
   SCHEMA_V14,
+  SCHEMA_V15,
 ];

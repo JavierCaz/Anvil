@@ -4,10 +4,12 @@ import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { BodyWeightTrend } from '@/components/BodyWeightTrend';
 import { Screen } from '@/components/Screen';
 import { BarTrendChart, type BarTrendPoint } from '@/components/charts/BarTrendChart';
 import { MuscleDonut, type DonutSlice } from '@/components/charts/MuscleDonut';
 import { muscleI18nKey } from '@/constants/exercises';
+import { getBodyWeights } from '@/db/body-weight';
 import {
   buildTimeSeries,
   getCardioDayDistances,
@@ -134,14 +136,17 @@ export default function StatisticsScreen() {
 
   const { data, loaded } = useFocusQuery(
     async (db) => {
-      const [sessionStats, muscleSlices, dayCounts, cardioStats, cardioDays] = await Promise.all([
-        getSessionStats(db, bounds.from, bounds.to),
-        getMuscleDistribution(db, bounds.from, bounds.to),
-        getWorkoutDayCounts(db, bounds.from, bounds.to),
-        getCardioStats(db, bounds.from, bounds.to),
-        getCardioDayDistances(db, bounds.from, bounds.to),
-      ]);
+      const [sessionStats, muscleSlices, dayCounts, cardioStats, cardioDays, bodyWeights] =
+        await Promise.all([
+          getSessionStats(db, bounds.from, bounds.to),
+          getMuscleDistribution(db, bounds.from, bounds.to),
+          getWorkoutDayCounts(db, bounds.from, bounds.to),
+          getCardioStats(db, bounds.from, bounds.to),
+          getCardioDayDistances(db, bounds.from, bounds.to),
+          getBodyWeights(db),
+        ]);
       return {
+        bodyWeights,
         stats: sessionStats,
         muscles: muscleSlices,
         series: buildTimeSeries(dayCounts, granularity, bounds.from, bounds.to),
@@ -372,6 +377,15 @@ export default function StatisticsScreen() {
               )}
             </ChartCard>
           )}
+
+          <ChartCard title={t('bodyWeight.title')} colors={colors}>
+            <BodyWeightTrend
+              entries={data?.bodyWeights ?? []}
+              range={range}
+              fromDay={bounds.from ? dayjs(bounds.from).format('YYYY-MM-DD') : null}
+              toDay={bounds.to ? dayjs(bounds.to).format('YYYY-MM-DD') : null}
+            />
+          </ChartCard>
         </ScrollView>
       )}
     </Screen>

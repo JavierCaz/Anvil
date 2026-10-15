@@ -16,7 +16,8 @@
     "search": "Search",
     "moveUp": "Move up",
     "moveDown": "Move down",
-    "close": "Close"
+    "close": "Close",
+    "done": "Done"
   },
   "tabs": {
     "home": "Home",
@@ -45,8 +46,6 @@
     "units": "Units",
     "weightIncrement": "Weight increment",
     "weightIncrementHint": "Amount added or removed with the +/− buttons on a set.",
-    "weeklyGoal": "Weekly workout goal",
-    "weeklyGoalHint": "How many days per week do you plan to train?",
     "data": "Data",
     "exportData": "Export data",
     "importData": "Import data",
@@ -96,6 +95,54 @@
     "setsUnit": "sets",
     "peak": "Peak {{value}}"
   },
+  "bodyWeight": {
+    "title": "Body weight",
+    "seeTrend": "See trend",
+    "emptyHint": "Log your weight to see whether you're gaining or losing.",
+    "emptyStatsHint": "Log your weight on the Home screen to see your trend here.",
+    "since": "since {{date}}",
+    "goalReached": "Goal reached! 🏆",
+    "toGo": "{{weight}} to go",
+    "todayLabel": "Today ({{unit}})",
+    "log": "Log",
+    "loggedToday": "Logged today: {{weight}} · logging again replaces it",
+    "saved": "Weight logged: {{weight}}",
+    "invalidTitle": "Check the weight",
+    "invalidMessage": "Enter a weight between {{min}} and {{max}} {{unit}}.",
+    "confirmTitle": "Is that right?",
+    "confirmMessage": "{{weight}} is a big change from your last weigh-in ({{previous}}). Save it anyway?",
+    "achievementUnlocked": "Unlocked: {{name}}",
+    "noDataInRange": "No weigh-ins in this period",
+    "range": {
+      "week": "this week",
+      "month": "this month",
+      "year": "this year",
+      "all": "all time"
+    },
+    "legend": {
+      "weighIns": "Weigh-ins",
+      "average": "{{days}}-day average",
+      "goal": "Goal"
+    },
+    "comparison": {
+      "lost": "You've lost {{icon}} {{object}} ({{weight}}) since your first weigh-in",
+      "gained": "You've gained {{icon}} {{object}} ({{weight}}) since your first weigh-in",
+      "almost": "Almost {{icon}} {{object}}! Keep going",
+      "next": "Next: {{icon}} {{object}} · {{weight}} to go"
+    },
+    "goalEditor": {
+      "title": "Weight goal",
+      "hint": "Your target bodyweight. Type it or use − / +.",
+      "sameAsStart": "Choose a target different from your starting weight.",
+      "summaryLose": "Lose {{weight}} · started at {{start}} on {{date}}",
+      "summaryGain": "Gain {{weight}} · started at {{start}} on {{date}}",
+      "clear": "Clear goal",
+      "clearTitle": "Clear weight goal?",
+      "clearMessage": "Your weigh-ins are kept, and goal achievements you've earned stay unlocked.",
+      "decrease": "Decrease weight goal",
+      "increase": "Increase weight goal"
+    }
+  },
   "home": {
     "tagline": "Forge your strength. Track your progress.",
     "startWorkout": "Start Workout",
@@ -108,7 +155,12 @@
     "goalRemaining_other": "{{count}} more workouts to hit your goal",
     "goalReached": "Weekly goal reached. Keep forging.",
     "workoutsLabel": "workouts",
-    "unlockedOf": "{{unlocked}} of {{total}} unlocked"
+    "unlockedOf": "{{unlocked}} of {{total}} unlocked",
+    "setGoal": "Set goal",
+    "editGoal": "Edit goal",
+    "weeklyGoalHint": "How many days per week do you plan to train?",
+    "weeklyGoalDecrease": "Decrease weekly goal",
+    "weeklyGoalIncrease": "Increase weekly goal"
   },
   "achievements": {
     "title": "Achievements",
@@ -117,7 +169,9 @@
     "metrics": {
       "workouts": "workouts",
       "weeks": "weeks",
-      "prs": "PRs"
+      "prs": "PRs",
+      "weighIns": "weigh-ins",
+      "days": "days"
     },
     "details": {
       "unlockedOn": "Unlocked on {{date}}",
@@ -130,6 +184,7 @@
       "endurance": "Endurance",
       "consistency": "Consistency",
       "experience": "Experience",
+      "body": "Body",
       "special": "Special"
     },
     "tiers": {
@@ -288,6 +343,68 @@
       "greatWall": {
         "name": "Great Wall of China",
         "description": "Cover the length of the Great Wall of China on one exercise"
+      }
+    },
+    "body": {
+      "firstWeighIn": {
+        "name": "First Weigh-In",
+        "description": "Log your bodyweight for the first time"
+      },
+      "weighInStreak7": {
+        "name": "Week on the Scale",
+        "description": "Log your bodyweight 7 days in a row"
+      },
+      "weighIn30": {
+        "name": "Data Driven",
+        "description": "Log your bodyweight 30 times"
+      },
+      "weighIn100": {
+        "name": "Scale Master",
+        "description": "Log your bodyweight 100 times"
+      },
+      "goalSet": {
+        "name": "Target Locked",
+        "description": "Set a bodyweight goal"
+      },
+      "goalHalfway": {
+        "name": "Halfway There",
+        "description": "Get halfway to your bodyweight goal"
+      },
+      "goalReached": {
+        "name": "Goal Crusher",
+        "description": "Reach your bodyweight goal"
+      },
+      "comparatives": {
+        "pineapple": {
+          "name": "Pineapple",
+          "description": "Lose or gain the weight of a pineapple since your first weigh-in",
+          "object": "a pineapple"
+        },
+        "cat": {
+          "name": "House Cat",
+          "description": "Lose or gain the weight of a house cat since your first weigh-in",
+          "object": "a house cat"
+        },
+        "bowlingBall": {
+          "name": "Bowling Ball",
+          "description": "Lose or gain the weight of a bowling ball since your first weigh-in",
+          "object": "a bowling ball"
+        },
+        "turkey": {
+          "name": "Holiday Turkey",
+          "description": "Lose or gain the weight of a holiday turkey since your first weigh-in",
+          "object": "a holiday turkey"
+        },
+        "suitcase": {
+          "name": "Checked Suitcase",
+          "description": "Lose or gain the weight of a checked suitcase since your first weigh-in",
+          "object": "a checked suitcase"
+        },
+        "labrador": {
+          "name": "Labrador",
+          "description": "Lose or gain the weight of a Labrador since your first weigh-in",
+          "object": "a Labrador"
+        }
       }
     }
   },

@@ -518,6 +518,9 @@ export async function unlockEarnedAchievements(
     if (definition.scope === 'exercise') {
       continue; // earned per-exercise, not from global stats
     }
+    if (definition.category === 'body') {
+      continue; // owned by syncBodyWeightAchievements (needs the bodyweight goal)
+    }
     if (METRIC_READERS[definition.metric](stats) >= definition.target) {
       if (await unlockAchievementIfNew(db, row.key)) {
         unlocked.push(row.key);

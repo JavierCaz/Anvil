@@ -1,6 +1,9 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import dayjs from 'dayjs';
 import { getExerciseMetrics } from '@/constants/exercise-metrics';
+import type { BodyWeightGoal } from '@/store/body-weight-goal';
+import { computeBodyWeightStats } from '@/utils/body-weight';
+import { getBodyWeights } from './body-weight';
 import { getRoutineExerciseSets, saveRoutineExerciseSets, type SetTargetInput } from './routines';
 import { getWeeklyConsistency } from './stats';
 import type {
@@ -27,11 +30,21 @@ export interface WorkoutStats {
   maxWeightKg: number;
   /** Consecutive weeks meeting the weekly training goal (0 when goal is disabled). */
   consistencyStreakWeeks: number;
+  /** Bodyweight weigh-ins logged. */
+  weighInCount: number;
+  /** Longest consecutive-day weigh-in streak. */
+  weighInStreakDays: number;
+  /** Absolute bodyweight change since the first weigh-in (kg). */
+  bodyChangeKg: number;
+  /** Whole-percent progress toward the bodyweight goal (0 without a goal). */
+  bodyGoalPercent: number;
 }
 
 export interface GetWorkoutStatsOptions {
   /** The user's weekly training goal (days per week). Defaults to 3 (store default). */
   weeklyGoal?: number;
+  /** The user's bodyweight goal (drives goal achievement progress). */
+  bodyWeightGoal?: BodyWeightGoal | null;
 }
 
 /**
@@ -77,6 +90,11 @@ export async function getWorkoutStats(
     options?.weeklyGoal ?? DEFAULT_WEEKLY_GOAL
   );
 
+  const bodyStats = computeBodyWeightStats(
+    await getBodyWeights(db),
+    options?.bodyWeightGoal ?? null
+  );
+
   return {
     totalWorkouts,
     totalVolumeKg,
@@ -84,6 +102,7 @@ export async function getWorkoutStats(
     prsThisMonth,
     maxWeightKg,
     consistencyStreakWeeks,
+    ...bodyStats,
   };
 }
 

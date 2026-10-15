@@ -222,6 +222,20 @@ export const ACHIEVEMENT_SEED = [
   { key: 'landmark_grand_canyon', name: 'Grand Canyon', description: 'Cover the length of the Grand Canyon on one exercise', icon: '🏜️' },
   { key: 'landmark_route_66', name: 'Route 66', description: 'Cover the length of Route 66 on one exercise', icon: '🛣️' },
   { key: 'landmark_great_wall', name: 'Great Wall of China', description: 'Cover the length of the Great Wall on one exercise', icon: '🧱' },
+  // Bodyweight tracking. `name`/`description` are fallbacks; the UI renders via i18n.
+  { key: 'first_weigh_in', name: 'First Weigh-In', description: 'Log your bodyweight for the first time', icon: '⚖️' },
+  { key: 'weigh_in_streak_7', name: 'Week on the Scale', description: 'Log your bodyweight 7 days in a row', icon: '📆' },
+  { key: 'weigh_in_30', name: 'Data Driven', description: 'Log your bodyweight 30 times', icon: '📊' },
+  { key: 'weigh_in_100', name: 'Scale Master', description: 'Log your bodyweight 100 times', icon: '🗂️' },
+  { key: 'goal_set', name: 'Target Locked', description: 'Set a bodyweight goal', icon: '🎯' },
+  { key: 'goal_halfway', name: 'Halfway There', description: 'Get halfway to your bodyweight goal', icon: '⛳' },
+  { key: 'goal_reached', name: 'Goal Crusher', description: 'Reach your bodyweight goal', icon: '🏆' },
+  { key: 'body_comparative_pineapple', name: 'Pineapple', description: 'Change your bodyweight by a pineapple', icon: '🍍' },
+  { key: 'body_comparative_cat', name: 'House Cat', description: 'Change your bodyweight by a house cat', icon: '🐈' },
+  { key: 'body_comparative_bowling_ball', name: 'Bowling Ball', description: 'Change your bodyweight by a bowling ball', icon: '🎳' },
+  { key: 'body_comparative_turkey', name: 'Holiday Turkey', description: 'Change your bodyweight by a holiday turkey', icon: '🦃' },
+  { key: 'body_comparative_suitcase', name: 'Checked Suitcase', description: 'Change your bodyweight by a checked suitcase', icon: '🧳' },
+  { key: 'body_comparative_labrador', name: 'Labrador', description: 'Change your bodyweight by a Labrador', icon: '🐕' },
 ] as const;
 
 /** Seed achievement definitions that aren't present yet (keyed by `key`). Idempotent. */

@@ -20,6 +20,7 @@ import {
 } from '@/db/achievements';
 import { getAllExerciseStats, getWorkoutStats } from '@/db/workouts';
 import { useFocusQuery } from '@/hooks/use-focus-query';
+import { useBodyWeightGoalStore } from '@/store/body-weight-goal';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { radius, shape, typography } from '@/theme/tokens';
@@ -29,13 +30,14 @@ export default function AchievementsScreen() {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const weeklyGoal = useWeeklyGoalStore((state) => state.weeklyWorkouts);
+  const bodyWeightGoal = useBodyWeightGoalStore((state) => state.goal);
 
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementProgressItem | null>(null);
 
   const { data, loaded } = useFocusQuery(
     async (db) => {
       const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
-        getWorkoutStats(db, { weeklyGoal }),
+        getWorkoutStats(db, { weeklyGoal, bodyWeightGoal }),
         getAchievements(db),
         getAllExerciseStats(db),
         getAllExerciseUnlocks(db),
@@ -47,7 +49,7 @@ export default function AchievementsScreen() {
         exerciseMeta,
       });
     },
-    [weeklyGoal],
+    [weeklyGoal, bodyWeightGoal],
     { refetchOnFocus: true }
   );
   const items = data ?? [];

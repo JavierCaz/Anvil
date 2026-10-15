@@ -35,6 +35,7 @@ function metricUnit(metric: AchievementMetric, t: (key: string) => string, unit:
   switch (metric) {
     case 'maxWeight':
     case 'totalVolume':
+    case 'bodyChange':
       return weightUnitLabel(unit);
     case 'totalWorkouts':
       return t('achievements.metrics.workouts');
@@ -45,6 +46,12 @@ function metricUnit(metric: AchievementMetric, t: (key: string) => string, unit:
     case 'maxDistance':
     case 'totalDistance':
       return distanceUnitLabel(unit);
+    case 'weighInCount':
+      return t('achievements.metrics.weighIns');
+    case 'weighInStreak':
+      return t('achievements.metrics.days');
+    case 'bodyGoalPercent':
+      return '%';
   }
 }
 
@@ -71,7 +78,8 @@ export function AchievementDetailModal({
   // Distance milestones/landmarks likewise carry their meter threshold —
   // short ones (a running-track lap) read better in m / yd.
   const milestoneWeight =
-    definition.metric === 'maxWeight' && definition.target !== undefined
+    (definition.metric === 'maxWeight' || definition.metric === 'bodyChange') &&
+    definition.target !== undefined
       ? formatWeightWithUnit(definition.target, unit)
       : (definition.metric === 'maxDistance' || definition.metric === 'totalDistance') &&
           definition.target !== undefined
@@ -92,7 +100,8 @@ export function AchievementDetailModal({
         const metric = definition.metric as AchievementMetric;
         const target = definition.target as number;
         const current = Math.round(progress * target);
-        const isWeightMetric = metric === 'maxWeight' || metric === 'totalVolume';
+        const isWeightMetric =
+          metric === 'maxWeight' || metric === 'totalVolume' || metric === 'bodyChange';
         const currentDisplay = isWeightMetric ? kgToDisplay(current, unit) : current;
         const targetDisplay = isWeightMetric ? kgToDisplay(target, unit) : target;
         return `${formatNumber(currentDisplay)} / ${formatNumber(targetDisplay)} ${metricUnit(metric, t, unit)}`;

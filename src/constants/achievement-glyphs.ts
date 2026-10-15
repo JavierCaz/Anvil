@@ -43,6 +43,20 @@ const GLYPHS: Record<string, BadgeGlyph> = {
   comparative_piano: { icon: 'piano' },
   comparative_polar_bear: { icon: 'paw' },
   comparative_car: { icon: 'car-side' },
+  // Body
+  first_weigh_in: { icon: 'scale-bathroom' },
+  weigh_in_streak_7: { icon: 'calendar-week' },
+  weigh_in_30: { numeral: '30' },
+  weigh_in_100: { numeral: '100' },
+  goal_set: { icon: 'target' },
+  goal_halfway: { icon: 'map-marker-path' },
+  goal_reached: { icon: 'flag-checkered' },
+  body_comparative_pineapple: { icon: 'fruit-pineapple' },
+  body_comparative_cat: { icon: 'cat' },
+  body_comparative_bowling_ball: { icon: 'bowling' },
+  body_comparative_turkey: { icon: 'food-turkey' },
+  body_comparative_suitcase: { icon: 'bag-suitcase' },
+  body_comparative_labrador: { icon: 'dog' },
   // Distance efforts
   distance_5k: { icon: 'shoe-sneaker' },
   distance_10k: { icon: 'run' },
@@ -66,6 +80,7 @@ const CATEGORY_GLYPHS: Record<AchievementCategory, BadgeGlyph> = {
   endurance: { icon: 'run' },
   consistency: { icon: 'calendar-check' },
   experience: { icon: 'medal' },
+  body: { icon: 'scale-bathroom' },
   special: { icon: 'star' },
 };
 

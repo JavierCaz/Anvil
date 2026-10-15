@@ -8,10 +8,14 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AchievementBadge } from '@/components/AchievementBadge';
 import { AchievementDetailModal } from '@/components/AchievementDetailModal';
 import { AnvilLogo } from '@/components/AnvilLogo';
+import { BodyWeightHomeCard } from '@/components/BodyWeightHomeCard';
+import { GoalToggleButton } from '@/components/GoalToggleButton';
 import { HeroGlow } from '@/components/HeroGlow';
+import { ProgressBar } from '@/components/ProgressBar';
 import { ProgressRing } from '@/components/ProgressRing';
 import { Screen } from '@/components/Screen';
 import { WeekStrip, type WeekDayItem } from '@/components/WeekStrip';
+import { WeeklyGoalEditor } from '@/components/WeeklyGoalEditor';
 import { getAchievementByKey } from '@/constants/achievements';
 import {
   buildAchievementItems,
@@ -20,15 +24,19 @@ import {
   getAchievements,
   type AchievementProgressItem,
 } from '@/db/achievements';
+import { getBodyWeights } from '@/db/body-weight';
 import { getAllExerciseStats, getWorkoutDaysInRange, getWorkoutStats } from '@/db/workouts';
 import { useFocusQuery } from '@/hooks/use-focus-query';
+import { useBodyWeightGoalStore } from '@/store/body-weight-goal';
 import { useWeeklyGoalStore } from '@/store/workout-goals';
 import { useAppTheme } from '@/theme/app-theme-provider';
+import type { BodyWeightEntry } from '@/utils/body-weight';
 
 interface HomeData {
   weekDays: WeekDayItem[];
   workoutCountThisWeek: number;
   achievements: AchievementProgressItem[];
+  bodyWeights: BodyWeightEntry[];
 }
 
 /** Monday of the current week, independent of the dayjs locale week start. */
@@ -43,8 +51,10 @@ export default function HomeScreen() {
   const { colors } = useAppTheme();
   const { t, i18n } = useTranslation();
   const weeklyGoal = useWeeklyGoalStore((state) => state.weeklyWorkouts);
+  const bodyWeightGoal = useBodyWeightGoalStore((state) => state.goal);
 
   const [selectedAchievement, setSelectedAchievement] = useState<AchievementProgressItem | null>(null);
+  const [editingWeeklyGoal, setEditingWeeklyGoal] = useState(false);
 
   const monday = useMemo(() => getMonday(i18n.language), [i18n.language]);
   const weekDays = useMemo<WeekDayItem[]>(
@@ -62,15 +72,17 @@ export default function HomeScreen() {
     [monday]
   );
 
-  const { data } = useFocusQuery<HomeData>(
+  const { data, reload } = useFocusQuery<HomeData>(
     async (db) => {
-      const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta] = await Promise.all([
-        getWorkoutStats(db, { weeklyGoal }),
-        getAchievements(db),
-        getAllExerciseStats(db),
-        getAllExerciseUnlocks(db),
-        getAchievementExerciseMeta(db),
-      ]);
+      const [stats, rows, exerciseStats, exerciseUnlocks, exerciseMeta, bodyWeights] =
+        await Promise.all([
+          getWorkoutStats(db, { weeklyGoal, bodyWeightGoal }),
+          getAchievements(db),
+          getAllExerciseStats(db),
+          getAllExerciseUnlocks(db),
+          getAchievementExerciseMeta(db),
+          getBodyWeights(db),
+        ]);
       const workedOut = await getWorkoutDaysInRange(db, weekDays[0].iso, weekDays[6].iso);
 
       const achievements = buildAchievementItems(rows, stats, {
@@ -84,9 +96,10 @@ export default function HomeScreen() {
         workoutCountThisWeek: [...workedOut].filter((iso) => weekDays.some((day) => day.iso === iso))
           .length,
         achievements,
+        bodyWeights,
       };
     },
-    [weekDays, weeklyGoal],
+    [weekDays, weeklyGoal, bodyWeightGoal],
     { refetchOnFocus: true }
   );
 
@@ -133,7 +146,14 @@ export default function HomeScreen() {
           <HeroGlow color={colors.primary} />
           <View style={styles.heroTop}>
             <View style={styles.heroCopy}>
-              <Text style={[styles.overline, { color: colors.primary }]}>{t('home.thisWeek')}</Text>
+              <View style={styles.overlineRow}>
+                <Text style={[styles.overline, { color: colors.primary }]}>{t('home.thisWeek')}</Text>
+                <GoalToggleButton
+                  editing={editingWeeklyGoal}
+                  hasGoal
+                  onPress={() => setEditingWeeklyGoal((editing) => !editing)}
+                />
+              </View>
               <View style={styles.heroFigureRow}>
                 <Text style={[styles.heroFigure, { color: colors.text }]}>{done}</Text>
                 <Text style={[styles.heroFigureGoal, { color: colors.textSecondary }]}>
@@ -156,7 +176,11 @@ export default function HomeScreen() {
           </View>
           <View style={[styles.divider, { backgroundColor: colors.border }]} />
           {data && <WeekStrip days={data.weekDays} />}
+          {editingWeeklyGoal && <WeeklyGoalEditor />}
         </View>
+
+        {/* Bodyweight quick action */}
+        {data && <BodyWeightHomeCard entries={data.bodyWeights} onSaved={reload} />}
 
         {/* Achievements */}
         <View style={styles.sectionHeader}>
@@ -214,14 +238,7 @@ export default function HomeScreen() {
                     </Text>
                   ) : (
                     <View style={styles.summaryProgressRow}>
-                      <View style={[styles.summaryTrack, { backgroundColor: colors.surfaceElevated }]}>
-                        <View
-                          style={[
-                            styles.summaryFill,
-                            { backgroundColor: colors.primary, width: `${percent}%` },
-                          ]}
-                        />
-                      </View>
+                      <ProgressBar progress={item.progress} height={4} />
                       <Text style={[styles.summaryPercent, { color: colors.textSecondary }]}>
                         {percent}%
                       </Text>
@@ -295,6 +312,12 @@ const styles = StyleSheet.create({
   heroCopy: {
     flex: 1,
     gap: 2,
+  },
+  overlineRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginBottom: 4,
   },
   overline: {
     fontSize: 11,
@@ -383,16 +406,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-  },
-  summaryTrack: {
-    flex: 1,
-    height: 4,
-    borderRadius: 2,
-    overflow: 'hidden',
-  },
-  summaryFill: {
-    height: '100%',
-    borderRadius: 2,
   },
   summaryPercent: {
     width: 36,

@@ -4,6 +4,11 @@ import {
   getDistanceAchievementByKey,
   type DistanceAchievementDefinition,
 } from './distance-achievements';
+import {
+  BODY_COMPARATIVES,
+  getBodyComparativeByKey,
+  type BodyComparativeDefinition,
+} from './body-comparatives';
 import { getWeightComparativeByKey } from './weight-comparatives';
 
 /**
@@ -13,7 +18,7 @@ import { getWeightComparativeByKey } from './weight-comparatives';
  * src/db/achievements.ts); `key` links a row to its definition here.
  *
  * Achievements are grouped into categories (strength / volume / endurance /
- * consistency / experience / special) and optionally tiered (bronze / silver / gold /
+ * consistency / experience / body / special) and optionally tiered (bronze / silver / gold /
  * diamond). Progress is computed data-driven: each definition carries a
  * `metric` (read from `WorkoutStats` via `METRIC_READERS`) and a `target`.
  * Event-based "special" achievements have no `metric`/`target` — they are
@@ -25,6 +30,7 @@ export type AchievementCategory =
   | 'endurance'
   | 'consistency'
   | 'experience'
+  | 'body'
   | 'special';
 export type AchievementTier = 'bronze' | 'silver' | 'gold' | 'diamond';
 export type AchievementMetric =
@@ -36,7 +42,15 @@ export type AchievementMetric =
   /** Longest single set, in meters (distance milestones — exercise-scoped). */
   | 'maxDistance'
   /** Cumulative distance, in meters (distance landmarks — exercise-scoped). */
-  | 'totalDistance';
+  | 'totalDistance'
+  /** Bodyweight weigh-ins logged. */
+  | 'weighInCount'
+  /** Longest consecutive-day weigh-in streak. */
+  | 'weighInStreak'
+  /** Absolute bodyweight change since the first weigh-in, in kg. */
+  | 'bodyChange'
+  /** Whole-percent progress toward the bodyweight goal. */
+  | 'bodyGoalPercent';
 /**
  * Whether the achievement is earned globally (any exercise counts toward a
  * single unlock) or per-exercise (each exercise tracks its own unlock).
@@ -65,6 +79,7 @@ export const ACHIEVEMENT_CATEGORY_ORDER: readonly AchievementCategory[] = [
   'endurance',
   'consistency',
   'experience',
+  'body',
   'special',
 ];
 
@@ -214,6 +229,75 @@ export const ACHIEVEMENTS: readonly AchievementDefinition[] = [
     metric: 'totalWorkouts',
     target: 250,
   },
+  // --- Body: bodyweight tracking, evaluated on weigh-in / goal changes. ---
+  {
+    key: 'first_weigh_in',
+    nameKey: 'achievements.body.firstWeighIn.name',
+    descriptionKey: 'achievements.body.firstWeighIn.description',
+    icon: '⚖️',
+    category: 'body',
+    metric: 'weighInCount',
+    target: 1,
+  },
+  {
+    key: 'weigh_in_streak_7',
+    nameKey: 'achievements.body.weighInStreak7.name',
+    descriptionKey: 'achievements.body.weighInStreak7.description',
+    icon: '📆',
+    category: 'body',
+    tier: 'silver',
+    metric: 'weighInStreak',
+    target: 7,
+  },
+  {
+    key: 'weigh_in_30',
+    nameKey: 'achievements.body.weighIn30.name',
+    descriptionKey: 'achievements.body.weighIn30.description',
+    icon: '📊',
+    category: 'body',
+    tier: 'silver',
+    metric: 'weighInCount',
+    target: 30,
+  },
+  {
+    key: 'weigh_in_100',
+    nameKey: 'achievements.body.weighIn100.name',
+    descriptionKey: 'achievements.body.weighIn100.description',
+    icon: '🗂️',
+    category: 'body',
+    tier: 'gold',
+    metric: 'weighInCount',
+    target: 100,
+  },
+  // Goal achievements are never revoked: changing or clearing the goal later
+  // must not take back a target that was really set / reached.
+  {
+    key: 'goal_set',
+    nameKey: 'achievements.body.goalSet.name',
+    descriptionKey: 'achievements.body.goalSet.description',
+    icon: '🎯',
+    category: 'body',
+  },
+  {
+    key: 'goal_halfway',
+    nameKey: 'achievements.body.goalHalfway.name',
+    descriptionKey: 'achievements.body.goalHalfway.description',
+    icon: '⛳',
+    category: 'body',
+    tier: 'silver',
+    metric: 'bodyGoalPercent',
+    target: 50,
+  },
+  {
+    key: 'goal_reached',
+    nameKey: 'achievements.body.goalReached.name',
+    descriptionKey: 'achievements.body.goalReached.description',
+    icon: '🏆',
+    category: 'body',
+    tier: 'gold',
+    metric: 'bodyGoalPercent',
+    target: 100,
+  },
   // --- Special: event-based, unlocked at workout completion. ---
   {
     key: 'early_bird',
@@ -255,6 +339,10 @@ export const METRIC_READERS: Record<AchievementMetric, (stats: WorkoutStats) => 
   // Distance achievements are exercise-scoped only — never read globally.
   maxDistance: () => 0,
   totalDistance: () => 0,
+  weighInCount: (stats) => stats.weighInCount,
+  weighInStreak: (stats) => stats.weighInStreakDays,
+  bodyChange: (stats) => stats.bodyChangeKg,
+  bodyGoalPercent: (stats) => stats.bodyGoalPercent,
 };
 
 /**
@@ -301,6 +389,37 @@ function normalizeDistanceAchievement(entry: DistanceAchievementDefinition): Ach
   };
 }
 
+/** A bodyweight milestone in the shared `AchievementDefinition` shape. */
+function normalizeBodyComparative(entry: BodyComparativeDefinition): AchievementDefinition {
+  return {
+    key: entry.key,
+    nameKey: entry.nameKey,
+    descriptionKey: entry.descriptionKey,
+    icon: entry.icon,
+    category: 'body',
+    tier: entry.tier,
+    metric: 'bodyChange',
+    target: entry.thresholdKg,
+  };
+}
+
+/**
+ * Every `body` achievement, evaluated from bodyweight data by
+ * `syncBodyWeightAchievements` (src/db/body-weight.ts) rather than at workout
+ * completion.
+ */
+export const BODY_ACHIEVEMENTS: readonly AchievementDefinition[] = [
+  ...ACHIEVEMENTS.filter((entry) => entry.category === 'body'),
+  ...BODY_COMPARATIVES.map(normalizeBodyComparative),
+];
+
+/** Body achievements tied to the goal — granted once, never revoked. */
+export const BODY_GOAL_ACHIEVEMENT_KEYS: ReadonlySet<string> = new Set([
+  'goal_set',
+  'goal_halfway',
+  'goal_reached',
+]);
+
 /**
  * Every exercise-scoped achievement unlocked from per-exercise stats: the
  * catalog's exercise-scoped entries plus the distance achievements. Weight
@@ -341,6 +460,10 @@ export function getAchievementByKey(key: string): AchievementDefinition | undefi
   const distance = getDistanceAchievementByKey(key);
   if (distance) {
     return normalizeDistanceAchievement(distance);
+  }
+  const body = getBodyComparativeByKey(key);
+  if (body) {
+    return normalizeBodyComparative(body);
   }
   // Weight milestones live in their own catalog; normalize them into the shared
   // `AchievementDefinition` shape (target = the milestone's kg threshold).
