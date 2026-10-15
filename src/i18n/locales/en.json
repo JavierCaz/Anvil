@@ -156,6 +156,8 @@
     "goalReached": "Weekly goal reached. Keep forging.",
     "workoutsLabel": "workouts",
     "unlockedOf": "{{unlocked}} of {{total}} unlocked",
+    "recentlyUnlocked": "Recently unlocked",
+    "closestToUnlock": "Almost there",
     "setGoal": "Set goal",
     "editGoal": "Edit goal",
     "weeklyGoalHint": "How many days per week do you plan to train?",

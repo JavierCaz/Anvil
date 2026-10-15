@@ -103,16 +103,21 @@ export default function HomeScreen() {
     { refetchOnFocus: true }
   );
 
-  // Summary: most recently unlocked first, then the closest-to-unlocking, capped at 3.
-  const summaryItems = useMemo(() => {
+  // Summary: the 3 most recently unlocked, plus the 3 closest to unlocking to keep the user motivated.
+  const summaryGroups = useMemo(() => {
     const items = data?.achievements ?? [];
     const unlocked = items
       .filter((item) => item.unlocked)
-      .sort((a, b) => (b.unlockedAt ?? '').localeCompare(a.unlockedAt ?? ''));
+      .sort((a, b) => (b.unlockedAt ?? '').localeCompare(a.unlockedAt ?? ''))
+      .slice(0, 3);
     const inProgress = items
       .filter((item) => !item.unlocked)
-      .sort((a, b) => b.progress - a.progress);
-    return [...unlocked, ...inProgress].slice(0, 3);
+      .sort((a, b) => b.progress - a.progress)
+      .slice(0, 3);
+    return [
+      { key: 'closest', labelKey: 'home.closestToUnlock', items: inProgress },
+      { key: 'recent', labelKey: 'home.recentlyUnlocked', items: unlocked },
+    ].filter((group) => group.items.length > 0);
   }, [data]);
 
   const done = Math.min(data?.workoutCountThisWeek ?? 0, weeklyGoal);
@@ -209,47 +214,52 @@ export default function HomeScreen() {
           </Pressable>
         </View>
 
-        <View style={[styles.listCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
-          {summaryItems.map((item, index) => {
-            const definition = getAchievementByKey(item.definitionKey);
-            if (!definition) {
-              return null;
-            }
-            const percent = Math.round(item.progress * 100);
-            return (
-              <Pressable
-                key={definition.key}
-                accessibilityRole="button"
-                onPress={() => setSelectedAchievement(item)}
-                style={({ pressed }) => [
-                  styles.summaryRow,
-                  index > 0 && { borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth },
-                  { opacity: pressed ? 0.7 : 1 },
-                ]}
-              >
-                <AchievementBadge achievementKey={definition.key} size={44} locked={!item.unlocked} />
-                <View style={styles.summaryBody}>
-                  <Text style={[styles.summaryName, { color: colors.text }]} numberOfLines={1}>
-                    {t(definition.nameKey)}
-                  </Text>
-                  {item.unlocked ? (
-                    <Text style={[styles.summaryStatus, { color: colors.primary }]}>
-                      {t('achievements.unlocked')}
-                    </Text>
-                  ) : (
-                    <View style={styles.summaryProgressRow}>
-                      <ProgressBar progress={item.progress} height={4} />
-                      <Text style={[styles.summaryPercent, { color: colors.textSecondary }]}>
-                        {percent}%
+        {summaryGroups.map((group) => (
+          <View key={group.key} style={styles.summaryGroup}>
+            <Text style={[styles.groupLabel, { color: colors.textSecondary }]}>{t(group.labelKey)}</Text>
+            <View style={[styles.listCard, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+              {group.items.map((item, index) => {
+                const definition = getAchievementByKey(item.definitionKey);
+                if (!definition) {
+                  return null;
+                }
+                const percent = Math.round(item.progress * 100);
+                return (
+                  <Pressable
+                    key={definition.key}
+                    accessibilityRole="button"
+                    onPress={() => setSelectedAchievement(item)}
+                    style={({ pressed }) => [
+                      styles.summaryRow,
+                      index > 0 && { borderTopColor: colors.border, borderTopWidth: StyleSheet.hairlineWidth },
+                      { opacity: pressed ? 0.7 : 1 },
+                    ]}
+                  >
+                    <AchievementBadge achievementKey={definition.key} size={44} locked={!item.unlocked} />
+                    <View style={styles.summaryBody}>
+                      <Text style={[styles.summaryName, { color: colors.text }]} numberOfLines={1}>
+                        {t(definition.nameKey)}
                       </Text>
+                      {item.unlocked ? (
+                        <Text style={[styles.summaryStatus, { color: colors.primary }]}>
+                          {t('achievements.unlocked')}
+                        </Text>
+                      ) : (
+                        <View style={styles.summaryProgressRow}>
+                          <ProgressBar progress={item.progress} height={4} />
+                          <Text style={[styles.summaryPercent, { color: colors.textSecondary }]}>
+                            {percent}%
+                          </Text>
+                        </View>
+                      )}
                     </View>
-                  )}
-                </View>
-                <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
-              </Pressable>
-            );
-          })}
-        </View>
+                    <Ionicons name="chevron-forward" size={16} color={colors.textSecondary} />
+                  </Pressable>
+                );
+              })}
+            </View>
+          </View>
+        ))}
       </ScrollView>
 
       {selectedAchievement && (() => {
@@ -376,6 +386,16 @@ const styles = StyleSheet.create({
   seeAllLabel: {
     fontSize: 13,
     fontWeight: '700',
+  },
+  summaryGroup: {
+    gap: 8,
+  },
+  groupLabel: {
+    fontSize: 11,
+    fontWeight: '800',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
+    marginLeft: 4,
   },
   listCard: {
     borderRadius: 20,

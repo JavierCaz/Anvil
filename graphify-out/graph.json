@@ -10291,7 +10291,7 @@
       "file_type": "code",
       "norm_label": "styles",
       "source_file": "src/app/(tabs)/index.tsx",
-      "source_location": "L272"
+      "source_location": "L282"
     },
     {
       "id": "src_components_heroglow",
@@ -16345,7 +16345,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/app/(tabs)/index.tsx",
-      "source_location": "L214",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
@@ -43482,7 +43482,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/app/(tabs)/index.tsx",
-      "source_location": "L272",
+      "source_location": "L282",
       "weight": 1.0
     },
     {
@@ -54337,5 +54337,5 @@
       "source_file": "assets/images/icon.png"
     }
   ],
-  "built_at_commit": "44fe258c4155af2d4060d5458ccf6472b3236397"
+  "built_at_commit": "8e56eb38dfbd48221b66d13d5864d2398cef1cd9"
 }

@@ -156,6 +156,8 @@
     "goalReached": "Meta semanal cumplida. Sigue forjando.",
     "workoutsLabel": "entrenamientos",
     "unlockedOf": "{{unlocked}} de {{total}} desbloqueados",
+    "recentlyUnlocked": "Desbloqueados recientemente",
+    "closestToUnlock": "Casi lo tienes",
     "setGoal": "Fijar objetivo",
     "editGoal": "Editar objetivo",
     "weeklyGoalHint": "¿Cuántos días por semana planeas entrenar?",

@@ -54,9 +54,9 @@
     "semantic_hash": ""
   },
   "src/app/(tabs)/index.tsx": {
-    "mtime": 1792084344.0363007,
-    "seen": 1792084652.727037,
-    "ast_hash": "7032939b5159dac044e37010db5f9944",
+    "mtime": 1792085020.3529236,
+    "seen": 1792085070.702463,
+    "ast_hash": "bdbb8f447fb6b1713f2c3f5477a991ff",
     "semantic_hash": ""
   },
   "src/app/(tabs)/routines.tsx": {
@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "src/app/settings.tsx": {
-    "mtime": 1792084451.1493967,
-    "seen": 1792084652.7270758,
-    "ast_hash": "7377ac027499b6c12f3becfe539ef02c",
+    "mtime": 1792085035.0304391,
+    "seen": 1792085070.7025259,
+    "ast_hash": "d063d03087a605bc2e19125e8745eb4f",
     "semantic_hash": ""
   },
   "src/app/workout/[id].tsx": {
@@ -396,15 +396,15 @@
     "semantic_hash": "8f6d6d5070a32407a48defe6d7867dee"
   },
   "src/i18n/locales/en.json": {
-    "mtime": 1792084869.5080566,
-    "seen": 1792084894.241407,
-    "ast_hash": "a248fe145923d12fe9d865b26c4f4316",
+    "mtime": 1792085035.0531206,
+    "seen": 1792085070.7027464,
+    "ast_hash": "74cfc3c08e1fedd93f451f85ed95db81",
     "semantic_hash": ""
   },
   "src/i18n/locales/es.json": {
-    "mtime": 1792084869.5100567,
-    "seen": 1792084894.241412,
-    "ast_hash": "c87d4ad8e0903fa27c49339d9d4e6299",
+    "mtime": 1792085035.0545824,
+    "seen": 1792085070.702751,
+    "ast_hash": "be5cca946252b657b465e8220f86689c",
     "semantic_hash": ""
   },
   "src/store/units.ts": {
@@ -707,16 +707,10 @@
     "ast_hash": "c4097494f60417e51f744cf32cfe1a8b",
     "semantic_hash": ""
   },
-  "src/components/BodyWeightGoalSetting.tsx": {
-    "mtime": 1792084552.5387301,
-    "seen": 1792084652.7271116,
-    "ast_hash": "cb9db112b403af7263238939681883bf",
-    "semantic_hash": ""
-  },
   "src/components/BodyWeightHomeCard.tsx": {
-    "mtime": 1792084330.3597941,
-    "seen": 1792084652.7271166,
-    "ast_hash": "846f6dc90db472e3804e6198e21dc1d3",
+    "mtime": 1792085020.3532486,
+    "seen": 1792085070.7025611,
+    "ast_hash": "9e6a0db2fd81c951c90880f6e6c1fbc6",
     "semantic_hash": ""
   },
   "src/components/BodyWeightLogField.tsx": {
@@ -783,6 +777,24 @@
     "mtime": 1792084087.0449836,
     "seen": 1792084652.7273526,
     "ast_hash": "45c50e38884c6ac65a8d33fd0262359a",
+    "semantic_hash": ""
+  },
+  "src/components/BodyWeightGoalEditor.tsx": {
+    "mtime": 1792084999.4110136,
+    "seen": 1792085070.7025564,
+    "ast_hash": "8d553888e48c4af21f774f29a12d8231",
+    "semantic_hash": ""
+  },
+  "src/components/GoalToggleButton.tsx": {
+    "mtime": 1792085000.4641154,
+    "seen": 1792085070.7025876,
+    "ast_hash": "8c5983f588f54346ad1faafb15cd9680",
+    "semantic_hash": ""
+  },
+  "src/components/WeeklyGoalEditor.tsx": {
+    "mtime": 1792085001.515319,
+    "seen": 1792085070.7026248,
+    "ast_hash": "d4a4a3386aefccefb158a78ec2914a50",
     "semantic_hash": ""
   }
 }
