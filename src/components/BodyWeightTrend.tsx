@@ -2,7 +2,6 @@ import dayjs from 'dayjs';
 import { useMemo, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
-import { BodyComparisonLine } from '@/components/BodyComparisonLine';
 import { BodyWeightDelta } from '@/components/BodyWeightDelta';
 import { LineTrendChart, type LineTrendPoint } from '@/components/charts/LineTrendChart';
 import { useBodyWeightGoalStore } from '@/store/body-weight-goal';
@@ -32,7 +31,7 @@ interface BodyWeightTrendProps {
 /**
  * Body of the Statistics tab's bodyweight card: current weight, change over
  * the selected range, the trend chart (raw weigh-ins + moving average + goal
- * line) and the fun comparison. Logging happens on the Home card.
+ * line). Logging happens on the Home card.
  */
 export function BodyWeightTrend({ entries, range, fromDay, toDay }: BodyWeightTrendProps) {
   const { colors } = useAppTheme();
@@ -119,8 +118,6 @@ export function BodyWeightTrend({ entries, range, fromDay, toDay }: BodyWeightTr
             {t('bodyWeight.noDataInRange')}
           </Text>
         ))}
-
-      <BodyComparisonLine entries={entries} />
     </View>
   );
 }

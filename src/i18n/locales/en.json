@@ -126,12 +126,6 @@
       "average": "{{days}}-day average",
       "goal": "Goal"
     },
-    "comparison": {
-      "lost": "You've lost {{icon}} {{object}} ({{weight}}) since your first weigh-in",
-      "gained": "You've gained {{icon}} {{object}} ({{weight}}) since your first weigh-in",
-      "almost": "Almost {{icon}} {{object}}! Keep going",
-      "next": "Next: {{icon}} {{object}} · {{weight}} to go"
-    },
     "goalEditor": {
       "title": "Weight goal",
       "hint": "Your target bodyweight. Type it or use − / +.",

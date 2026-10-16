@@ -55,14 +55,3 @@ export const BODY_COMPARATIVES: readonly BodyComparativeDefinition[] = [
 export function getBodyComparativeByKey(key: string): BodyComparativeDefinition | undefined {
   return BODY_COMPARATIVES.find((entry) => entry.key === key);
 }
-
-/** Largest milestone reached by a change of `changeKg` (sign ignored), or null. */
-export function getBodyComparativeFor(changeKg: number): BodyComparativeDefinition | null {
-  const reached = BODY_COMPARATIVES.filter((entry) => entry.thresholdKg <= Math.abs(changeKg));
-  return reached[reached.length - 1] ?? null;
-}
-
-/** First milestone above a change of `changeKg` (sign ignored), or null at the top. */
-export function getNextBodyComparative(changeKg: number): BodyComparativeDefinition | null {
-  return BODY_COMPARATIVES.find((entry) => entry.thresholdKg > Math.abs(changeKg)) ?? null;
-}

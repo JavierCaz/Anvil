@@ -126,12 +126,6 @@
       "average": "Media de {{days}} días",
       "goal": "Objetivo"
     },
-    "comparison": {
-      "lost": "Has perdido {{icon}} {{object}} ({{weight}}) desde tu primer registro",
-      "gained": "Has ganado {{icon}} {{object}} ({{weight}}) desde tu primer registro",
-      "almost": "¡Casi {{icon}} {{object}}! Sigue así",
-      "next": "Siguiente: {{icon}} {{object}} · faltan {{weight}}"
-    },
     "goalEditor": {
       "title": "Objetivo de peso",
       "hint": "Tu peso corporal objetivo. Escríbelo o usa − / +.",

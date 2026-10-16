@@ -1,10 +1,6 @@
 import type { SQLiteDatabase } from 'expo-sqlite';
 import { getAchievementByKey } from '@/constants/achievements';
-import {
-  BODY_COMPARATIVES,
-  getBodyComparativeFor,
-  getNextBodyComparative,
-} from '@/constants/body-comparatives';
+import { BODY_COMPARATIVES } from '@/constants/body-comparatives';
 import { ACHIEVEMENT_SEED } from '@/db/achievements';
 import { syncBodyWeightAchievements, upsertBodyWeight } from '@/db/body-weight';
 import type { BodyWeightGoal } from '@/store/body-weight-goal';
@@ -150,18 +146,6 @@ describe('syncBodyWeightAchievements', () => {
 });
 
 describe('body comparatives', () => {
-  it('picks the largest object reached, ignoring direction', () => {
-    expect(getBodyComparativeFor(0.5)).toBeNull();
-    expect(getBodyComparativeFor(-7.2)?.key).toBe('body_comparative_bowling_ball');
-    expect(getBodyComparativeFor(40)?.key).toBe('body_comparative_labrador');
-  });
-
-  it('finds the next object on the ladder', () => {
-    expect(getNextBodyComparative(0.5)?.key).toBe('body_comparative_pineapple');
-    expect(getNextBodyComparative(-7.2)?.key).toBe('body_comparative_turkey');
-    expect(getNextBodyComparative(40)).toBeNull();
-  });
-
   it('is seeded and resolvable as achievements', () => {
     const seeded = new Set<string>(ACHIEVEMENT_SEED.map((seed) => seed.key));
     for (const entry of BODY_COMPARATIVES) {

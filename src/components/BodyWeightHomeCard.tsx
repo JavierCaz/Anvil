@@ -4,7 +4,6 @@ import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { BodyComparisonLine } from '@/components/BodyComparisonLine';
 import { BodyWeightDelta } from '@/components/BodyWeightDelta';
 import { BodyWeightGoalEditor } from '@/components/BodyWeightGoalEditor';
 import { BodyWeightLogField } from '@/components/BodyWeightLogField';
@@ -32,8 +31,8 @@ interface BodyWeightHomeCardProps {
 
 /**
  * Home quick action for bodyweight: current weight, recent change, the goal
- * progress bar (when a goal is set), the fun comparison, and an inline
- * field to log today's weight. The trend chart lives on the Statistics tab.
+ * progress bar (when a goal is set), and an inline field to log today's
+ * weight. The trend chart lives on the Statistics tab.
  */
 export function BodyWeightHomeCard({ entries, onSaved }: BodyWeightHomeCardProps) {
   const router = useRouter();
@@ -122,8 +121,6 @@ export function BodyWeightHomeCard({ entries, onSaved }: BodyWeightHomeCardProps
       )}
 
       {latest && editingGoal && <BodyWeightGoalEditor latest={latest} />}
-
-      <BodyComparisonLine entries={entries} />
 
       <BodyWeightLogField entries={entries} onSaved={onSaved} />
     </View>

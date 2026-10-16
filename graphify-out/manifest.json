@@ -396,15 +396,15 @@
     "semantic_hash": "8f6d6d5070a32407a48defe6d7867dee"
   },
   "src/i18n/locales/en.json": {
-    "mtime": 1792168184.788493,
-    "seen": 1792168277.211521,
-    "ast_hash": "288e284e1589046ba750640e28c53fc3",
+    "mtime": 1792170708.345941,
+    "seen": 1792170743.0213404,
+    "ast_hash": "1414a88f7db3b45ce5c7118be0360c06",
     "semantic_hash": ""
   },
   "src/i18n/locales/es.json": {
-    "mtime": 1792168184.7897933,
-    "seen": 1792168277.2115233,
-    "ast_hash": "7019a2125715f87f23e457ca59fdebdc",
+    "mtime": 1792170708.3477483,
+    "seen": 1792170743.0213425,
+    "ast_hash": "6a644f7b795db1709618d9a25cb10d0b",
     "semantic_hash": ""
   },
   "src/store/units.ts": {
@@ -695,12 +695,6 @@
     "ast_hash": "b7831685b9e2dd3e5d5faf0b5a845483",
     "semantic_hash": ""
   },
-  "src/components/BodyComparisonLine.tsx": {
-    "mtime": 1792084301.4171004,
-    "seen": 1792084652.727104,
-    "ast_hash": "cd3b365dfa93c8268fed23a375e4cde3",
-    "semantic_hash": ""
-  },
   "src/components/BodyWeightDelta.tsx": {
     "mtime": 1792084329.301088,
     "seen": 1792084652.7271087,
@@ -708,9 +702,9 @@
     "semantic_hash": ""
   },
   "src/components/BodyWeightHomeCard.tsx": {
-    "mtime": 1792085020.3532486,
-    "seen": 1792085070.7025611,
-    "ast_hash": "9e6a0db2fd81c951c90880f6e6c1fbc6",
+    "mtime": 1792170708.345269,
+    "seen": 1792170743.0211427,
+    "ast_hash": "21fa0f0de2dd26ac1610a4849304799d",
     "semantic_hash": ""
   },
   "src/components/BodyWeightLogField.tsx": {
@@ -720,9 +714,9 @@
     "semantic_hash": ""
   },
   "src/components/BodyWeightTrend.tsx": {
-    "mtime": 1792168184.7874682,
-    "seen": 1792168277.2113316,
-    "ast_hash": "906e1bc1802dbe6c6348c32c728bb84a",
+    "mtime": 1792170703.9739888,
+    "seen": 1792170743.0211494,
+    "ast_hash": "6f98436a42bcaf77418b9462baf1aa6d",
     "semantic_hash": ""
   },
   "src/components/ProgressBar.tsx": {
@@ -738,15 +732,15 @@
     "semantic_hash": ""
   },
   "src/constants/body-comparatives.ts": {
-    "mtime": 1792084088.0928109,
-    "seen": 1792084652.7272139,
-    "ast_hash": "c1b2b5a82215251bfcf04348746a2bdf",
+    "mtime": 1792170703.9747632,
+    "seen": 1792170743.0212605,
+    "ast_hash": "2ba8712799a2cbe6a98284e13d0a23fa",
     "semantic_hash": ""
   },
   "src/db/__tests__/body-weight.test.ts": {
-    "mtime": 1792166843.0072803,
-    "seen": 1792166902.5718832,
-    "ast_hash": "e52efe7a767b37a61577e063c07554d0",
+    "mtime": 1792170703.9750803,
+    "seen": 1792170743.0212839,
+    "ast_hash": "e0ea3ec79857abf384b57d03c70a4887",
     "semantic_hash": ""
   },
   "src/db/body-weight.ts": {

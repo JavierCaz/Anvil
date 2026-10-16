@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "src/app/(tabs)/statistics.tsx": {
-    "mtime": 1792168184.7869263,
-    "seen": 1792168277.2112658,
-    "ast_hash": "abb1476a7a2d39212c9c3e2f59f04f0b",
+    "mtime": 1792170424.9143832,
+    "seen": 1792170477.4596877,
+    "ast_hash": "39e3eced0b828a75a20de0269da41bf4",
     "semantic_hash": ""
   },
   "src/app/_layout.tsx": {
@@ -630,15 +630,15 @@
     "semantic_hash": ""
   },
   "src/components/charts/BarTrendChart.tsx": {
-    "mtime": 1792168103.6182637,
-    "seen": 1792168277.2114003,
-    "ast_hash": "6dcef73c9477b981243e00c96737ff29",
+    "mtime": 1792170424.9111557,
+    "seen": 1792170477.459822,
+    "ast_hash": "7bab8fdf85ec79fc1b07155ecc2f8c5c",
     "semantic_hash": ""
   },
   "src/components/charts/MuscleDonut.tsx": {
-    "mtime": 1792168247.8621209,
-    "seen": 1792168277.2114084,
-    "ast_hash": "97a9086396b7249dfc2efc5ba198f5d8",
+    "mtime": 1792170424.913381,
+    "seen": 1792170477.4598298,
+    "ast_hash": "77ab123640bf8700439ac49150162bf5",
     "semantic_hash": ""
   },
   "src/constants/__tests__/achievement-glyphs.test.ts": {
@@ -732,9 +732,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/LineTrendChart.tsx": {
-    "mtime": 1792168129.7744374,
-    "seen": 1792168277.2114058,
-    "ast_hash": "256bfd563b400056295cb6fe1abfb500",
+    "mtime": 1792170424.9119546,
+    "seen": 1792170477.4598274,
+    "ast_hash": "03e33b206ddc9a890ab1719ceae53d99",
     "semantic_hash": ""
   },
   "src/constants/body-comparatives.ts": {
@@ -867,6 +867,12 @@
     "mtime": 1792168247.8617828,
     "seen": 1792168277.2114127,
     "ast_hash": "bf7a1d25edbb3500aac646b23018ec0e",
+    "semantic_hash": ""
+  },
+  "src/components/charts/chart-dismiss.tsx": {
+    "mtime": 1792170452.5335462,
+    "seen": 1792170477.4598353,
+    "ast_hash": "029738e3767fd15f67d56a7ff9095307",
     "semantic_hash": ""
   }
 }
