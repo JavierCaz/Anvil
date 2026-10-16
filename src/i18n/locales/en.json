@@ -443,7 +443,8 @@
       "targetDuration": "Time",
       "targetDistance": "Distance",
       "targetLoad": "Load",
-      "targetIncline": "Incline"
+      "targetIncline": "Incline",
+      "targetLevel": "Level"
     },
     "setsEditor": {
       "setCount_one": "{{count}} set",
@@ -694,7 +695,12 @@
     "inclineShort": "incline",
     "addIncline": "Add incline",
     "decreaseIncline": "Decrease incline",
-    "increaseIncline": "Increase incline"
+    "increaseIncline": "Increase incline",
+    "level": "Level",
+    "levelShort": "level",
+    "addLevel": "Add level",
+    "decreaseLevel": "Decrease level",
+    "increaseLevel": "Increase level"
   },
   "notifications": {
     "comparativeLifted": "You just lifted {{object}}!",

@@ -149,6 +149,9 @@ export default function RoutineDetailScreen() {
                         item.first_set_incline
                           ? `${t('routines.detail.targetIncline')} ${item.first_set_incline}%`
                           : null,
+                        item.first_set_level
+                          ? `${t('routines.detail.targetLevel')} ${item.first_set_level}`
+                          : null,
                       ]
                     : [`${t('routines.detail.targetReps')} ${firstReps}`]),
                   `${t('routines.detail.targetRest')} ${firstRest}s`,

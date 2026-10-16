@@ -481,6 +481,8 @@ export interface SetLogInput {
   distanceM?: number | null;
   /** Logged treadmill incline (percent grade), else null. */
   inclinePercent?: number | null;
+  /** Logged machine resistance level, else null. */
+  level?: number | null;
 }
 
 /**
@@ -496,13 +498,13 @@ export async function upsertSet(
 ): Promise<void> {
   await db.runAsync(
     `INSERT INTO sets (workout_log_id, exercise_id, set_number, weight, reps, rest_seconds, completed,
-                       duration_seconds, distance_m, incline_percent)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                       duration_seconds, distance_m, incline_percent, level)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
      ON CONFLICT(workout_log_id, exercise_id, set_number)
      DO UPDATE SET weight = excluded.weight, reps = excluded.reps,
                    rest_seconds = excluded.rest_seconds, completed = excluded.completed,
                    duration_seconds = excluded.duration_seconds, distance_m = excluded.distance_m,
-                   incline_percent = excluded.incline_percent`,
+                   incline_percent = excluded.incline_percent, level = excluded.level`,
     logId,
     exerciseId,
     setNumber,
@@ -512,7 +514,8 @@ export async function upsertSet(
     input.completed,
     input.durationSeconds ?? null,
     input.distanceM ?? null,
-    input.inclinePercent && input.inclinePercent > 0 ? input.inclinePercent : null
+    input.inclinePercent && input.inclinePercent > 0 ? input.inclinePercent : null,
+    input.level && input.level > 0 ? Math.round(input.level) : null
   );
 }
 
@@ -675,6 +678,7 @@ export async function syncRoutineSetCountFromWorkout(
       duration_seconds: null,
       distance_m: null,
       incline_percent: null,
+      level: null,
     };
     await saveRoutineExerciseSets(
       db,
@@ -690,6 +694,7 @@ export async function syncRoutineSetCountFromWorkout(
           durationSeconds: existing?.duration_seconds ?? template.duration_seconds ?? null,
           distanceM: existing?.distance_m ?? template.distance_m ?? null,
           inclinePercent: existing?.incline_percent ?? template.incline_percent ?? null,
+          level: existing?.level ?? template.level ?? null,
         };
       })
     );
@@ -727,11 +732,12 @@ const INCLINE_EPSILON = 0.05;
 export function setDiffersFromTarget(
   set: Pick<WorkoutSet, 'weight' | 'reps' | 'rest_seconds' | 'duration_seconds' | 'distance_m'> & {
     incline_percent?: number | null;
+    level?: number | null;
   },
   target: Pick<
     RoutineExerciseSet,
     'weight' | 'reps' | 'rest_seconds' | 'duration_seconds' | 'distance_m'
-  > & { incline_percent?: number | null },
+  > & { incline_percent?: number | null; level?: number | null },
   exerciseType: string | null
 ): boolean {
   const metrics = getExerciseMetrics(exerciseType);
@@ -762,6 +768,10 @@ export function setDiffersFromTarget(
     metrics.duration &&
     Math.abs((set.incline_percent ?? 0) - (target.incline_percent ?? 0)) > INCLINE_EPSILON
   ) {
+    return true;
+  }
+  // Same for machine level; NULL and 0 both mean not set.
+  if (metrics.duration && (set.level ?? 0) !== (target.level ?? 0)) {
     return true;
   }
   return false;
@@ -843,6 +853,7 @@ export async function syncRoutineSetValuesFromWorkout(
           durationSeconds: target.duration_seconds,
           distanceM: target.distance_m,
           inclinePercent: target.incline_percent,
+          level: target.level,
         };
       }
       return {
@@ -853,6 +864,7 @@ export async function syncRoutineSetValuesFromWorkout(
         durationSeconds: loggedSet.duration_seconds,
         distanceM: loggedSet.distance_m,
         inclinePercent: loggedSet.incline_percent,
+        level: loggedSet.level,
       };
     });
     if (targets.length > 0) {

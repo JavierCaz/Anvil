@@ -9,6 +9,7 @@ import { StepIcon } from '@/components/StepIcon';
 import { SwipeToDelete } from '@/components/SwipeToDelete';
 import {
   clampIncline,
+  clampLevel,
   distanceScale,
   distanceStep,
   durationStepSeconds,
@@ -16,7 +17,10 @@ import {
   INCLINE_STEP,
   inclineByDefault,
   isFreeWeightEquipment,
+  LEVEL_STEP,
+  levelByDefault,
   supportsIncline,
+  supportsLevel,
   type DistanceScale,
   type ExerciseMetrics,
 } from '@/constants/exercise-metrics';
@@ -62,6 +66,8 @@ export interface SetEditorItem {
   distance: string;
   /** Treadmill-capable cardio: incline in percent, as typed ('' = flat / not set). */
   incline: string;
+  /** Cardio machines: resistance level, as typed ('' = not set). */
+  level: string;
   /** Workout mode, timed exercises: planned duration (haptic cue when the set timer reaches it). */
   targetDurationSeconds?: number;
   /** Workout mode only: set already logged as completed. */
@@ -92,6 +98,7 @@ interface ExerciseSetEditorProps {
   onDurationChange: (setNumber: number, seconds: number) => void;
   onDistanceChange: (setNumber: number, value: string) => void;
   onInclineChange: (setNumber: number, value: string) => void;
+  onLevelChange: (setNumber: number, value: string) => void;
   /**
    * Workout mode: exercise id keying the live set timer (shown for timed
    * exercises). Omit to hide the timer.
@@ -137,6 +144,7 @@ export function ExerciseSetEditor({
   onDurationChange,
   onDistanceChange,
   onInclineChange,
+  onLevelChange,
   timerExerciseId,
   onAddSet,
   onRemoveSet,
@@ -169,6 +177,12 @@ export function ExerciseSetEditor({
     (inclineRequested ||
       inclineByDefault(slug) ||
       sets.some((set) => parseNumber(set.incline) > 0));
+  // Machine level (stair climber, elliptical…): same opt-in pattern.
+  const [levelRequested, setLevelRequested] = useState(false);
+  const canLevel = supportsLevel(exerciseType, slug, exerciseEquipment);
+  const showLevel =
+    canLevel &&
+    (levelRequested || levelByDefault(slug) || sets.some((set) => parseNumber(set.level) > 0));
   const isControlled = onExpandedChange !== undefined;
   // Routine mode (uncontrolled): the first set starts expanded so editing
   // begins immediately. Workout mode (uncontrolled): first incomplete set.
@@ -242,6 +256,8 @@ export function ExerciseSetEditor({
             onAddLoad={metrics.load && !showLoad ? () => setLoadRequested(true) : undefined}
             showIncline={showIncline}
             onAddIncline={canIncline && !showIncline ? () => setInclineRequested(true) : undefined}
+            showLevel={showLevel}
+            onAddLevel={canLevel && !showLevel ? () => setLevelRequested(true) : undefined}
             durationStep={durationStepSeconds(exerciseType)}
             fallbackReps={fallbackReps}
             expanded={isExpanded}
@@ -253,6 +269,7 @@ export function ExerciseSetEditor({
             onDurationChange={(seconds) => onDurationChange(item.setNumber, seconds)}
             onDistanceChange={(value) => onDistanceChange(item.setNumber, value)}
             onInclineChange={(value) => onInclineChange(item.setNumber, value)}
+            onLevelChange={(value) => onLevelChange(item.setNumber, value)}
             onApplyToAll={onApplyToAll ? () => onApplyToAll(item.setNumber) : undefined}
             onComplete={onCompleteSet ? () => onCompleteSet(item.setNumber) : undefined}
             onUndo={onUndoSet ? () => onUndoSet(item.setNumber) : undefined}
@@ -298,6 +315,10 @@ interface SetCardProps {
   showIncline: boolean;
   /** Treadmill-capable cardio without a visible incline: reveal it. */
   onAddIncline?: () => void;
+  /** Cardio machines: the level field is visible. */
+  showLevel: boolean;
+  /** Cardio machines without a visible level: reveal it. */
+  onAddLevel?: () => void;
   durationStep: number;
   fallbackReps: number;
   expanded: boolean;
@@ -309,6 +330,7 @@ interface SetCardProps {
   onDurationChange: (seconds: number) => void;
   onDistanceChange: (value: string) => void;
   onInclineChange: (value: string) => void;
+  onLevelChange: (value: string) => void;
   onApplyToAll?: () => void;
   onComplete?: () => void;
   onUndo?: () => void;
@@ -317,7 +339,7 @@ interface SetCardProps {
 /**
  * One-line set summary for the collapsed/done states, per exercise type:
  * "80 kg × 8", "12 reps", "5 km · 25:30 · 5:06 /km · 6% incline",
- * "32 kg · 40 m · 0:45" or "0:45".
+ * "20:00 · level 8", "32 kg · 40 m · 0:45" or "0:45".
  */
 function formatSetValues(
   item: SetEditorItem,
@@ -325,7 +347,8 @@ function formatSetValues(
   fallbackReps: number,
   unit: UnitSystem,
   scale: DistanceScale,
-  inclineLabel: string
+  inclineLabel: string,
+  levelLabel: string
 ): string {
   if (!metrics.duration) {
     const reps = item.reps || fallbackReps;
@@ -350,6 +373,9 @@ function formatSetValues(
   if (parseNumber(item.incline) > 0) {
     parts.push(`${item.incline}% ${inclineLabel}`);
   }
+  if (parseNumber(item.level) > 0) {
+    parts.push(`${levelLabel} ${item.level}`);
+  }
   return parts.join(' · ');
 }
 
@@ -362,6 +388,8 @@ function SetCard({
   onAddLoad,
   showIncline,
   onAddIncline,
+  showLevel,
+  onAddLevel,
   durationStep,
   fallbackReps,
   expanded,
@@ -373,6 +401,7 @@ function SetCard({
   onDurationChange,
   onDistanceChange,
   onInclineChange,
+  onLevelChange,
   onApplyToAll,
   onComplete,
   onUndo,
@@ -413,12 +442,31 @@ function SetCard({
     onRestChange(Math.min(REST_MAX_SECONDS, Math.max(0, Math.round(parseNumber(value)))));
   };
 
-  const summary = formatSetValues(item, metrics, fallbackReps, unit, scale, t('workout.inclineShort'));
+  const summary = formatSetValues(
+    item,
+    metrics,
+    fallbackReps,
+    unit,
+    scale,
+    t('workout.inclineShort'),
+    t('workout.levelShort')
+  );
   const inclineValue = parseNumber(item.incline);
+  const levelValue = parseNumber(item.level);
 
   const stepIncline = (delta: number) => {
     const next = clampIncline(inclineValue + delta);
     onInclineChange(next > 0 ? String(next) : '');
+  };
+
+  const stepLevel = (delta: number) => {
+    const next = clampLevel(levelValue + delta);
+    onLevelChange(next > 0 ? String(next) : '');
+  };
+
+  const onLevelInputChange = (value: string) => {
+    const digits = value.replace(/\D/g, '');
+    onLevelChange(digits === '' ? '' : String(clampLevel(parseNumber(digits))));
   };
   const timerRunning = useWorkoutToolsStore(
     (state) =>
@@ -650,7 +698,43 @@ function SetCard({
                 </Pressable>
               </View>
             )}
-            {(onAddLoad || onAddIncline) && (
+            {showLevel && (
+              <View style={styles.stepperField}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('workout.decreaseLevel')}
+                  hitSlop={8}
+                  disabled={levelValue <= 0}
+                  onPress={() => stepLevel(-LEVEL_STEP)}
+                >
+                  <StepIcon kind="minus" disabled={levelValue <= 0} />
+                </Pressable>
+                <View style={[styles.inputField, { borderColor: colors.border, backgroundColor: colors.background }]}>
+                  <Text style={[styles.inputLabel, { color: colors.textSecondary }]}>
+                    {t('workout.level')}
+                  </Text>
+                  <TextInput
+                    value={item.level}
+                    onChangeText={onLevelInputChange}
+                    placeholder="0"
+                    placeholderTextColor={colors.textSecondary}
+                    keyboardType="number-pad"
+                    maxLength={3}
+                    selectTextOnFocus
+                    style={[styles.inputValue, { color: colors.text }]}
+                  />
+                </View>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={t('workout.increaseLevel')}
+                  hitSlop={8}
+                  onPress={() => stepLevel(LEVEL_STEP)}
+                >
+                  <StepIcon kind="plus" />
+                </Pressable>
+              </View>
+            )}
+            {(onAddLoad || onAddIncline || onAddLevel) && (
               <View style={styles.optionalRow}>
                 {onAddLoad && (
                   <Pressable
@@ -679,6 +763,21 @@ function SetCard({
                     <Ionicons name="trending-up-outline" size={16} color={colors.primary} />
                     <Text style={[styles.addLoadLabel, { color: colors.primary }]}>
                       {t('workout.addIncline')}
+                    </Text>
+                  </Pressable>
+                )}
+                {onAddLevel && (
+                  <Pressable
+                    accessibilityRole="button"
+                    onPress={onAddLevel}
+                    style={({ pressed }) => [
+                      styles.addLoadButton,
+                      { backgroundColor: colors.primarySoft, opacity: pressed ? 0.6 : 1 },
+                    ]}
+                  >
+                    <Ionicons name="speedometer-outline" size={16} color={colors.primary} />
+                    <Text style={[styles.addLoadLabel, { color: colors.primary }]}>
+                      {t('workout.addLevel')}
                     </Text>
                   </Pressable>
                 )}

@@ -443,7 +443,8 @@
       "targetDuration": "Tiempo",
       "targetDistance": "Distancia",
       "targetLoad": "Carga",
-      "targetIncline": "Inclinación"
+      "targetIncline": "Inclinación",
+      "targetLevel": "Nivel"
     },
     "setsEditor": {
       "setCount_one": "{{count}} serie",
@@ -694,7 +695,12 @@
     "inclineShort": "inclinación",
     "addIncline": "Añadir inclinación",
     "decreaseIncline": "Reducir inclinación",
-    "increaseIncline": "Aumentar inclinación"
+    "increaseIncline": "Aumentar inclinación",
+    "level": "Nivel",
+    "levelShort": "nivel",
+    "addLevel": "Añadir nivel",
+    "decreaseLevel": "Bajar nivel",
+    "increaseLevel": "Subir nivel"
   },
   "notifications": {
     "comparativeLifted": "¡Acabas de levantar {{object}}!",

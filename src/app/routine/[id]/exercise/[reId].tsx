@@ -18,7 +18,12 @@ import {
 import type { Exercise } from '@/db/types';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
-import { clampIncline, distanceScale, getExerciseMetrics } from '@/constants/exercise-metrics';
+import {
+  clampIncline,
+  clampLevel,
+  distanceScale,
+  getExerciseMetrics,
+} from '@/constants/exercise-metrics';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { hairline, shape, typography } from '@/theme/tokens';
 import { displayToMeters, formatDistance } from '@/utils/distance';
@@ -33,6 +38,8 @@ interface SetDraft {
   distance: string;
   /** Treadmill incline, percent ('' = flat). */
   incline: string;
+  /** Machine resistance level ('' = not set). */
+  level: string;
 }
 
 const MAX_SETS = 99;
@@ -75,6 +82,7 @@ export default function RoutineSetEditorScreen() {
         reps: String(row.reps),
         restSeconds: row.rest_seconds,
         incline: row.incline_percent && row.incline_percent > 0 ? String(row.incline_percent) : '',
+        level: row.level && row.level > 0 ? String(row.level) : '',
         durationSeconds: row.duration_seconds ?? 0,
         distance:
           row.distance_m && row.distance_m > 0
@@ -100,6 +108,7 @@ export default function RoutineSetEditorScreen() {
     durationSeconds: set.durationSeconds,
     distance: set.distance,
     incline: set.incline,
+    level: set.level,
   }));
   const metrics = getExerciseMetrics(exercise?.exercise_type ?? null);
   const scale = distanceScale(
@@ -124,6 +133,7 @@ export default function RoutineSetEditorScreen() {
         durationSeconds: 0,
         distance: '',
         incline: '',
+        level: '',
       };
       return [...current, { ...template }];
     });
@@ -181,6 +191,7 @@ export default function RoutineSetEditorScreen() {
                   ? displayToMeters(parseNumber(set.distance), unit, scale)
                   : null,
               inclinePercent: clampIncline(parseNumber(set.incline)) || null,
+              level: clampLevel(parseNumber(set.level)) || null,
             }
           : {
               setNumber: index + 1,
@@ -228,6 +239,7 @@ export default function RoutineSetEditorScreen() {
               onDurationChange={(number, seconds) => updateSet(number - 1, { durationSeconds: seconds })}
               onDistanceChange={(number, value) => updateSet(number - 1, { distance: value })}
               onInclineChange={(number, value) => updateSet(number - 1, { incline: value })}
+              onLevelChange={(number, value) => updateSet(number - 1, { level: value })}
               onAddSet={handleAddSet}
               onRemoveSet={confirmRemoveSet}
               onApplyToAll={handleApplyToAll}

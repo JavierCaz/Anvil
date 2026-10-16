@@ -178,3 +178,48 @@ export function clampIncline(percent: number): number {
   }
   return Math.round(Math.min(INCLINE_MAX_PERCENT, Math.max(0, percent)) * 10) / 10;
 }
+
+/** Catalog cardio machines with numbered resistance / speed / damper levels. */
+const LEVEL_SLUGS = new Set(['stair-climber', 'elliptical', 'cycling', 'rowing', 'skierg']);
+
+/** Catalog machines driven by their level — the field shows by default. */
+const LEVEL_DEFAULT_SLUGS = new Set(['stair-climber', 'elliptical']);
+
+/** Equipment of custom exercises that may record a machine level. */
+const LEVEL_EQUIPMENT = new Set(['cardio', 'machine']);
+
+/**
+ * Whether sets of this exercise can record a machine level (1, 2, 3…).
+ * Catalog exercises opt in by slug; custom timed exercises can when their
+ * equipment is a cardio machine (e.g. a user-created "StairMaster").
+ */
+export function supportsLevel(
+  type: string | null | undefined,
+  slug: string | null | undefined,
+  equipment: string | null | undefined
+): boolean {
+  if (!isTimedType(type)) {
+    return false;
+  }
+  if (slug) {
+    return LEVEL_SLUGS.has(slug);
+  }
+  return equipment ? LEVEL_EQUIPMENT.has(equipment.trim().toLowerCase()) : false;
+}
+
+/** True when the level field should show without the user asking for it. */
+export function levelByDefault(slug: string | null | undefined): boolean {
+  return slug != null && LEVEL_DEFAULT_SLUGS.has(slug);
+}
+
+/** Level stepper increment and accepted range (some bikes go 0–100). */
+export const LEVEL_STEP = 1;
+export const LEVEL_MAX = 100;
+
+/** Clamp a level to whole numbers in `[0, LEVEL_MAX]` (0 = not set). */
+export function clampLevel(level: number): number {
+  if (!Number.isFinite(level)) {
+    return 0;
+  }
+  return Math.round(Math.min(LEVEL_MAX, Math.max(0, level)));
+}

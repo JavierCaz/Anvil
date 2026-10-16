@@ -70,7 +70,10 @@ export async function getRoutineExercises(
               ORDER BY res.set_number ASC LIMIT 1) AS first_set_weight,
             (SELECT res.incline_percent FROM routine_exercise_sets res
               WHERE res.routine_exercise_id = re.id
-              ORDER BY res.set_number ASC LIMIT 1) AS first_set_incline
+              ORDER BY res.set_number ASC LIMIT 1) AS first_set_incline,
+            (SELECT res.level FROM routine_exercise_sets res
+              WHERE res.routine_exercise_id = re.id
+              ORDER BY res.set_number ASC LIMIT 1) AS first_set_level
      FROM routine_exercises re
      JOIN exercises e ON e.id = re.exercise_id
      WHERE re.routine_id = ?
@@ -113,7 +116,10 @@ export async function getRoutineExercise(
                 ORDER BY res.set_number ASC LIMIT 1) AS first_set_weight,
               (SELECT res.incline_percent FROM routine_exercise_sets res
                 WHERE res.routine_exercise_id = re.id
-                ORDER BY res.set_number ASC LIMIT 1) AS first_set_incline
+                ORDER BY res.set_number ASC LIMIT 1) AS first_set_incline,
+              (SELECT res.level FROM routine_exercise_sets res
+                WHERE res.routine_exercise_id = re.id
+                ORDER BY res.set_number ASC LIMIT 1) AS first_set_level
        FROM routine_exercises re
        JOIN exercises e ON e.id = re.exercise_id
        WHERE re.id = ?`,
@@ -279,6 +285,8 @@ export interface SetTargetInput {
   distanceM?: number | null;
   /** Planned treadmill incline (percent grade), else null. */
   inclinePercent?: number | null;
+  /** Planned machine resistance level, else null. */
+  level?: number | null;
 }
 
 /**
@@ -305,8 +313,8 @@ export async function saveRoutineExerciseSets(
       await db.runAsync(
         `INSERT INTO routine_exercise_sets
            (routine_exercise_id, set_number, reps, rest_seconds, weight, duration_seconds,
-            distance_m, incline_percent)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+            distance_m, incline_percent, level)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
         routineExerciseId,
         target.setNumber,
         repsFor(target),
@@ -314,7 +322,8 @@ export async function saveRoutineExerciseSets(
         target.weight && target.weight > 0 ? target.weight : null,
         positiveIntOrNull(target.durationSeconds),
         positiveOrNull(target.distanceM),
-        positiveOrNull(target.inclinePercent)
+        positiveOrNull(target.inclinePercent),
+        positiveIntOrNull(target.level)
       );
     }
     const first = targets[0];

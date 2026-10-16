@@ -6,7 +6,7 @@
  */
 
 /** Current schema version. Bump when adding a new migration. */
-export const DATABASE_VERSION = 15;
+export const DATABASE_VERSION = 16;
 
 /**
  * Migration 1 — initial tables.
@@ -352,6 +352,17 @@ CREATE TABLE IF NOT EXISTS body_weights (
 );
 `;
 
+/**
+ * Migration 16 — machine resistance level.
+ *
+ * Optional resistance level per set for cardio machines with numbered
+ * settings (stair climber, elliptical, bike, rower…). NULL = not recorded.
+ */
+export const SCHEMA_V16 = `
+ALTER TABLE sets ADD COLUMN level INTEGER;
+ALTER TABLE routine_exercise_sets ADD COLUMN level INTEGER;
+`;
+
 export const MIGRATIONS: readonly string[] = [
   SCHEMA_V1,
   SCHEMA_V2,
@@ -368,4 +379,5 @@ export const MIGRATIONS: readonly string[] = [
   SCHEMA_V13,
   SCHEMA_V14,
   SCHEMA_V15,
+  SCHEMA_V16,
 ];

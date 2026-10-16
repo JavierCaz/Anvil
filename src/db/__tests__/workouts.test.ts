@@ -233,10 +233,10 @@ describe('syncRoutineSetValuesFromWorkout', () => {
     // DELETE + 3 INSERTs + 1 aggregate UPDATE = 5 runAsync calls.
     const calls = runAsync.mock.calls as unknown[][];
     expect(calls.length).toBe(5);
-    // INSERT params: (routine_exercise_id, set_number, reps, rest_seconds, weight, duration_seconds, distance_m, incline_percent)
-    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 8, 90, 102.5, null, null, null]);
-    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 100, null, null, null]);
-    expect(calls[3]).toEqual([expect.stringContaining('INSERT'), 10, 3, 10, 90, 100, null, null, null]);
+    // INSERT params: (routine_exercise_id, set_number, reps, rest_seconds, weight, duration_seconds, distance_m, incline_percent, level)
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 8, 90, 102.5, null, null, null, null]);
+    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 100, null, null, null, null]);
+    expect(calls[3]).toEqual([expect.stringContaining('INSERT'), 10, 3, 10, 90, 100, null, null, null, null]);
   });
 
   it('stores a logged weight of 0 as NULL in the routine defaults', async () => {
@@ -252,8 +252,8 @@ describe('syncRoutineSetValuesFromWorkout', () => {
     await syncRoutineSetValuesFromWorkout(db, 1);
 
     const calls = runAsync.mock.calls as unknown[][];
-    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 10, 90, null, null, null, null]);
-    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 60, null, null, null]);
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 10, 90, null, null, null, null, null]);
+    expect(calls[2]).toEqual([expect.stringContaining('INSERT'), 10, 2, 10, 90, 60, null, null, null, null]);
   });
 
   it('does nothing when no set values changed', async () => {
@@ -436,6 +436,9 @@ describe('cardio / timed sets', () => {
     expect(
       setDiffersFromTarget({ ...set, incline_percent: 0 }, { ...target, incline_percent: null }, 'distance_duration')
     ).toBe(false);
+    // Same for a machine level; NULL and 0 both mean not set.
+    expect(setDiffersFromTarget({ ...set, level: 8 }, { ...target, level: 6 }, 'duration')).toBe(true);
+    expect(setDiffersFromTarget({ ...set, level: 0 }, { ...target, level: null }, 'duration')).toBe(false);
     // An unloaded hold treats logged 0 kg and a NULL planned load as equal.
     expect(setDiffersFromTarget({ ...set, weight: 0 }, { ...target, weight: null }, 'duration')).toBe(false);
     // Rep-based exercises ignore duration.
@@ -473,7 +476,7 @@ describe('cardio / timed sets', () => {
 
     const calls = runAsync.mock.calls as unknown[][];
     // Timed targets keep 0 planned reps (not clamped up to 1) and no weight.
-    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1650, 5500, null]);
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1650, 5500, null, null]);
   });
 
   it('writes a logged treadmill incline back to the routine', async () => {
@@ -488,7 +491,22 @@ describe('cardio / timed sets', () => {
     await syncRoutineSetValuesFromWorkout(db, 1);
 
     const calls = runAsync.mock.calls as unknown[][];
-    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1800, 5000, 4.5]);
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1800, 5000, 4.5, null]);
+  });
+
+  it('writes a logged machine level back to the routine', async () => {
+    const { db, getAllQueue, getFirstQueue, runAsync } = makeDb();
+    getFirstQueue.push(logRow());
+    getAllQueue.push([exerciseRow({ ...running, target_sets: 1, completed_sets: 1 })]);
+    getAllQueue.push([runTarget(1, { level: null })]);
+    getAllQueue.push([runSet(1, { level: 8 })]);
+    getAllQueue.push([runTarget(1, { level: null })]);
+    getAllQueue.push([runSet(1, { level: 8 })]);
+
+    await syncRoutineSetValuesFromWorkout(db, 1);
+
+    const calls = runAsync.mock.calls as unknown[][];
+    expect(calls[1]).toEqual([expect.stringContaining('INSERT'), 10, 1, 0, 0, null, 1800, 5000, null, 8]);
   });
 });
 

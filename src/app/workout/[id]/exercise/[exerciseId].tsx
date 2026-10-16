@@ -19,7 +19,12 @@ import { useToast } from '@/components/ToastProvider';
 import { WorkoutElapsedBar } from '@/components/WorkoutElapsed';
 import { WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
 import { getAchievementByKey } from '@/constants/achievements';
-import { clampIncline, distanceScale, getExerciseMetrics } from '@/constants/exercise-metrics';
+import {
+  clampIncline,
+  clampLevel,
+  distanceScale,
+  getExerciseMetrics,
+} from '@/constants/exercise-metrics';
 import type { AchievementDefinition } from '@/constants/achievements';
 import {
   getExerciseAchievements,
@@ -56,6 +61,8 @@ interface SetDraft {
   distance: string;
   /** Treadmill incline, percent ('' = flat). */
   incline: string;
+  /** Machine resistance level ('' = not set). */
+  level: string;
 }
 
 export default function WorkoutExerciseScreen() {
@@ -129,6 +136,10 @@ export default function WorkoutExerciseScreen() {
   const inclineDraft = (percent: number | null | undefined) =>
     percent && percent > 0 ? String(percent) : '';
 
+  /** Planned/logged machine level → input text ('' = not set). */
+  const levelDraft = (level: number | null | undefined) =>
+    level && level > 0 ? String(level) : '';
+
   const seededRef = useRef<string | null>(null);
   const seedKey = `${logId}:${exerciseIdNum}:${unit}`;
 
@@ -160,6 +171,7 @@ export default function WorkoutExerciseScreen() {
           durationSeconds: logged.duration_seconds ?? target.duration_seconds ?? 0,
           distance: distanceDraft(logged.distance_m ?? target.distance_m),
           incline: inclineDraft(logged.incline_percent ?? target.incline_percent),
+          level: levelDraft(logged.level ?? target.level),
         };
         initialRest[target.set_number] = logged.rest_seconds;
       } else {
@@ -169,6 +181,7 @@ export default function WorkoutExerciseScreen() {
           durationSeconds: target.duration_seconds ?? 0,
           distance: distanceDraft(target.distance_m),
           incline: inclineDraft(target.incline_percent),
+          level: levelDraft(target.level),
         };
         initialRest[target.set_number] = target.rest_seconds;
       }
@@ -192,6 +205,7 @@ export default function WorkoutExerciseScreen() {
     durationSeconds: firstTarget?.duration_seconds ?? 0,
     distance: distanceDraft(firstTarget?.distance_m),
     incline: inclineDraft(firstTarget?.incline_percent),
+    level: levelDraft(firstTarget?.level),
   });
 
   const setNumbers = Array.from({ length: setCount }, (_, i) => i + 1);
@@ -213,6 +227,7 @@ export default function WorkoutExerciseScreen() {
       durationSeconds: draft.durationSeconds,
       distance: draft.distance,
       incline: draft.incline,
+      level: draft.level,
       targetDurationSeconds:
         targetsByNumber.get(number)?.duration_seconds ?? firstTarget?.duration_seconds ?? 0,
       done: set?.completed === 1,
@@ -304,6 +319,7 @@ export default function WorkoutExerciseScreen() {
         durationSeconds: draft.durationSeconds,
         distanceM: metrics.distance && distance > 0 ? displayToMeters(distance, unit, scale) : null,
         inclinePercent: clampIncline(parseNumber(draft.incline)) || null,
+        level: clampLevel(parseNumber(draft.level)) || null,
       };
     }
     return {
@@ -312,6 +328,7 @@ export default function WorkoutExerciseScreen() {
       durationSeconds: null,
       distanceM: null,
       inclinePercent: null,
+      level: null,
     };
   };
 
@@ -487,6 +504,7 @@ export default function WorkoutExerciseScreen() {
               onDurationChange={(number, seconds) => updateDraft(number, { durationSeconds: seconds })}
               onDistanceChange={(number, value) => updateDraft(number, { distance: value })}
               onInclineChange={(number, value) => updateDraft(number, { incline: value })}
+              onLevelChange={(number, value) => updateDraft(number, { level: value })}
               onAddSet={handleAddSet}
               onRemoveSet={handleRemoveSet}
               onCompleteSet={handleComplete}

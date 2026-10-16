@@ -81,6 +81,8 @@ export interface RoutineExerciseWithExercise extends RoutineExercise {
   first_set_weight: number | null;
   /** Planned incline of the first set, percent grade. */
   first_set_incline: number | null;
+  /** Planned machine resistance level of the first set. */
+  first_set_level: number | null;
 }
 
 /**
@@ -101,6 +103,8 @@ export interface RoutineExerciseSet {
   distance_m: number | null;
   /** Planned treadmill incline, percent grade (null = not set). */
   incline_percent: number | null;
+  /** Planned machine resistance level (null = not set). */
+  level: number | null;
 }
 
 export interface WorkoutLog {
@@ -134,6 +138,8 @@ export interface WorkoutSet {
   distance_m: number | null;
   /** Logged treadmill incline, percent grade (null = not recorded). */
   incline_percent: number | null;
+  /** Logged machine resistance level (null = not recorded). */
+  level: number | null;
 }
 
 /**

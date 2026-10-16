@@ -1,5 +1,6 @@
 import {
   clampIncline,
+  clampLevel,
   distanceScale,
   distanceStep,
   durationStepSeconds,
@@ -9,7 +10,9 @@ import {
   isDistanceType,
   isFreeWeightEquipment,
   isTimedType,
+  levelByDefault,
   supportsIncline,
+  supportsLevel,
 } from '@/constants/exercise-metrics';
 
 describe('getExerciseMetrics', () => {
@@ -169,5 +172,42 @@ describe('treadmill incline', () => {
     expect(clampIncline(-2)).toBe(0);
     expect(clampIncline(55)).toBe(40);
     expect(clampIncline(Number.NaN)).toBe(0);
+  });
+});
+
+describe('machine level', () => {
+  it('is offered on catalog cardio machines with levels', () => {
+    expect(supportsLevel('duration', 'stair-climber', 'Cardio')).toBe(true);
+    expect(supportsLevel('duration', 'elliptical', 'Cardio')).toBe(true);
+    expect(supportsLevel('distance_duration', 'cycling', 'Cardio')).toBe(true);
+    expect(supportsLevel('distance_duration', 'rowing', 'Cardio')).toBe(true);
+  });
+
+  it('is not offered where a level makes no sense', () => {
+    expect(supportsLevel('distance_duration', 'running', 'Cardio')).toBe(false);
+    expect(supportsLevel('duration', 'jump-rope', 'Cardio')).toBe(false);
+    expect(supportsLevel('duration', 'plank', 'Bodyweight')).toBe(false);
+    expect(supportsLevel('weight_reps', 'stair-climber', 'Cardio')).toBe(false);
+  });
+
+  it('is offered on custom timed exercises using a cardio machine', () => {
+    expect(supportsLevel('duration', null, 'Cardio')).toBe(true);
+    expect(supportsLevel('distance_duration', null, ' machine ')).toBe(true);
+    expect(supportsLevel('duration', null, 'Bodyweight')).toBe(false);
+    expect(supportsLevel('duration', null, null)).toBe(false);
+  });
+
+  it('shows by default only for level-driven machines', () => {
+    expect(levelByDefault('stair-climber')).toBe(true);
+    expect(levelByDefault('elliptical')).toBe(true);
+    expect(levelByDefault('cycling')).toBe(false);
+    expect(levelByDefault(null)).toBe(false);
+  });
+
+  it('clamps to whole levels in range', () => {
+    expect(clampLevel(7.6)).toBe(8);
+    expect(clampLevel(-1)).toBe(0);
+    expect(clampLevel(250)).toBe(100);
+    expect(clampLevel(Number.NaN)).toBe(0);
   });
 });
