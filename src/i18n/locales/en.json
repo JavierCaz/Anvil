@@ -661,9 +661,28 @@
     "saveOrderAndValuesMessage": "You changed the exercise order and the set values during this workout. Save these changes to your routine?",
     "saveOrderAllMessage": "You changed the exercise order, added or removed sets and changed set values during this workout. Save all these changes to your routine?",
     "tools": {
-      "open": "Timer & stopwatch",
+      "open": "Workout tools",
       "timer": "Timer",
       "stopwatch": "Stopwatch",
+      "converter": "Convert",
+      "categories": {
+        "weight": "Weight",
+        "distance": "Distance",
+        "speed": "Speed"
+      },
+      "from": "From",
+      "to": "To",
+      "swapUnits": "Swap units",
+      "keys": {
+        "add": "Plus",
+        "subtract": "Minus",
+        "multiply": "Times",
+        "divide": "Divided by",
+        "decimal": "Decimal point",
+        "backspace": "Delete",
+        "clear": "Clear",
+        "equals": "Equals"
+      },
       "start": "Start",
       "pause": "Pause",
       "resume": "Resume",

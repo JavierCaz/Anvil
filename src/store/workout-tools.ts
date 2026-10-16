@@ -1,4 +1,11 @@
 import { create } from 'zustand';
+import {
+  applyCalculatorKey,
+  type CalculatorKey,
+  type CalculatorState,
+  INITIAL_CALCULATOR,
+} from '@/utils/calculator';
+import type { ConverterCategory } from '@/utils/unit-converter';
 
 export const TIMER_DEFAULT_SECONDS = 60;
 export const TIMER_MIN_SECONDS = 5;
@@ -55,6 +62,18 @@ export interface SetTimerState {
   startedAt: number;
 }
 
+/**
+ * Unit converter with a small calculator for the input value. `from`/`to` are
+ * null until the user picks units — the panel then falls back to the pair for
+ * their unit-system preference.
+ */
+export interface ConverterState {
+  category: ConverterCategory;
+  from: string | null;
+  to: string | null;
+  calculator: CalculatorState;
+}
+
 export function getSetTimerElapsedSeconds(setTimer: SetTimerState, now: number): number {
   return Math.max(0, Math.floor((now - setTimer.startedAt) / 1000));
 }
@@ -103,11 +122,19 @@ const initialStopwatch: StopwatchState = {
   laps: [],
 };
 
+const initialConverter: ConverterState = {
+  category: 'weight',
+  from: null,
+  to: null,
+  calculator: INITIAL_CALCULATOR,
+};
+
 interface WorkoutToolsState {
   timer: TimerState;
   stopwatch: StopwatchState;
   rest: RestState | null;
   setTimer: SetTimerState | null;
+  converter: ConverterState;
 
   /** Set the idle timer's duration (ignored while running/paused). */
   setTimerDuration: (seconds: number) => void;
@@ -156,12 +183,19 @@ interface WorkoutToolsState {
    */
   releaseSetTimer: (exerciseId: number, setNumber: number, shift?: boolean) => void;
 
+  /** Switch converter category — units go back to the defaults, the typed value stays. */
+  setConverterCategory: (category: ConverterCategory) => void;
+  /** Pick the converter's units (both resolved by the caller, never equal). */
+  setConverterUnits: (from: string, to: string) => void;
+  /** Apply a calculator keypad press to the converter's input. */
+  pressConverterKey: (key: CalculatorKey) => void;
+
   /** Clear all tools — called when the workout session ends. */
   resetAll: () => void;
 }
 
 /**
- * Session-scoped timer, stopwatch and rest countdown available during a workout. Shared across
+ * Session-scoped timer, stopwatch, unit converter and rest countdown available during a workout. Shared across
  * the session and exercise screens; intentionally not persisted.
  */
 export const useWorkoutToolsStore = create<WorkoutToolsState>()((set, get) => ({
@@ -169,6 +203,7 @@ export const useWorkoutToolsStore = create<WorkoutToolsState>()((set, get) => ({
   stopwatch: initialStopwatch,
   rest: null,
   setTimer: null,
+  converter: initialConverter,
 
   setTimerDuration: (seconds) => {
     const { timer } = get();
@@ -322,7 +357,30 @@ export const useWorkoutToolsStore = create<WorkoutToolsState>()((set, get) => ({
     }
   },
 
+  setConverterCategory: (category) => {
+    set((state) => ({ converter: { ...state.converter, category, from: null, to: null } }));
+  },
+
+  setConverterUnits: (from, to) => {
+    set((state) => ({ converter: { ...state.converter, from, to } }));
+  },
+
+  pressConverterKey: (key) => {
+    set((state) => ({
+      converter: {
+        ...state.converter,
+        calculator: applyCalculatorKey(state.converter.calculator, key),
+      },
+    }));
+  },
+
   resetAll: () => {
-    set({ timer: initialTimer, stopwatch: initialStopwatch, rest: null, setTimer: null });
+    set({
+      timer: initialTimer,
+      stopwatch: initialStopwatch,
+      rest: null,
+      setTimer: null,
+      converter: initialConverter,
+    });
   },
 }));

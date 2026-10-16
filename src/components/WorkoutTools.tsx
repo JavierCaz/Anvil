@@ -1,7 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
 import { useAudioPlayer } from 'expo-audio';
 import * as Haptics from 'expo-haptics';
-import { useEffect, useLayoutEffect, useState } from 'react';
+import { type ReactNode, useEffect, useLayoutEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, Modal, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
@@ -15,6 +15,7 @@ import {
   TIMER_PRESETS_SECONDS,
   useWorkoutToolsStore,
 } from '@/store/workout-tools';
+import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { withAlpha } from '@/theme/colors';
 import { hairline, radius, shape, typography } from '@/theme/tokens';
@@ -26,6 +27,20 @@ import {
   playAlarm,
   scheduleAlarmNotification,
 } from '@/utils/alarm';
+import {
+  type CalculatorKey,
+  evaluateExpression,
+  formatExpression,
+  hasOperator,
+  isOperator,
+} from '@/utils/calculator';
+import {
+  CONVERTER_CATEGORIES,
+  convertUnit,
+  converterUnits,
+  defaultConverterUnits,
+  formatConverted,
+} from '@/utils/unit-converter';
 
 /** Identifier of the workout timer's scheduled background alarm. */
 const WORKOUT_TIMER_NOTIFICATION_ID = 'anvil-workout-timer';
@@ -39,7 +54,38 @@ const WORKOUT_TIMER_CHANNEL_ID = 'workout-timer';
  */
 const LATE_FIRE_THRESHOLD_MS = 1500;
 
-type ToolTab = 'timer' | 'stopwatch';
+/** Height of one converter keypad key, and the spacing between keys. */
+const KEY_HEIGHT = 48;
+const KEY_GAP = 8;
+
+type ToolTab = 'timer' | 'stopwatch' | 'converter';
+
+const TOOL_TABS: readonly { value: ToolTab; icon: keyof typeof Ionicons.glyphMap }[] = [
+  { value: 'timer', icon: 'timer-outline' },
+  { value: 'stopwatch', icon: 'stopwatch-outline' },
+  { value: 'converter', icon: 'calculator-outline' },
+];
+
+/** Converter keypad: a 4-column grid, plus a side column of backspace / clear / equals. */
+const KEYPAD_ROWS: readonly (readonly CalculatorKey[])[] = [
+  ['7', '8', '9', '÷'],
+  ['4', '5', '6', '×'],
+  ['1', '2', '3', '-'],
+  ['0', '.', '+'],
+];
+const KEYPAD_SIDE: readonly CalculatorKey[] = ['backspace', 'clear', 'equals'];
+
+/** i18n key (under `workout.tools.keys`) for keys whose glyph needs a spoken label. */
+const KEY_LABELS: Partial<Record<CalculatorKey, string>> = {
+  '+': 'add',
+  '-': 'subtract',
+  '×': 'multiply',
+  '÷': 'divide',
+  '.': 'decimal',
+  backspace: 'backspace',
+  clear: 'clear',
+  equals: 'equals',
+};
 
 /** `m:ss` countdown, rounding up so the display hits 0:00 exactly at the deadline. */
 export function formatTimer(ms: number): string {
@@ -157,8 +203,8 @@ interface WorkoutToolsButtonProps {
 }
 
 /**
- * Header button that opens the workout tools. While the timer or stopwatch is
- * running it shows a live readout next to the icon.
+ * Header button that opens the workout tools (a toolbox icon). While the timer
+ * or stopwatch is running it shows a live readout next to its icon instead.
  */
 export function WorkoutToolsButton({ onPress }: WorkoutToolsButtonProps) {
   const { colors } = useAppTheme();
@@ -174,13 +220,14 @@ export function WorkoutToolsButton({ onPress }: WorkoutToolsButtonProps) {
   // The timer takes precedence — a countdown is the more time-sensitive readout.
   let readout: string | null = null;
   let readoutColor = colors.primary;
-  let icon: keyof typeof Ionicons.glyphMap = 'stopwatch-outline';
+  let icon: keyof typeof Ionicons.glyphMap = 'construct-outline';
   if (timerStatus !== 'idle') {
     readout = formatTimer(getTimerRemainingMs(timer, now));
     icon = 'timer-outline';
   } else if (stopwatchActive) {
     readout = formatStopwatch(getStopwatchElapsedMs(stopwatch, now), false);
     readoutColor = colors.accent;
+    icon = 'stopwatch-outline';
   }
 
   return (
@@ -208,7 +255,7 @@ interface WorkoutToolsSheetProps {
   onClose: () => void;
 }
 
-/** Bottom sheet with the workout timer and stopwatch. */
+/** Bottom sheet with the workout timer, stopwatch and unit converter. */
 export function WorkoutToolsSheet({ visible, onClose }: WorkoutToolsSheetProps) {
   const { colors } = useAppTheme();
   const { t } = useTranslation();
@@ -237,7 +284,7 @@ export function WorkoutToolsSheet({ visible, onClose }: WorkoutToolsSheetProps) 
           <View style={[styles.grabber, { backgroundColor: colors.border }]} />
           <View style={styles.sheetHeader}>
             <View style={[styles.segmented, { backgroundColor: colors.background, borderColor: colors.border }]}>
-              {(['timer', 'stopwatch'] as const).map((value) => {
+              {TOOL_TABS.map(({ value, icon }) => {
                 const selected = tab === value;
                 return (
                   <Pressable
@@ -251,11 +298,13 @@ export function WorkoutToolsSheet({ visible, onClose }: WorkoutToolsSheetProps) 
                     ]}
                   >
                     <Ionicons
-                      name={value === 'timer' ? 'timer-outline' : 'stopwatch-outline'}
+                      name={icon}
                       size={16}
                       color={selected ? colors.text : colors.textSecondary}
                     />
                     <Text
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
                       style={[
                         styles.segmentLabel,
                         { color: selected ? colors.text : colors.textSecondary },
@@ -278,7 +327,9 @@ export function WorkoutToolsSheet({ visible, onClose }: WorkoutToolsSheetProps) 
           </View>
 
           {/* Only tick while the sheet is on screen. */}
-          {visible && (tab === 'timer' ? <TimerPanel /> : <StopwatchPanel />)}
+          {visible && tab === 'timer' && <TimerPanel />}
+          {visible && tab === 'stopwatch' && <StopwatchPanel />}
+          {visible && tab === 'converter' && <ConverterPanel />}
         </View>
       </View>
     </Modal>
@@ -463,6 +514,258 @@ function StopwatchPanel() {
         </ScrollView>
       )}
     </View>
+  );
+}
+
+/**
+ * Unit converter (weight, distance, speed) whose input is typed on a small
+ * calculator keypad — e.g. "20 + 2 × 2.5" for a bar plus plates.
+ */
+function ConverterPanel() {
+  const { colors } = useAppTheme();
+  const { t } = useTranslation();
+  const unitSystem = useUnitsStore((state) => state.unitSystem);
+  const converter = useWorkoutToolsStore((state) => state.converter);
+  const { setConverterCategory, setConverterUnits, pressConverterKey } =
+    useWorkoutToolsStore.getState();
+
+  const { category, calculator } = converter;
+  const defaults = defaultConverterUnits(category, unitSystem);
+  const from = converter.from ?? defaults.from;
+  const to = converter.to ?? defaults.to;
+  const units = converterUnits(category);
+
+  const value = evaluateExpression(calculator.expression);
+  const result = value === null ? null : formatConverted(convertUnit(value, category, from, to));
+  // Show the running total while an operation is pending ("20 + 5" → "= 25").
+  const pending = !calculator.evaluated && value !== null && hasOperator(calculator.expression);
+
+  // Picking the unit already on the other side swaps the pair instead of matching it.
+  const pickFrom = (unit: string) => setConverterUnits(unit, unit === to ? from : to);
+  const pickTo = (unit: string) => setConverterUnits(unit === from ? to : from, unit);
+
+  const handleSwap = () => {
+    void Haptics.selectionAsync();
+    setConverterUnits(to, from);
+  };
+
+  const handleKey = (key: CalculatorKey) => {
+    void Haptics.selectionAsync();
+    pressConverterKey(key);
+  };
+
+  return (
+    <View style={styles.converter}>
+      <View style={styles.presets}>
+        {CONVERTER_CATEGORIES.map((value) => {
+          const selected = category === value;
+          return (
+            <Pressable
+              key={value}
+              accessibilityRole="button"
+              accessibilityState={{ selected }}
+              onPress={() => setConverterCategory(value)}
+              style={({ pressed }) => [
+                styles.preset,
+                {
+                  borderColor: selected ? colors.primary : colors.border,
+                  backgroundColor: selected ? colors.primarySoft : 'transparent',
+                  opacity: pressed ? 0.7 : 1,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.presetLabel,
+                  { color: selected ? colors.primary : colors.text },
+                  selected && styles.presetLabelSelected,
+                ]}
+              >
+                {t(`workout.tools.categories.${value}`)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+
+      <View>
+        <View style={[styles.converterCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <UnitPicker label={t('workout.tools.from')} units={units} selected={from} onSelect={pickFrom} />
+          <View style={styles.converterValueRow}>
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              style={[
+                styles.converterValue,
+                { color: calculator.expression === '' ? colors.textSecondary : colors.text },
+              ]}
+            >
+              {calculator.expression === '' ? '0' : formatExpression(calculator.expression)}
+            </Text>
+            <Text style={[styles.converterUnit, { color: colors.textSecondary }]}>{from}</Text>
+          </View>
+          {pending && (
+            <Text style={[styles.converterPreview, { color: colors.textSecondary }]}>
+              = {formatConverted(value, 4)} {from}
+            </Text>
+          )}
+        </View>
+
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t('workout.tools.swapUnits')}
+          hitSlop={6}
+          onPress={handleSwap}
+          style={({ pressed }) => [
+            styles.swapButton,
+            {
+              backgroundColor: colors.surfaceElevated,
+              borderColor: colors.border,
+              opacity: pressed ? 0.6 : 1,
+            },
+          ]}
+        >
+          <Ionicons name="swap-vertical" size={18} color={colors.primary} />
+        </Pressable>
+
+        <View style={[styles.converterCard, { backgroundColor: colors.background, borderColor: colors.border }]}>
+          <UnitPicker label={t('workout.tools.to')} units={units} selected={to} onSelect={pickTo} />
+          <View style={styles.converterValueRow}>
+            <Text
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              accessibilityLiveRegion="polite"
+              style={[
+                styles.converterValue,
+                { color: result === null ? colors.textSecondary : colors.primary },
+              ]}
+            >
+              {result ?? '0'}
+            </Text>
+            <Text style={[styles.converterUnit, { color: colors.textSecondary }]}>{to}</Text>
+          </View>
+        </View>
+      </View>
+
+      <View style={styles.keypad}>
+        <View style={styles.keypadGrid}>
+          {KEYPAD_ROWS.map((row, rowIndex) => (
+            <View key={rowIndex} style={styles.keypadRow}>
+              {row.map((key) => (
+                <KeypadButton key={key} calculatorKey={key} wide={key === '0'} onPress={handleKey} />
+              ))}
+            </View>
+          ))}
+        </View>
+        <View style={styles.keypadSide}>
+          {KEYPAD_SIDE.map((key) => (
+            <KeypadButton key={key} calculatorKey={key} tall={key === 'equals'} onPress={handleKey} />
+          ))}
+        </View>
+      </View>
+    </View>
+  );
+}
+
+interface UnitPickerProps {
+  label: string;
+  units: string[];
+  selected: string;
+  onSelect: (unit: string) => void;
+}
+
+function UnitPicker({ label, units, selected, onSelect }: UnitPickerProps) {
+  const { colors } = useAppTheme();
+  return (
+    <View style={styles.unitPicker}>
+      <Text style={[typography.overline, { color: colors.textSecondary }]}>{label}</Text>
+      <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.unitChips}>
+        {units.map((unit) => {
+          const active = unit === selected;
+          return (
+            <Pressable
+              key={unit}
+              accessibilityRole="button"
+              accessibilityState={{ selected: active }}
+              accessibilityLabel={`${label} ${unit}`}
+              hitSlop={4}
+              onPress={() => onSelect(unit)}
+              style={({ pressed }) => [
+                styles.unitChip,
+                {
+                  backgroundColor: active ? colors.primarySoft : 'transparent',
+                  opacity: pressed ? 0.6 : 1,
+                },
+              ]}
+            >
+              <Text
+                style={[
+                  styles.unitChipLabel,
+                  { color: active ? colors.primary : colors.textSecondary },
+                ]}
+              >
+                {unit}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </ScrollView>
+    </View>
+  );
+}
+
+interface KeypadButtonProps {
+  calculatorKey: CalculatorKey;
+  /** Spans two columns (the 0 key). */
+  wide?: boolean;
+  /** Spans two rows (the = key). */
+  tall?: boolean;
+  onPress: (key: CalculatorKey) => void;
+}
+
+function KeypadButton({ calculatorKey, wide, tall, onPress }: KeypadButtonProps) {
+  const { colors } = useAppTheme();
+  const { t } = useTranslation();
+  const isEquals = calculatorKey === 'equals';
+  const isFunction = isOperator(calculatorKey) || calculatorKey === 'clear' || calculatorKey === 'backspace';
+  const labelKey = KEY_LABELS[calculatorKey];
+
+  let content: ReactNode;
+  if (calculatorKey === 'backspace') {
+    content = <Ionicons name="backspace-outline" size={22} color={colors.text} />;
+  } else {
+    const glyph =
+      calculatorKey === 'equals' ? '=' : calculatorKey === 'clear' ? 'C' : calculatorKey === '-' ? '−' : calculatorKey;
+    content = (
+      <Text
+        style={[
+          styles.keyLabel,
+          { color: isEquals ? colors.onPrimary : isFunction ? colors.primary : colors.text },
+        ]}
+      >
+        {glyph}
+      </Text>
+    );
+  }
+
+  return (
+    <Pressable
+      accessibilityRole="button"
+      accessibilityLabel={labelKey ? t(`workout.tools.keys.${labelKey}`) : calculatorKey}
+      onPress={() => onPress(calculatorKey)}
+      style={({ pressed }) => [
+        styles.key,
+        wide && styles.keyWide,
+        tall && styles.keyTall,
+        {
+          backgroundColor: isEquals ? colors.primary : isFunction ? colors.primarySoft : colors.surfaceElevated,
+          borderColor: colors.border,
+          opacity: pressed ? 0.6 : 1,
+        },
+      ]}
+    >
+      {content}
+    </Pressable>
   );
 }
 
@@ -685,6 +988,109 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 14,
     textAlign: 'right',
+    fontVariant: ['tabular-nums'],
+  },
+  converter: {
+    gap: 14,
+  },
+  converterCard: {
+    borderRadius: radius.lg,
+    borderWidth: hairline,
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    gap: 2,
+  },
+  unitPicker: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  unitChips: {
+    gap: 2,
+  },
+  unitChip: {
+    borderRadius: radius.pill,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+  },
+  unitChipLabel: {
+    fontSize: 13,
+    fontWeight: '700',
+  },
+  converterValueRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    justifyContent: 'flex-end',
+    gap: 8,
+  },
+  converterValue: {
+    flexShrink: 1,
+    fontSize: 34,
+    fontWeight: '800',
+    letterSpacing: -1,
+    fontVariant: ['tabular-nums'],
+  },
+  converterUnit: {
+    fontSize: 16,
+    fontWeight: '700',
+  },
+  converterPreview: {
+    alignSelf: 'flex-end',
+    fontSize: 13,
+    fontWeight: '600',
+    fontVariant: ['tabular-nums'],
+  },
+  swapButton: {
+    alignSelf: 'center',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    borderWidth: hairline,
+    // Overlap both cards so the button reads as the hinge between them.
+    marginVertical: -10,
+    zIndex: 1,
+  },
+  keypad: {
+    flexDirection: 'row',
+    gap: KEY_GAP,
+  },
+  // Flex bases cover the inner gaps so the side column is exactly one key wide.
+  keypadGrid: {
+    flexGrow: 4,
+    flexBasis: KEY_GAP * 3,
+    gap: KEY_GAP,
+  },
+  keypadRow: {
+    flexDirection: 'row',
+    gap: KEY_GAP,
+  },
+  keypadSide: {
+    flexGrow: 1,
+    flexBasis: 0,
+    gap: KEY_GAP,
+  },
+  key: {
+    flex: 1,
+    height: KEY_HEIGHT,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radius.md,
+    borderWidth: hairline,
+  },
+  // Two keys plus the gap between them.
+  keyWide: {
+    flexGrow: 2,
+    flexBasis: KEY_GAP,
+  },
+  keyTall: {
+    flex: 0,
+    height: KEY_HEIGHT * 2 + KEY_GAP,
+  },
+  keyLabel: {
+    fontSize: 22,
+    fontWeight: '700',
     fontVariant: ['tabular-nums'],
   },
 });

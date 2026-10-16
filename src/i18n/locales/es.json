@@ -661,9 +661,28 @@
     "saveOrderAndValuesMessage": "Cambiaste el orden de los ejercicios y los valores de las series durante este entrenamiento. ¿Guardar estos cambios en tu rutina?",
     "saveOrderAllMessage": "Cambiaste el orden de los ejercicios, añadiste o quitaste series y cambiaste valores de series durante este entrenamiento. ¿Guardar todos estos cambios en tu rutina?",
     "tools": {
-      "open": "Temporizador y cronómetro",
+      "open": "Herramientas de entrenamiento",
       "timer": "Temporizador",
       "stopwatch": "Cronómetro",
+      "converter": "Convertir",
+      "categories": {
+        "weight": "Peso",
+        "distance": "Distancia",
+        "speed": "Velocidad"
+      },
+      "from": "De",
+      "to": "A",
+      "swapUnits": "Intercambiar unidades",
+      "keys": {
+        "add": "Más",
+        "subtract": "Menos",
+        "multiply": "Por",
+        "divide": "Entre",
+        "decimal": "Punto decimal",
+        "backspace": "Borrar",
+        "clear": "Limpiar",
+        "equals": "Igual"
+      },
       "start": "Iniciar",
       "pause": "Pausar",
       "resume": "Reanudar",

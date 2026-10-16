@@ -171,3 +171,29 @@ describe('set timer', () => {
     expect(store().setTimer).toBeNull();
   });
 });
+
+describe('unit converter', () => {
+  it('feeds keypad presses into the calculator', () => {
+    store().pressConverterKey('2');
+    store().pressConverterKey('0');
+    store().pressConverterKey('+');
+    store().pressConverterKey('5');
+    expect(store().converter.calculator.expression).toBe('20+5');
+  });
+
+  it('resets units but keeps the typed value when the category changes', () => {
+    store().pressConverterKey('5');
+    store().setConverterUnits('g', 'oz');
+    store().setConverterCategory('distance');
+    expect(store().converter).toMatchObject({ category: 'distance', from: null, to: null });
+    expect(store().converter.calculator.expression).toBe('5');
+  });
+
+  it('is cleared with the rest of the tools', () => {
+    store().setConverterCategory('speed');
+    store().pressConverterKey('9');
+    store().resetAll();
+    expect(store().converter).toMatchObject({ category: 'weight', from: null, to: null });
+    expect(store().converter.calculator.expression).toBe('');
+  });
+});
