@@ -413,13 +413,6 @@ export const BODY_ACHIEVEMENTS: readonly AchievementDefinition[] = [
   ...BODY_COMPARATIVES.map(normalizeBodyComparative),
 ];
 
-/** Body achievements tied to the goal — granted once, never revoked. */
-export const BODY_GOAL_ACHIEVEMENT_KEYS: ReadonlySet<string> = new Set([
-  'goal_set',
-  'goal_halfway',
-  'goal_reached',
-]);
-
 /**
  * Every exercise-scoped achievement unlocked from per-exercise stats: the
  * catalog's exercise-scoped entries plus the distance achievements. Weight

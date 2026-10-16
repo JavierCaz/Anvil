@@ -32,11 +32,16 @@ export function useBodyWeightActions() {
     [t, toast]
   );
 
-  /** Log today's weigh-in (kg), replacing today's value if one exists. */
+  /**
+   * Log today's weigh-in (kg), replacing today's value if one exists. Body
+   * achievements unlocked today are re-evaluated against the new value and
+   * undone if it no longer earns them.
+   */
   const logToday = useCallback(
     async (weightKg: number) => {
-      await upsertBodyWeight(db, todayKey(), weightKg);
-      announce(await syncBodyWeightAchievements(db, useBodyWeightGoalStore.getState().goal));
+      const day = todayKey();
+      await upsertBodyWeight(db, day, weightKg);
+      announce(await syncBodyWeightAchievements(db, useBodyWeightGoalStore.getState().goal, day));
     },
     [announce, db]
   );

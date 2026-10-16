@@ -81,7 +81,23 @@ describe('syncBodyWeightAchievements', () => {
     expect(unlocked).not.toContain('body_comparative_turkey');
   });
 
-  it('revokes data-derived achievements after a correction', async () => {
+  it('revokes achievements unlocked that day after a correction', async () => {
+    const { db, rows } = createMockDb(
+      [
+        { day: '2026-10-01', weightKg: 80 },
+        { day: '2026-10-15', weightKg: 80.4 },
+      ],
+      ['first_weigh_in']
+    );
+    rows.set('body_comparative_labrador', '2026-10-15T09:00:00');
+    rows.set('body_comparative_cat', '2026-10-15T09:00:00');
+    await syncBodyWeightAchievements(db, null, '2026-10-15');
+    expect(rows.get('body_comparative_labrador')).toBeNull();
+    expect(rows.get('body_comparative_cat')).toBeNull();
+    expect(rows.get('first_weigh_in')).not.toBeNull();
+  });
+
+  it('keeps achievements unlocked on earlier days', async () => {
     const { db, rows } = createMockDb(
       [
         { day: '2026-10-01', weightKg: 80 },
@@ -89,12 +105,33 @@ describe('syncBodyWeightAchievements', () => {
       ],
       ['first_weigh_in', 'body_comparative_labrador']
     );
-    await syncBodyWeightAchievements(db, null);
-    expect(rows.get('body_comparative_labrador')).toBeNull();
-    expect(rows.get('first_weigh_in')).not.toBeNull();
+    await syncBodyWeightAchievements(db, null, '2026-10-15');
+    expect(rows.get('body_comparative_labrador')).not.toBeNull();
   });
 
-  it('grants goal achievements and never revokes them', async () => {
+  it('does not revoke without a day to reconcile', async () => {
+    const { db, rows } = createMockDb(days(1));
+    rows.set('body_comparative_labrador', '2026-10-15T09:00:00');
+    await syncBodyWeightAchievements(db, null);
+    expect(rows.get('body_comparative_labrador')).not.toBeNull();
+  });
+
+  it('revokes goal progress unlocked that day but keeps goal_set', async () => {
+    const goal: BodyWeightGoal = { targetKg: 75, startKg: 80, startDay: '2026-10-01' };
+    const { db, rows } = createMockDb([
+      { day: '2026-10-01', weightKg: 80 },
+      { day: '2026-10-15', weightKg: 79 },
+    ]);
+    for (const key of ['goal_set', 'goal_halfway', 'goal_reached']) {
+      rows.set(key, '2026-10-15T09:00:00');
+    }
+    await syncBodyWeightAchievements(db, goal, '2026-10-15');
+    expect(rows.get('goal_set')).not.toBeNull();
+    expect(rows.get('goal_halfway')).toBeNull();
+    expect(rows.get('goal_reached')).toBeNull();
+  });
+
+  it('grants goal achievements and keeps earlier ones', async () => {
     const goal: BodyWeightGoal = { targetKg: 75, startKg: 80, startDay: '2026-10-01' };
     const reached = createMockDb([
       { day: '2026-10-01', weightKg: 80 },
@@ -106,7 +143,7 @@ describe('syncBodyWeightAchievements', () => {
     );
 
     const cleared = createMockDb(days(1), ['goal_set', 'goal_halfway', 'goal_reached']);
-    await syncBodyWeightAchievements(cleared.db, null);
+    await syncBodyWeightAchievements(cleared.db, null, '2026-10-15');
     expect(cleared.rows.get('goal_set')).not.toBeNull();
     expect(cleared.rows.get('goal_reached')).not.toBeNull();
   });

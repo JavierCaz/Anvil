@@ -1,9 +1,6 @@
+import dayjs from 'dayjs';
 import type { SQLiteDatabase } from 'expo-sqlite';
-import {
-  BODY_ACHIEVEMENTS,
-  BODY_GOAL_ACHIEVEMENT_KEYS,
-  type AchievementMetric,
-} from '@/constants/achievements';
+import { BODY_ACHIEVEMENTS, type AchievementMetric } from '@/constants/achievements';
 import type { BodyWeightGoal } from '@/store/body-weight-goal';
 import {
   computeBodyWeightStats,
@@ -63,30 +60,41 @@ export function isBodyAchievementEarned(
 /**
  * Bring the `body` achievements in line with the current weigh-ins and goal.
  * Call after every weigh-in and goal change. Newly earned ones are unlocked
- * (their keys are returned for the toast); data-derived ones that no longer
- * hold — e.g. after correcting today's typo — are locked again. Goal
- * achievements are never revoked.
+ * (their keys are returned for the toast).
+ *
+ * With `revokeUnlockedOn` (a local day key), achievements unlocked on that
+ * day that no longer hold are locked again — used when today's weigh-in is
+ * overwritten, so a typo can't leave a badge behind. Achievements earned on
+ * earlier days are kept even if the data has since moved, and `goal_set` is
+ * never revoked (it doesn't depend on the weight).
  */
 export async function syncBodyWeightAchievements(
   db: SQLiteDatabase,
-  goal: BodyWeightGoal | null
+  goal: BodyWeightGoal | null,
+  revokeUnlockedOn?: string
 ): Promise<string[]> {
   const stats = computeBodyWeightStats(await getBodyWeights(db), goal);
   const rows = await db.getAllAsync<{ key: string; unlocked_at: string | null }>(
     'SELECT key, unlocked_at FROM achievements'
   );
-  const unlockedByKey = new Map(rows.map((row) => [row.key, row.unlocked_at !== null]));
+  const unlockedAtByKey = new Map(rows.map((row) => [row.key, row.unlocked_at]));
 
   const newlyUnlocked: string[] = [];
   for (const definition of BODY_ACHIEVEMENTS) {
-    const wasUnlocked = unlockedByKey.get(definition.key);
-    if (wasUnlocked === undefined) continue; // not seeded
+    if (!unlockedAtByKey.has(definition.key)) continue; // not seeded
+    const unlockedAt = unlockedAtByKey.get(definition.key) ?? null;
     const earned = isBodyAchievementEarned(definition.key, stats, goal);
-    if (earned && !wasUnlocked) {
+    if (earned && unlockedAt === null) {
       if (await unlockAchievementIfNew(db, definition.key)) {
         newlyUnlocked.push(definition.key);
       }
-    } else if (!earned && wasUnlocked && !BODY_GOAL_ACHIEVEMENT_KEYS.has(definition.key)) {
+    } else if (
+      !earned &&
+      unlockedAt !== null &&
+      revokeUnlockedOn !== undefined &&
+      definition.key !== 'goal_set' &&
+      dayjs(unlockedAt).format('YYYY-MM-DD') === revokeUnlockedOn
+    ) {
       await db.runAsync('UPDATE achievements SET unlocked_at = NULL WHERE key = ?', definition.key);
     }
   }
