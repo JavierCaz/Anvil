@@ -258,9 +258,9 @@
     "semantic_hash": "88e98174dd576248be04c3af31310a24"
   },
   "src/constants/achievements.ts": {
-    "mtime": 1792084117.2238894,
-    "seen": 1792084652.7272112,
-    "ast_hash": "2d56479bf290f93bb24e93c98f808621",
+    "mtime": 1792166833.8119485,
+    "seen": 1792166902.5718567,
+    "ast_hash": "b821aa642ebdd6110aefb5af0937f625",
     "semantic_hash": ""
   },
   "src/constants/exercise-frames.ts": {
@@ -744,21 +744,21 @@
     "semantic_hash": ""
   },
   "src/db/__tests__/body-weight.test.ts": {
-    "mtime": 1792084628.4782321,
-    "seen": 1792084652.7272427,
-    "ast_hash": "f62b3c91f1698a11127d432cfc066675",
+    "mtime": 1792166843.0072803,
+    "seen": 1792166902.5718832,
+    "ast_hash": "e52efe7a767b37a61577e063c07554d0",
     "semantic_hash": ""
   },
   "src/db/body-weight.ts": {
-    "mtime": 1792084141.748087,
-    "seen": 1792084652.72727,
-    "ast_hash": "e6308f230e23eefb554499803b33a38f",
+    "mtime": 1792166826.4523613,
+    "seen": 1792166902.571904,
+    "ast_hash": "640650c67ff3625609171cb2d36e87ce",
     "semantic_hash": ""
   },
   "src/hooks/use-body-weight-actions.ts": {
-    "mtime": 1792084223.428518,
-    "seen": 1792084652.727296,
-    "ast_hash": "02d9c9652f2a97302983da25f256c573",
+    "mtime": 1792166829.1313484,
+    "seen": 1792166902.5719268,
+    "ast_hash": "35b9e0a8da71d5a6e9fb796b7a9a8b6e",
     "semantic_hash": ""
   },
   "src/store/body-weight-goal.ts": {

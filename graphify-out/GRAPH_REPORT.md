@@ -1,7 +1,7 @@
 # Graph Report - anvil  (2026-10-16)
 
 ## Corpus Check
-- 132 files · ~145,185 words
+- 132 files · ~145,276 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 2 file(s) not represented in the graph (top: (none) 2)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `68023858`
+- Built from commit: `46cf90e3`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -239,11 +239,11 @@ Nodes (17): ref_expo_vector_icons_build_vendor_react_native_vector_icons_glyphma
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `react-native` connect `react-native` to `exercise-frames.ts`, `[exerciseId].tsx`, `backup-file.ts`, `react-i18next`, `settings.tsx`, `package.json`, `RestTimer.tsx`, `WorkoutTools.tsx`, `index.tsx`, `workout/[id].tsx`, `WeeklyGoalEditor.tsx`, `useAppTheme`, `ToastProvider.tsx`, `routines.ts`, `useDialog`, `app-theme-provider.tsx`, `android-navigation-bar.tsx`, `WorkoutShareCard.tsx`, `statistics.tsx`, `react`, `AchievementBadge.tsx`?**
-  _High betweenness centrality (0.347) - this node is a cross-community bridge._
+  _High betweenness centrality (0.343) - this node is a cross-community bridge._
 - **Why does `dependencies` connect `dependencies` to `package.json`?**
   _High betweenness centrality (0.063) - this node is a cross-community bridge._
 - **Why does `useAppTheme()` connect `useAppTheme` to `routines.ts`, `[exerciseId].tsx`, `useDialog`, `react-i18next`, `app-theme-provider.tsx`, `android-navigation-bar.tsx`, `settings.tsx`, `WorkoutShareCard.tsx`, `RestTimer.tsx`, `statistics.tsx`, `WorkoutTools.tsx`, `react-native`, `index.tsx`, `workout/[id].tsx`, `WeeklyGoalEditor.tsx`, `react`, `ToastProvider.tsx`?**
-  _High betweenness centrality (0.053) - this node is a cross-community bridge._
+  _High betweenness centrality (0.054) - this node is a cross-community bridge._
 - **What connects `VARIANTS`, `{ defineConfig }`, `expoConfig` to the rest of the system?**
   _673 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `exercise-frames.ts` be split into smaller, more focused modules?**

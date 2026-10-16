@@ -2903,7 +2903,7 @@
       "file_type": "code",
       "norm_label": "settimerbutton()",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L829"
+      "source_location": "L842"
     },
     {
       "id": "src_components_workouttools_formatstopwatch",
@@ -9958,7 +9958,7 @@
       "file_type": "code",
       "norm_label": "styles",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L902"
+      "source_location": "L915"
     },
     {
       "id": "src_components_loadingoverlay",
@@ -19224,7 +19224,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L784",
+      "source_location": "L791",
       "weight": 1.0
     },
     {
@@ -19236,7 +19236,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L784",
+      "source_location": "L791",
       "weight": 1.0
     },
     {
@@ -19596,7 +19596,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L840",
+      "source_location": "L853",
       "weight": 1.0
     },
     {
@@ -19608,7 +19608,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L842",
+      "source_location": "L855",
       "weight": 1.0
     },
     {
@@ -19620,7 +19620,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L857",
+      "source_location": "L870",
       "weight": 1.0
     },
     {
@@ -19632,7 +19632,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L871",
+      "source_location": "L884",
       "weight": 1.0
     },
     {
@@ -19644,7 +19644,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L895",
+      "source_location": "L908",
       "weight": 1.0
     },
     {
@@ -47457,7 +47457,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L829",
+      "source_location": "L842",
       "weight": 1.0
     },
     {
@@ -47468,7 +47468,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/components/ExerciseSetEditor.tsx",
-      "source_location": "L902",
+      "source_location": "L915",
       "weight": 1.0
     },
     {
@@ -57245,5 +57245,5 @@
       "source_file": "assets/images/icon.png"
     }
   ],
-  "built_at_commit": "680238581e64d3762f8c4385f037e42e755cf844"
+  "built_at_commit": "46cf90e38047e7424a11e6346d8e6dccd1d46107"
 }

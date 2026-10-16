@@ -779,12 +779,21 @@ function DurationInput({
   const { colors } = useAppTheme();
   const { t } = useTranslation();
   const { min, sec } = splitDuration(seconds);
+  // While a field is focused it shows exactly what was typed: reformatting
+  // mid-edit (e.g. "3" → "03") would hit maxLength and swallow the next digit.
+  // The formatted value comes back on blur.
+  const [minutesDraft, setMinutesDraft] = useState<string | null>(null);
+  const [secondsDraft, setSecondsDraft] = useState<string | null>(null);
 
   const onMinutesChange = (value: string) => {
-    onChange(joinDuration(parseNumber(value), sec));
+    const digits = value.replace(/\D/g, '');
+    setMinutesDraft(digits);
+    onChange(joinDuration(parseNumber(digits), sec));
   };
   const onSecondsChange = (value: string) => {
-    onChange(joinDuration(min, Math.min(59, parseNumber(value))));
+    const digits = value.replace(/\D/g, '').slice(0, 2);
+    setSecondsDraft(digits);
+    onChange(joinDuration(min, Math.min(59, parseNumber(digits))));
   };
 
   return (
@@ -794,8 +803,10 @@ function DurationInput({
       </Text>
       <View style={styles.durationRow}>
         <TextInput
-          value={min > 0 ? String(min) : ''}
+          value={minutesDraft ?? (min > 0 ? String(min) : '')}
           onChangeText={onMinutesChange}
+          onFocus={() => setMinutesDraft(min > 0 ? String(min) : '')}
+          onBlur={() => setMinutesDraft(null)}
           accessibilityLabel={t('workout.minutes')}
           placeholder="0"
           placeholderTextColor={colors.textSecondary}
@@ -805,8 +816,10 @@ function DurationInput({
         />
         <Text style={[styles.inputValue, { color: colors.textSecondary }]}>:</Text>
         <TextInput
-          value={sec > 0 ? String(sec).padStart(2, '0') : ''}
+          value={secondsDraft ?? (sec > 0 ? String(sec).padStart(2, '0') : '')}
           onChangeText={onSecondsChange}
+          onFocus={() => setSecondsDraft(sec > 0 ? String(sec).padStart(2, '0') : '')}
+          onBlur={() => setSecondsDraft(null)}
           accessibilityLabel={t('workout.seconds')}
           placeholder="00"
           placeholderTextColor={colors.textSecondary}
