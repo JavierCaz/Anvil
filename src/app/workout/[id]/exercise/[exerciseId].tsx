@@ -16,7 +16,7 @@ import { Screen } from '@/components/Screen';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { useToast } from '@/components/ToastProvider';
-import { WorkoutElapsedBar } from '@/components/WorkoutElapsed';
+import { WorkoutElapsedHeaderTitle } from '@/components/WorkoutElapsed';
 import { WorkoutToolsButton, WorkoutToolsSheet } from '@/components/WorkoutTools';
 import { getAchievementByKey } from '@/constants/achievements';
 import {
@@ -35,13 +35,13 @@ import {
 } from '@/db/achievements';
 import {
   deleteSetAndShift,
-  getActiveWorkoutExercise,
+  getActiveWorkoutExercises,
   getWorkoutLog,
   getWorkoutSets,
   markWorkoutSetsEdited,
   upsertSet,
 } from '@/db/workouts';
-import type { WorkoutSet } from '@/db/types';
+import type { ActiveWorkoutExercise, WorkoutSet } from '@/db/types';
 import { useExerciseInfo } from '@/hooks/use-exercise-info';
 import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
@@ -52,6 +52,23 @@ import { displayToMeters, formatDistance, formatDistanceWithUnit } from '@/utils
 import { displayToKg, formatWeight, kgToDisplay, weightUnitLabel } from '@/utils/weight';
 
 const DEFAULT_REST_SECONDS = 90;
+
+/**
+ * The first unfinished exercise after `index` in session order, wrapping
+ * around to pick up earlier skipped ones. Null when nothing else is pending.
+ */
+function findNextPendingExercise(
+  rows: readonly ActiveWorkoutExercise[],
+  index: number
+): ActiveWorkoutExercise | null {
+  for (let offset = 1; offset < rows.length; offset++) {
+    const row = rows[(index + offset) % rows.length];
+    if (row.completed_sets < row.target_sets) {
+      return row;
+    }
+  }
+  return null;
+}
 
 interface SetDraft {
   weight: string;
@@ -79,12 +96,18 @@ export default function WorkoutExerciseScreen() {
 
   const { data, loaded, reload: reloadQuery } = useFocusQuery(
     async (db) => {
-      const [exerciseRow, setRows, logRow] = await Promise.all([
-        getActiveWorkoutExercise(db, logId, exerciseIdNum),
+      const [exerciseRows, setRows, logRow] = await Promise.all([
+        getActiveWorkoutExercises(db, logId),
         getWorkoutSets(db, logId, exerciseIdNum),
         getWorkoutLog(db, logId),
       ]);
-      return { exercise: exerciseRow, sets: setRows, startedAt: logRow?.started_at ?? null };
+      const index = exerciseRows.findIndex((row) => row.exercise_id === exerciseIdNum);
+      return {
+        exercise: index >= 0 ? exerciseRows[index] : null,
+        nextExercise: index >= 0 ? findNextPendingExercise(exerciseRows, index) : null,
+        sets: setRows,
+        startedAt: logRow?.started_at ?? null,
+      };
     },
     [logId, exerciseIdNum, unit],
     { refetchOnFocus: false }
@@ -100,25 +123,44 @@ export default function WorkoutExerciseScreen() {
   const exerciseInfo = useExerciseInfo();
   const [achievementKeys, setAchievementKeys] = useState<string[]>([]);
   // Achievement detail card: opened from an unlock toast or from a medal in the exercise info modal.
+  // `exercise` is set when the medal belongs to another exercise (the "next" info card);
+  // otherwise the card is for the exercise on screen.
   const [detailAchievement, setDetailAchievement] = useState<{
     definition: AchievementDefinition;
     unlockedAt: string;
+    exercise?: { id: number; name: string; slug: string | null };
   } | null>(null);
 
   const showAchievementDetail = (key: string) => {
     const definition = getAchievementByKey(key);
+    const infoExercise = exerciseInfo.info?.exercise;
     if (!definition) {
       return;
     }
-    void getExerciseAchievementUnlockedAt(db, exerciseIdNum, key).then((unlockedAt) => {
+    const targetId = infoExercise?.id ?? exerciseIdNum;
+    void getExerciseAchievementUnlockedAt(db, targetId, key).then((unlockedAt) => {
       exerciseInfo.close();
-      setDetailAchievement({ definition, unlockedAt: unlockedAt ?? new Date().toISOString() });
+      setDetailAchievement({
+        definition,
+        unlockedAt: unlockedAt ?? new Date().toISOString(),
+        exercise:
+          infoExercise && infoExercise.id !== exerciseIdNum
+            ? { id: infoExercise.id, name: infoExercise.name, slug: infoExercise.slug }
+            : undefined,
+      });
     });
   };
 
   const showExerciseInfo = () => {
     if (exercise) {
       exerciseInfo.open(exercise.exercise_id);
+    }
+  };
+
+  const nextExercise = data?.nextExercise ?? null;
+  const showNextExerciseInfo = () => {
+    if (nextExercise) {
+      exerciseInfo.open(nextExercise.exercise_id);
     }
   };
 
@@ -472,6 +514,17 @@ export default function WorkoutExerciseScreen() {
         options={{
           headerShown: true,
           title: exercise?.exercise_name ?? '',
+          // The session timer replaces the exercise name (shown in the set editor below).
+          // Hidden while the loading overlay is up, like the screen body.
+          headerTitle: () =>
+            loaded && exercise ? (
+              <WorkoutElapsedHeaderTitle
+                startedAt={data?.startedAt}
+                nextExerciseName={nextExercise?.exercise_name ?? null}
+                onNextExercisePress={showNextExerciseInfo}
+              />
+            ) : null,
+          headerTitleAlign: 'center',
           headerRight: () => <WorkoutToolsButton onPress={() => setToolsOpen(true)} />,
         }}
       />
@@ -483,7 +536,6 @@ export default function WorkoutExerciseScreen() {
             keyboardShouldPersistTaps="handled"
             showsVerticalScrollIndicator={false}
           >
-            <WorkoutElapsedBar startedAt={data?.startedAt} />
             <ExerciseSetEditor
               mode="workout"
               exerciseName={exercise.exercise_name}
@@ -529,7 +581,9 @@ export default function WorkoutExerciseScreen() {
               unlocked
               unlockedAt={detailAchievement.unlockedAt}
               exercises={
-                exercise
+                detailAchievement.exercise
+                  ? [{ ...detailAchievement.exercise, unlockedAt: detailAchievement.unlockedAt }]
+                  : exercise
                   ? [{
                       id: exercise.exercise_id,
                       name: exercise.exercise_name,

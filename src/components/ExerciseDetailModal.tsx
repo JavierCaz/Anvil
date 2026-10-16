@@ -67,6 +67,7 @@ export function ExerciseDetailModal({
       </View>
 
       {/* Name + badges */}
+      <Text style={[styles.name, { color: colors.text }]}>{exercise.name}</Text>
       <View style={styles.badgeRow}>
         {primaryMuscle && (
           <View style={[styles.badge, { backgroundColor: colors.primarySoft }]}>

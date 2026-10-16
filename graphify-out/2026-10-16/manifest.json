@@ -138,9 +138,9 @@
     "semantic_hash": ""
   },
   "src/app/workout/[id]/exercise/[exerciseId].tsx": {
-    "mtime": 1792167593.602375,
-    "seen": 1792167677.7052138,
-    "ast_hash": "1d0e016b23ab1b053ad626947c282f8b",
+    "mtime": 1792172929.00836,
+    "seen": 1792172954.6001775,
+    "ast_hash": "085b5947b304ec70a8fdda777a59e5de",
     "semantic_hash": ""
   },
   "src/components/AchievementCard.tsx": {
@@ -174,9 +174,9 @@
     "semantic_hash": ""
   },
   "src/components/ExerciseDetailModal.tsx": {
-    "mtime": 1792093660.3757246,
-    "seen": 1792093690.2730517,
-    "ast_hash": "8ae9e408a3928e6ec90ec43b19f8eb89",
+    "mtime": 1792172176.189983,
+    "seen": 1792172201.3669188,
+    "ast_hash": "03cb625af84b2759e26f44a7c7396fa1",
     "semantic_hash": ""
   },
   "src/components/ExerciseForm.tsx": {
@@ -396,15 +396,15 @@
     "semantic_hash": "8f6d6d5070a32407a48defe6d7867dee"
   },
   "src/i18n/locales/en.json": {
-    "mtime": 1792170708.345941,
-    "seen": 1792170743.0213404,
-    "ast_hash": "1414a88f7db3b45ce5c7118be0360c06",
+    "mtime": 1792171860.0358176,
+    "seen": 1792171889.9529428,
+    "ast_hash": "9509d470743e92b1d2bc4bd4a1945a76",
     "semantic_hash": ""
   },
   "src/i18n/locales/es.json": {
-    "mtime": 1792170708.3477483,
-    "seen": 1792170743.0213425,
-    "ast_hash": "6a644f7b795db1709618d9a25cb10d0b",
+    "mtime": 1792171860.03797,
+    "seen": 1792171889.9529448,
+    "ast_hash": "60a452bdea1c7dd6380390397545c9b9",
     "semantic_hash": ""
   },
   "src/store/units.ts": {
@@ -522,21 +522,21 @@
     "semantic_hash": ""
   },
   "src/components/WorkoutTools.tsx": {
-    "mtime": 1791939371.0760484,
-    "seen": 1791939730.6195745,
-    "ast_hash": "b4cd24454a1bfafcebb9d848f666ec42",
+    "mtime": 1792171658.6238356,
+    "seen": 1792171889.9528313,
+    "ast_hash": "e783d8bfb887bc5e7ff36cccdc7a4b7f",
     "semantic_hash": ""
   },
   "src/store/__tests__/workout-tools.test.ts": {
-    "mtime": 1791925382.3162642,
-    "seen": 1791925465.1178272,
-    "ast_hash": "603fa2e68d71e563b45bb5d843407cdc",
+    "mtime": 1792171268.2230914,
+    "seen": 1792171304.7586393,
+    "ast_hash": "20dbb64924e82981b907567ef9081eea",
     "semantic_hash": ""
   },
   "src/store/workout-tools.ts": {
-    "mtime": 1791925044.8953884,
-    "seen": 1791925465.117835,
-    "ast_hash": "f64ca2af0507afd248f31956e206d4cb",
+    "mtime": 1792171136.2384162,
+    "seen": 1792171304.7586522,
+    "ast_hash": "e7a7b36847e9996a5cebf729cb006762",
     "semantic_hash": ""
   },
   "src/utils/alarm.ts": {
@@ -546,9 +546,9 @@
     "semantic_hash": ""
   },
   "src/components/WorkoutElapsed.tsx": {
-    "mtime": 1791939595.1324463,
-    "seen": 1791939730.6195703,
-    "ast_hash": "7a991910bb2b6c4af7f488b44187f924",
+    "mtime": 1792172929.0075557,
+    "seen": 1792172954.6002653,
+    "ast_hash": "ae471d2279ed274143968798d19fa8df",
     "semantic_hash": ""
   },
   "scripts/generate-icons.mjs": {
@@ -867,6 +867,30 @@
     "mtime": 1792170452.5335462,
     "seen": 1792170477.4598353,
     "ast_hash": "029738e3767fd15f67d56a7ff9095307",
+    "semantic_hash": ""
+  },
+  "src/utils/__tests__/calculator.test.ts": {
+    "mtime": 1792171260.8171818,
+    "seen": 1792171304.758667,
+    "ast_hash": "734e254ba40a21de37338376b14a0bfb",
+    "semantic_hash": ""
+  },
+  "src/utils/__tests__/unit-converter.test.ts": {
+    "mtime": 1792171261.870985,
+    "seen": 1792171304.7586772,
+    "ast_hash": "ad62843a5cca5204cbe065147e624108",
+    "semantic_hash": ""
+  },
+  "src/utils/calculator.ts": {
+    "mtime": 1792171216.9140584,
+    "seen": 1792171304.7586842,
+    "ast_hash": "065e467c3854db10d54787a40c779586",
+    "semantic_hash": ""
+  },
+  "src/utils/unit-converter.ts": {
+    "mtime": 1792171114.3244247,
+    "seen": 1792171304.7586937,
+    "ast_hash": "fb7965274d0b5aaf26d1acc158bdfc29",
     "semantic_hash": ""
   }
 }

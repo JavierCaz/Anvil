@@ -236,13 +236,16 @@ export function WorkoutToolsButton({ onPress }: WorkoutToolsButtonProps) {
       accessibilityLabel={t('workout.tools.open')}
       hitSlop={8}
       onPress={onPress}
+      // Outlined pill so it reads as tappable; tinted while a readout is live.
       style={({ pressed }) => [
         styles.headerButton,
-        readout && { backgroundColor: withAlpha(readoutColor, 0.14) },
+        readout
+          ? { backgroundColor: withAlpha(readoutColor, 0.14), borderColor: withAlpha(readoutColor, 0.4) }
+          : { backgroundColor: colors.surface, borderColor: colors.border },
         { opacity: pressed ? 0.6 : 1 },
       ]}
     >
-      <Ionicons name={icon} size={22} color={readout ? readoutColor : colors.textSecondary} />
+      <Ionicons name={icon} size={20} color={readout ? readoutColor : colors.text} />
       {readout && (
         <Text style={[styles.headerReadout, { color: readoutColor }]}>{readout}</Text>
       )}
@@ -854,8 +857,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     borderRadius: radius.pill,
-    paddingHorizontal: 6,
-    paddingVertical: 4,
+    borderWidth: hairline,
+    paddingHorizontal: 10,
+    paddingVertical: 5,
   },
   headerReadout: {
     fontSize: 14,

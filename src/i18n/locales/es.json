@@ -626,6 +626,8 @@
     "leaveWorkoutMessage": "Debes terminar o descartar este entrenamiento antes de salir.",
     "keepWorkingOut": "Seguir entrenando",
     "elapsed": "Tiempo",
+    "nextExercise": "Siguiente",
+    "lastExercise": "Último ejercicio",
     "exercisesDone": "{{done}} de {{total}} ejercicios",
     "setsDone": "{{done}} de {{total}} series",
     "achievementsUnlocked": "Logros desbloqueados",

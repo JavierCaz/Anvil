@@ -626,6 +626,8 @@
     "leaveWorkoutMessage": "You need to finish or discard this workout before leaving.",
     "keepWorkingOut": "Keep working out",
     "elapsed": "Elapsed",
+    "nextExercise": "Next",
+    "lastExercise": "Last exercise",
     "exercisesDone": "{{done}} of {{total}} exercises",
     "setsDone": "{{done}} of {{total}} sets",
     "achievementsUnlocked": "Achievements unlocked",
