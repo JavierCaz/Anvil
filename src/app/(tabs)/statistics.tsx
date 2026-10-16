@@ -7,6 +7,7 @@ import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from
 import { BodyWeightTrend } from '@/components/BodyWeightTrend';
 import { Screen } from '@/components/Screen';
 import { BarTrendChart, type BarTrendPoint } from '@/components/charts/BarTrendChart';
+import { ChartDismissArea } from '@/components/charts/chart-dismiss';
 import { MuscleDonut, type DonutSlice } from '@/components/charts/MuscleDonut';
 import { muscleI18nKey } from '@/constants/exercises';
 import { getBodyWeights } from '@/db/body-weight';
@@ -23,7 +24,13 @@ import { useFocusQuery } from '@/hooks/use-focus-query';
 import { useUnitsStore } from '@/store/units';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { withAlpha } from '@/theme/colors';
-import { distanceUnitLabel, formatDistance, formatPace, metersToDisplay } from '@/utils/distance';
+import {
+  distanceUnitLabel,
+  formatDistance,
+  formatDistanceValue,
+  formatPace,
+  metersToDisplay,
+} from '@/utils/distance';
 import { formatDuration } from '@/utils/duration';
 
 type RangeKey = 'week' | 'month' | 'year' | 'all';
@@ -102,13 +109,14 @@ interface ChartCardProps {
 
 function ChartCard({ title, meta, colors, children }: ChartCardProps) {
   return (
-    <View style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
+    // Tapping the card anywhere off a chart element clears that chart's selection.
+    <ChartDismissArea style={[styles.card, { backgroundColor: colors.surface, borderColor: colors.border }]}>
       <View style={styles.cardHeader}>
         <Text style={[styles.cardTitle, { color: colors.text }]}>{title}</Text>
         {meta ? <Text style={[styles.cardMeta, { color: colors.textSecondary }]}>{meta}</Text> : null}
       </View>
       {children}
-    </View>
+    </ChartDismissArea>
   );
 }
 
@@ -317,6 +325,7 @@ export default function StatisticsScreen() {
                 highlightIndex={sessionsHighlight}
                 color={colors.primaryBright}
                 colorDeep={colors.primaryPressed}
+                formatValue={(value) => t('statistics.workoutCount', { count: value })}
               />
             )}
           </ChartCard>
@@ -372,6 +381,7 @@ export default function StatisticsScreen() {
                     color={withAlpha(colors.accent, 1)}
                     colorDeep={withAlpha(colors.accent, 0.35)}
                     height={150}
+                    formatValue={(value) => `${formatDistanceValue(value)} ${distanceUnitLabel(unit)}`}
                   />
                 </>
               )}

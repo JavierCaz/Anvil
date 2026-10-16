@@ -66,9 +66,9 @@
     "semantic_hash": ""
   },
   "src/app/(tabs)/statistics.tsx": {
-    "mtime": 1792084869.5069714,
-    "seen": 1792084894.2412088,
-    "ast_hash": "101bf90202e2fd2ad6812c2a29b8cb53",
+    "mtime": 1792170424.9143832,
+    "seen": 1792170477.4596877,
+    "ast_hash": "39e3eced0b828a75a20de0269da41bf4",
     "semantic_hash": ""
   },
   "src/app/_layout.tsx": {
@@ -396,15 +396,15 @@
     "semantic_hash": "8f6d6d5070a32407a48defe6d7867dee"
   },
   "src/i18n/locales/en.json": {
-    "mtime": 1792167578.8575757,
-    "seen": 1792167677.7054293,
-    "ast_hash": "e7150d99f3d41faf7e1c1f9f5221bbae",
+    "mtime": 1792168184.788493,
+    "seen": 1792168277.211521,
+    "ast_hash": "288e284e1589046ba750640e28c53fc3",
     "semantic_hash": ""
   },
   "src/i18n/locales/es.json": {
-    "mtime": 1792167578.8592534,
-    "seen": 1792167677.7054317,
-    "ast_hash": "6bf5fa53729b9e226bf87383464080f6",
+    "mtime": 1792168184.7897933,
+    "seen": 1792168277.2115233,
+    "ast_hash": "7019a2125715f87f23e457ca59fdebdc",
     "semantic_hash": ""
   },
   "src/store/units.ts": {
@@ -630,15 +630,15 @@
     "semantic_hash": ""
   },
   "src/components/charts/BarTrendChart.tsx": {
-    "mtime": 1791938407.056567,
-    "seen": 1791938729.6332324,
-    "ast_hash": "d89a0c2f1c5d1fa5e2bbaee699ed7c86",
+    "mtime": 1792170424.9111557,
+    "seen": 1792170477.459822,
+    "ast_hash": "7bab8fdf85ec79fc1b07155ecc2f8c5c",
     "semantic_hash": ""
   },
   "src/components/charts/MuscleDonut.tsx": {
-    "mtime": 1791938418.8382268,
-    "seen": 1791938729.633234,
-    "ast_hash": "e753069f2b473b759d7f4ccdc9041b1a",
+    "mtime": 1792170424.913381,
+    "seen": 1792170477.4598298,
+    "ast_hash": "77ab123640bf8700439ac49150162bf5",
     "semantic_hash": ""
   },
   "src/constants/__tests__/achievement-glyphs.test.ts": {
@@ -720,9 +720,9 @@
     "semantic_hash": ""
   },
   "src/components/BodyWeightTrend.tsx": {
-    "mtime": 1792084869.5061867,
-    "seen": 1792084894.2412684,
-    "ast_hash": "362a5c94b16f86c9d4e05506e40200f2",
+    "mtime": 1792168184.7874682,
+    "seen": 1792168277.2113316,
+    "ast_hash": "906e1bc1802dbe6c6348c32c728bb84a",
     "semantic_hash": ""
   },
   "src/components/ProgressBar.tsx": {
@@ -732,9 +732,9 @@
     "semantic_hash": ""
   },
   "src/components/charts/LineTrendChart.tsx": {
-    "mtime": 1792084273.217774,
-    "seen": 1792084652.727193,
-    "ast_hash": "23d4d1356a82d6e8d00776f673e24cb9",
+    "mtime": 1792170424.9119546,
+    "seen": 1792170477.4598274,
+    "ast_hash": "03e33b206ddc9a890ab1719ceae53d99",
     "semantic_hash": ""
   },
   "src/constants/body-comparatives.ts": {
@@ -849,6 +849,30 @@
     "mtime": 1792167787.7299197,
     "seen": 1792167810.6933985,
     "ast_hash": "879188a298e93e90f38529f131a256dc",
+    "semantic_hash": ""
+  },
+  "src/components/charts/ChartTooltip.tsx": {
+    "mtime": 1792168078.5889134,
+    "seen": 1792168277.211403,
+    "ast_hash": "5e354dc7f5796b9cb128df66eac85643",
+    "semantic_hash": ""
+  },
+  "src/components/charts/__tests__/slice-hit-test.test.ts": {
+    "mtime": 1792168247.8686612,
+    "seen": 1792168277.2114105,
+    "ast_hash": "df98ee538f205432c05f089e498fd33b",
+    "semantic_hash": ""
+  },
+  "src/components/charts/slice-hit-test.ts": {
+    "mtime": 1792168247.8617828,
+    "seen": 1792168277.2114127,
+    "ast_hash": "bf7a1d25edbb3500aac646b23018ec0e",
+    "semantic_hash": ""
+  },
+  "src/components/charts/chart-dismiss.tsx": {
+    "mtime": 1792170452.5335462,
+    "seen": 1792170477.4598353,
+    "ast_hash": "029738e3767fd15f67d56a7ff9095307",
     "semantic_hash": ""
   }
 }

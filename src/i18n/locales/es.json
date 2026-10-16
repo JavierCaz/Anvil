@@ -93,7 +93,9 @@
     "distancePerWeek": "Distancia por semana ({{unit}})",
     "distancePerMonth": "Distancia por mes ({{unit}})",
     "setsUnit": "series",
-    "peak": "Máximo {{value}}"
+    "peak": "Máximo {{value}}",
+    "workoutCount_one": "{{count}} entrenamiento",
+    "workoutCount_other": "{{count}} entrenamientos"
   },
   "bodyWeight": {
     "title": "Peso corporal",

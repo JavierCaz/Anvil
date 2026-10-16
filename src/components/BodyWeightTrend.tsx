@@ -94,6 +94,8 @@ export function BodyWeightTrend({ entries, range, fromDay, toDay }: BodyWeightTr
               startLabel={formatDay(points[0].day)}
               endLabel={points.length > 1 ? formatDay(points[points.length - 1].day) : undefined}
               height={170}
+              formatValue={(value) => `${value.toFixed(1)} ${weightUnitLabel(unit)}`}
+              formatDay={(day) => dayjs(day).locale(i18n.language).format('MMM D, YYYY')}
             />
             <View style={styles.legend}>
               <LegendItem
