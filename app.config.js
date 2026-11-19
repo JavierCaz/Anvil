@@ -8,6 +8,8 @@
 // per EAS build profile in eas.json. When unset (e.g. `npx expo start`), the
 // development variant is used.
 
+const { version, versionCode } = require('./package.json');
+
 const variant = process.env.EXPO_PUBLIC_APP_VARIANT ?? 'development';
 
 const VARIANTS = {
@@ -47,13 +49,16 @@ export default {
   expo: {
     name: appVariant.name,
     slug: 'anvil',
-    version: '1.0.0',
+    // Single source of truth: `version` / `versionCode` in package.json, bumped
+    // with `npm run bump`. F-Droid reads them from there too.
+    version,
     orientation: 'portrait',
     icon: './assets/images/icon.png',
     scheme: appVariant.scheme,
     userInterfaceStyle: 'automatic',
     ios: {
       bundleIdentifier: appVariant.package,
+      buildNumber: String(versionCode),
     },
     android: {
       adaptiveIcon: {
@@ -64,6 +69,7 @@ export default {
       },
       predictiveBackGestureEnabled: false,
       package: appVariant.package,
+      versionCode,
       // Notification + exact-alarm permissions for the rest timer are declared
       // by the local `modules/anvil-alarm` native module's manifest.
       blockedPermissions: BLOCKED_ANDROID_PERMISSIONS,
@@ -74,6 +80,7 @@ export default {
     },
     plugins: [
       'expo-router',
+      './plugins/with-release-signing',
       [
         'expo-dev-client',
         // Only the development build registers the generated scheme, so preview and

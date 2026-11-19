@@ -1,0 +1,33 @@
+Anvil is a gym tracker that keeps your training data on your phone and nowhere else. No account, no cloud, no ads, no tracking — the app doesn't even request internet access.
+
+<b>Plan and log your workouts</b>
+<ul>
+<li>Build routines like Push, Pull or Leg Day from 302 illustrated exercises</li>
+<li>Log weight, reps and sets, machine resistance levels, and cardio distance and time</li>
+<li>Rest timer that rings even with the screen locked, plus a stopwatch and a converter for weight, distance and speed units</li>
+</ul>
+
+<b>See your progress</b>
+<ul>
+<li>Charts for weight, volume and estimated one-rep max per exercise</li>
+<li>Automatic personal records</li>
+<li>Statistics for sessions, training time, muscle groups and cardio pace</li>
+<li>Body weight log with trend and goal</li>
+</ul>
+
+<b>Stay motivated</b>
+<ul>
+<li>Weekly workout goal and streaks</li>
+<li>50 achievements to unlock</li>
+<li>Milestones that compare the weight you lift to everyday objects</li>
+<li>A recap after every session that you can share as an image</li>
+</ul>
+
+<b>Your data stays yours</b>
+<ul>
+<li>Everything is stored locally on your device</li>
+<li>Export and import a full JSON backup at any time</li>
+<li>Metric or imperial units, light and dark theme, English and Spanish</li>
+</ul>
+
+Exercise illustrations from Workout Guide by Bryl Lim, licensed under CC BY-SA 4.0.

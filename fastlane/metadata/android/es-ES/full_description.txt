@@ -1,0 +1,33 @@
+Anvil es un registro de gimnasio que guarda tus datos de entrenamiento en tu teléfono y en ningún otro sitio. Sin cuenta, sin nube, sin anuncios, sin rastreo: la app ni siquiera pide acceso a internet.
+
+<b>Planifica y registra tus entrenamientos</b>
+<ul>
+<li>Crea rutinas como Empuje, Tirón o Pierna con 302 ejercicios ilustrados</li>
+<li>Registra peso, repeticiones y series, niveles de resistencia de máquinas, y distancia y tiempo de cardio</li>
+<li>Temporizador de descanso que suena incluso con la pantalla bloqueada, además de cronómetro y conversor de unidades de peso, distancia y velocidad</li>
+</ul>
+
+<b>Mira tu progreso</b>
+<ul>
+<li>Gráficas de peso, volumen y una repetición máxima estimada por ejercicio</li>
+<li>Récords personales automáticos</li>
+<li>Estadísticas de sesiones, tiempo de entrenamiento, grupos musculares y ritmo de cardio</li>
+<li>Registro de peso corporal con tendencia y objetivo</li>
+</ul>
+
+<b>Mantén la motivación</b>
+<ul>
+<li>Objetivo semanal de entrenamientos y rachas</li>
+<li>50 logros por desbloquear</li>
+<li>Hitos que comparan el peso que levantas con objetos cotidianos</li>
+<li>Un resumen después de cada sesión que puedes compartir como imagen</li>
+</ul>
+
+<b>Tus datos son tuyos</b>
+<ul>
+<li>Todo se guarda localmente en tu dispositivo</li>
+<li>Exporta e importa una copia de seguridad completa en JSON cuando quieras</li>
+<li>Unidades métricas o imperiales, tema claro y oscuro, inglés y español</li>
+</ul>
+
+Ilustraciones de ejercicios de Workout Guide por Bryl Lim, con licencia CC BY-SA 4.0.
