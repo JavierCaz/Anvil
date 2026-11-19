@@ -93,4 +93,4 @@ Build an unsigned release (as F-Droid's build server does) with `./gradlew assem
 
 Anvil is released under the [MIT License](LICENSE).
 
-Exercise illustrations come from [Workout Guide](https://github.com/bryllim/workout-guide) by Bryl Lim, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/).
+Exercise illustrations come from [Workout Guide](https://github.com/bryllim/workout-guide) by Bryl Lim, licensed under [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/); the copies in `assets/exercises/` are converted to lossless WebP (see its README).

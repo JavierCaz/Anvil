@@ -86,8 +86,8 @@ export default {
         'expo-build-properties',
         {
           android: {
-            // Keep release APKs small (arm64: 74 MB → 33 MB together with the
-            // per-ABI split and the SVG charts). R8 + resource shrinking strip
+            // Keep release APKs small (arm64: 74 MB → 32 MB together with the
+            // per-ABI split, SVG charts and WebP artwork). R8 + resource shrinking strip
             // unused code…
             enableMinifyInReleaseBuilds: true,
             enableShrinkResourcesInReleaseBuilds: true,
