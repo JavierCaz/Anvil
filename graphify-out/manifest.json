@@ -132,9 +132,9 @@
     "semantic_hash": ""
   },
   "src/app/workout/[id].tsx": {
-    "mtime": 1791940402.84338,
-    "seen": 1791940474.3909304,
-    "ast_hash": "191c7c373d1b4a7f04ffa7ffe0b5ad86",
+    "mtime": 1795104823.1934938,
+    "seen": 1795104866.0223875,
+    "ast_hash": "8dcf8546b881194698ce94ad429099c4",
     "semantic_hash": ""
   },
   "src/app/workout/[id]/exercise/[exerciseId].tsx": {
@@ -396,15 +396,15 @@
     "semantic_hash": "8f6d6d5070a32407a48defe6d7867dee"
   },
   "src/i18n/locales/en.json": {
-    "mtime": 1792171860.0358176,
-    "seen": 1792171889.9529428,
-    "ast_hash": "9509d470743e92b1d2bc4bd4a1945a76",
+    "mtime": 1795104823.1944938,
+    "seen": 1795104866.0226421,
+    "ast_hash": "2f6e2508aec0aeb2157366449df299e6",
     "semantic_hash": ""
   },
   "src/i18n/locales/es.json": {
-    "mtime": 1792171860.03797,
-    "seen": 1792171889.9529448,
-    "ast_hash": "60a452bdea1c7dd6380390397545c9b9",
+    "mtime": 1795104823.1963387,
+    "seen": 1795104866.0226448,
+    "ast_hash": "b87f929f2d1a1a10241c9db147374aef",
     "semantic_hash": ""
   },
   "src/store/units.ts": {
@@ -945,6 +945,12 @@
     "mtime": 1788042915.7770653,
     "seen": 1795040478.1545625,
     "ast_hash": "4b0cf7ed42442189c5d457b680813db3",
+    "semantic_hash": ""
+  },
+  "src/i18n/__tests__/plurals.test.ts": {
+    "mtime": 1795104833.072366,
+    "seen": 1795104866.0226367,
+    "ast_hash": "ad6bfae14070f49c26b1ed3fb306eb02",
     "semantic_hash": ""
   }
 }
