@@ -18,9 +18,9 @@
     "semantic_hash": "6b9302c1f72c315e90233c7539c48c9f"
   },
   "app.config.js": {
-    "mtime": 1795104952.0105467,
-    "seen": 1795105354.5230327,
-    "ast_hash": "f8129bad3569d04217aa97f53851e919",
+    "mtime": 1795110132.6716201,
+    "seen": 1795110859.2768342,
+    "ast_hash": "5ce7d252b355efdaf11619d1734bd85a",
     "semantic_hash": ""
   },
   "eas.json": {
@@ -36,9 +36,9 @@
     "semantic_hash": "b713dd66aa3ad59ed5098d7b9f8dc202"
   },
   "package.json": {
-    "mtime": 1795105336.2519977,
-    "seen": 1795105354.5230644,
-    "ast_hash": "1d4daff3e2f587e6dbec03e61de7fdb0",
+    "mtime": 1795110116.163547,
+    "seen": 1795110859.2768645,
+    "ast_hash": "ec736e77df271d47683e333a914f60f5",
     "semantic_hash": ""
   },
   "scripts/generate-exercise-frames.mjs": {
@@ -468,9 +468,9 @@
     "semantic_hash": "5c27369b226fcf2be8a6cfe52224e767"
   },
   "README.md": {
-    "mtime": 1795105040.5099258,
-    "seen": 1795105354.5234215,
-    "ast_hash": "dfadcb056a84587eac00ae2c0e16d0e2",
+    "mtime": 1795110341.0211573,
+    "seen": 1795110859.2772117,
+    "ast_hash": "4e06e657f8c0bc212877779bb3c02025",
     "semantic_hash": ""
   },
   "assets/images/android-icon-background.png": {
@@ -966,9 +966,9 @@
     "semantic_hash": ""
   },
   "scripts/build-android-release.sh": {
-    "mtime": 1795104984.3629339,
-    "seen": 1795105354.5230715,
-    "ast_hash": "46944c956fb594dbb636dfbd7d5d6f41",
+    "mtime": 1795109480.5765333,
+    "seen": 1795110859.2768776,
+    "ast_hash": "32c328f367cc005f3b74340bf4d66bf0",
     "semantic_hash": ""
   },
   "scripts/bump-version.mjs": {
@@ -1029,6 +1029,18 @@
     "mtime": 1795105003.8582935,
     "seen": 1795105354.523461,
     "ast_hash": "ffe8a29dac4c259229d11dc0118152fb",
+    "semantic_hash": ""
+  },
+  "plugins/__tests__/with-abi-splits.test.ts": {
+    "mtime": 1795109480.7367313,
+    "seen": 1795110859.2768672,
+    "ast_hash": "1a0cd62adac94fb557b3ce4d1adc845b",
+    "semantic_hash": ""
+  },
+  "plugins/with-abi-splits.js": {
+    "mtime": 1795109449.671792,
+    "seen": 1795110859.2768724,
+    "ast_hash": "ece7b3161b7d1b0cd369ac68e24ce4f9",
     "semantic_hash": ""
   }
 }

@@ -37,7 +37,7 @@ In the output, you'll find options to open the app in a:
 | `npm run web`     | Start and open in the browser |
 | `npm run lint`    | Run ESLint                    |
 | `npm run bump -- patch\|minor\|major` | Bump `version` + `versionCode` for a release |
-| `npm run build:apk` | Build a signed production APK locally |
+| `npm run build:apk` | Build signed production APKs locally (one per CPU architecture) |
 
 ## Project structure
 
@@ -73,8 +73,10 @@ The version lives in `package.json` (`version` + `versionCode`); `app.config.js`
 
 1. `npm run bump -- patch` (or `minor` / `major`), then write the release notes in `fastlane/metadata/android/*/changelogs/<versionCode>.txt`.
 2. Commit and tag: `git commit -am "chore: release vX.Y.Z" && git tag vX.Y.Z`.
-3. `npm run build:apk` → `dist/anvil-X.Y.Z.apk`, signed with your release key.
-4. Push the tag and attach the APK to a GitHub release.
+3. `npm run build:apk` → `dist/anvil-X.Y.Z-arm64-v8a.apk` and `dist/anvil-X.Y.Z-armeabi-v7a.apk`, signed with your release key.
+4. Push the tag and attach both APKs to a GitHub release.
+
+Release APKs are split per CPU architecture (`-PanvilAbiSplit=true`, see `plugins/with-abi-splits.js`), minified with R8 and ship compressed native libraries. Each split gets `versionCode × 10 + ABI` (armeabi-v7a = 1, arm64-v8a = 2, x86 = 3, x86_64 = 4), so version 1.0.0 (`versionCode` 1) ships as 11 and 12.
 
 Signing reads these Gradle properties from `~/.gradle/gradle.properties` (never commit them):
 

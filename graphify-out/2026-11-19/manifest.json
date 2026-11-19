@@ -18,16 +18,16 @@
     "semantic_hash": "6b9302c1f72c315e90233c7539c48c9f"
   },
   "app.config.js": {
-    "mtime": 1795103929.122266,
-    "seen": 1795104680.1455002,
-    "ast_hash": "950bec1fcf9c72a55df6e2b6133b30d7",
+    "mtime": 1795104952.0105467,
+    "seen": 1795105354.5230327,
+    "ast_hash": "f8129bad3569d04217aa97f53851e919",
     "semantic_hash": ""
   },
   "eas.json": {
-    "mtime": 1788154599.8217514,
-    "seen": 1789852290.9578907,
-    "ast_hash": "f343829a4385c77c461dec3cce21e170",
-    "semantic_hash": "f343829a4385c77c461dec3cce21e170"
+    "mtime": 1795104952.010251,
+    "seen": 1795105354.523037,
+    "ast_hash": "ba58f044e7b3e25ed76298355f5f6773",
+    "semantic_hash": ""
   },
   "eslint.config.js": {
     "mtime": 1787328566.3902588,
@@ -36,9 +36,9 @@
     "semantic_hash": "b713dd66aa3ad59ed5098d7b9f8dc202"
   },
   "package.json": {
-    "mtime": 1795103931.6346326,
-    "seen": 1795104680.145527,
-    "ast_hash": "24a2392e8c83af49fd30f1cdb2725f0e",
+    "mtime": 1795105336.2519977,
+    "seen": 1795105354.5230644,
+    "ast_hash": "1d4daff3e2f587e6dbec03e61de7fdb0",
     "semantic_hash": ""
   },
   "scripts/generate-exercise-frames.mjs": {
@@ -468,10 +468,10 @@
     "semantic_hash": "5c27369b226fcf2be8a6cfe52224e767"
   },
   "README.md": {
-    "mtime": 1787328537.9400258,
-    "seen": 1789852290.9580185,
-    "ast_hash": "21c2bdf1233e96ce47e63269ecba4ab1",
-    "semantic_hash": "21c2bdf1233e96ce47e63269ecba4ab1"
+    "mtime": 1795105040.5099258,
+    "seen": 1795105354.5234215,
+    "ast_hash": "dfadcb056a84587eac00ae2c0e16d0e2",
+    "semantic_hash": ""
   },
   "assets/images/android-icon-background.png": {
     "mtime": 1791937720.1505897,
@@ -951,6 +951,84 @@
     "mtime": 1795104833.072366,
     "seen": 1795104866.0226367,
     "ast_hash": "ad6bfae14070f49c26b1ed3fb306eb02",
+    "semantic_hash": ""
+  },
+  "plugins/__tests__/with-release-signing.test.ts": {
+    "mtime": 1795105062.8281305,
+    "seen": 1795105354.5230672,
+    "ast_hash": "d21745d9cad5958aa6eb228cb893cda2",
+    "semantic_hash": ""
+  },
+  "plugins/with-release-signing.js": {
+    "mtime": 1795104920.6429994,
+    "seen": 1795105354.5230694,
+    "ast_hash": "d10dbe6d1d3363501628293f88df394a",
+    "semantic_hash": ""
+  },
+  "scripts/build-android-release.sh": {
+    "mtime": 1795104984.3629339,
+    "seen": 1795105354.5230715,
+    "ast_hash": "46944c956fb594dbb636dfbd7d5d6f41",
+    "semantic_hash": ""
+  },
+  "scripts/bump-version.mjs": {
+    "mtime": 1795104977.4331658,
+    "seen": 1795105354.5230737,
+    "ast_hash": "e883485afe89e8e5d87d23c07272604e",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/en-US/changelogs/1.txt": {
+    "mtime": 1795105003.866978,
+    "seen": 1795105354.5234237,
+    "ast_hash": "653a9951d612c62af170bad5b95d07c1",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/en-US/full_description.txt": {
+    "mtime": 1795105028.8954043,
+    "seen": 1795105354.5234258,
+    "ast_hash": "44f1a676d609430c95abd95f5725078a",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/en-US/short_description.txt": {
+    "mtime": 1795105003.8662934,
+    "seen": 1795105354.5234275,
+    "ast_hash": "0f761670f809641fe3e2b1ba712d7a61",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/en-US/title.txt": {
+    "mtime": 1795105003.8662934,
+    "seen": 1795105354.5234296,
+    "ast_hash": "1e9d6d415b9141bc87fc5088ba985ca6",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/es-ES/changelogs/1.txt": {
+    "mtime": 1795105003.866978,
+    "seen": 1795105354.5234315,
+    "ast_hash": "2cd85cf1f4b8256f7b048afd00dbb4ec",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/es-ES/full_description.txt": {
+    "mtime": 1795105028.8984044,
+    "seen": 1795105354.5234332,
+    "ast_hash": "459a30794a636a59b04ac8c30908f594",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/es-ES/short_description.txt": {
+    "mtime": 1795105003.8662934,
+    "seen": 1795105354.5234354,
+    "ast_hash": "e9c9a5eaea156dec6fc8327037fa2f67",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/es-ES/title.txt": {
+    "mtime": 1795105003.8662934,
+    "seen": 1795105354.5234368,
+    "ast_hash": "1e9d6d415b9141bc87fc5088ba985ca6",
+    "semantic_hash": ""
+  },
+  "fastlane/metadata/android/en-US/images/icon.png": {
+    "mtime": 1795105003.8582935,
+    "seen": 1795105354.523461,
+    "ast_hash": "ffe8a29dac4c259229d11dc0118152fb",
     "semantic_hash": ""
   }
 }

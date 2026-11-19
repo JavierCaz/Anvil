@@ -81,6 +81,21 @@ export default {
     plugins: [
       'expo-router',
       './plugins/with-release-signing',
+      './plugins/with-abi-splits',
+      [
+        'expo-build-properties',
+        {
+          android: {
+            // Release APK size (arm64): 74 MB → 39 MB.
+            // R8 + resource shrinking strip unused code (~50 MB of dex)…
+            enableMinifyInReleaseBuilds: true,
+            enableShrinkResourcesInReleaseBuilds: true,
+            // …and compressing native libraries (~39 MB, mostly Skia) roughly
+            // halves the download, at the cost of extracting them on install.
+            useLegacyPackaging: true,
+          },
+        },
+      ],
       [
         'expo-dev-client',
         // Only the development build registers the generated scheme, so preview and
