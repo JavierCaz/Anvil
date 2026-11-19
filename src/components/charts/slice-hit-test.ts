@@ -5,8 +5,8 @@ const HIT_SLOP = 10;
 
 /**
  * Index of the slice under a tap at (x, y) in a `size` square, or `null` for
- * the hole / outside the ring. Mirrors victory's layout: slices sweep
- * clockwise from 3 o'clock in data order.
+ * the hole / outside the ring. Mirrors `MuscleDonut`'s layout
+ * (`sliceAngles`): slices sweep clockwise from 3 o'clock in data order.
  */
 export function sliceAt(
   slices: readonly { value: number }[],

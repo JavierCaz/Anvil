@@ -1,13 +1,13 @@
 import * as Haptics from 'expo-haptics';
 import { useMemo, useState } from 'react';
 import { Pressable, StyleSheet, Text, View, type GestureResponderEvent } from 'react-native';
-import { Pie, PolarChart } from 'victory-native';
+import Svg, { Line, Path } from 'react-native-svg';
+import { polar, ringSlicePath, sliceAngles } from '@/components/charts/chart-geometry';
 import { useChartDismiss } from '@/components/charts/chart-dismiss';
 import { INNER_RATIO, sliceAt } from '@/components/charts/slice-hit-test';
 import { useAppTheme } from '@/theme/app-theme-provider';
 import { withAlpha } from '@/theme/colors';
 
-// A type alias (not an interface) so it satisfies victory's Record<string, unknown> data constraint.
 export type DonutSlice = {
   label: string;
   value: number;
@@ -41,15 +41,16 @@ export function MuscleDonut({ slices, centerCaption, size = 196 }: MuscleDonutPr
     selection && slices[selection.index]?.label === selection.label ? selection.index : -1;
   const selected = selectedIndex >= 0 ? slices[selectedIndex] : null;
 
-  const chartSlices = useMemo(
-    () =>
-      selectedIndex < 0
-        ? slices
-        : slices.map((slice, index) =>
-            index === selectedIndex ? slice : { ...slice, color: withAlpha(slice.color, 0.22) }
-          ),
-    [slices, selectedIndex]
+  const radius = size / 2;
+  const innerRadius = radius * INNER_RATIO;
+  const angles = useMemo(
+    () => sliceAngles(slices.map((slice) => slice.value), total),
+    [slices, total]
   );
+  // Hairline gaps between slices (only where two non-empty slices meet).
+  const separators = slices.filter((slice) => slice.value > 0).length > 1
+    ? angles.filter((_, index) => slices[index].value > 0).map((angle) => angle.start)
+    : [];
 
   useChartDismiss(() => setSelection(null));
 
@@ -70,20 +71,31 @@ export function MuscleDonut({ slices, centerCaption, size = 196 }: MuscleDonutPr
   return (
     <View style={styles.root}>
       <View style={[styles.chart, { width: size, height: size }]}>
-        <PolarChart data={chartSlices} labelKey="label" valueKey="value" colorKey="color">
-          <Pie.Chart innerRadius="74%">
-            {() => (
-              <>
-                <Pie.Slice />
-                {slices.length > 1 && (
-                  <Pie.SliceAngularInset
-                    angularInset={{ angularStrokeWidth: 4, angularStrokeColor: colors.surface }}
-                  />
-                )}
-              </>
-            )}
-          </Pie.Chart>
-        </PolarChart>
+        <Svg width={size} height={size}>
+          {slices.map((slice, index) => (
+            <Path
+              key={`${slice.label}-${index}`}
+              d={ringSlicePath(radius, radius, radius, innerRadius, angles[index].start, angles[index].end)}
+              fill={selectedIndex < 0 || index === selectedIndex ? slice.color : withAlpha(slice.color, 0.22)}
+            />
+          ))}
+          {separators.map((degrees) => {
+            // Overshoot both radii slightly so anti-aliasing leaves no seam.
+            const inner = polar(radius, radius, innerRadius - 1, degrees);
+            const outer = polar(radius, radius, radius + 1, degrees);
+            return (
+              <Line
+                key={degrees}
+                x1={inner.x}
+                y1={inner.y}
+                x2={outer.x}
+                y2={outer.y}
+                stroke={colors.surface}
+                strokeWidth={4}
+              />
+            );
+          })}
+        </Svg>
         <View style={styles.center} pointerEvents="none">
           <Text style={[styles.total, { color: selected ? selected.color : colors.text }]}>
             {selected ? selected.value : total}

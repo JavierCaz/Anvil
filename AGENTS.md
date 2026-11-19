@@ -35,7 +35,7 @@ Anvil is a **privacy-first, locally-stored gym tracking app** that combines work
 | i18n | i18next + react-i18next | i18next `26.4.0`, react-i18next `17.0.12` |
 | Preferences KV | expo-sqlite/kv-store (no AsyncStorage) | bundled with expo-sqlite `57.0.1` |
 | Database | expo-sqlite (local only) | expo-sqlite `57.0.1` |
-| Charts | victory-native | victory-native `41.26.0` |
+| Charts | Custom SVG charts in `src/components/charts` (react-native-svg + Reanimated; no Skia) | — |
 | Icons | expo-symbols (SF Symbols) + @expo/vector-icons | expo-symbols `57.0.2`, @expo/vector-icons `15.x` |
 | Custom SVG | react-native-svg | `15.15.4` |
 | Animations | react-native-reanimated | reanimated `4.5.1` + react-native-worklets `0.10.1` |

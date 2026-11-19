@@ -1,4 +1,3 @@
-import { Circle, DashPathEffect, Line, vec } from '@shopify/react-native-skia';
 import dayjs from 'dayjs';
 import * as Haptics from 'expo-haptics';
 import { useMemo, useState } from 'react';
@@ -10,7 +9,9 @@ import {
   type GestureResponderEvent,
   type LayoutChangeEvent,
 } from 'react-native';
-import { CartesianChart, Scatter, Line as VictoryLine } from 'victory-native';
+import Svg, { Circle, Line } from 'react-native-svg';
+import { AnimatedCurve } from '@/components/charts/animated-svg';
+import { linearScale } from '@/components/charts/chart-geometry';
 import { ChartTooltip } from '@/components/charts/ChartTooltip';
 import { useChartDismiss } from '@/components/charts/chart-dismiss';
 import { useAppTheme } from '@/theme/app-theme-provider';
@@ -39,14 +40,14 @@ interface LineTrendChartProps {
   formatDay?: (day: string) => string;
 }
 
-type Scale = (value: number) => number;
-
 /** Vertical breathing room above/below the data, as a share of its span. */
 const Y_PADDING = 0.15;
 /** Minimum y span so a flat series doesn't render as noise. */
 const MIN_Y_SPAN = 2;
 /** Px from a weigh-in that still counts as a tap on it. */
 const HIT_RADIUS = 24;
+/** Horizontal inset so the first/last points aren't clipped at the edges. */
+const X_PADDING = 10;
 
 /**
  * Trend line chart: faint raw points under a bold smoothed line, an optional
@@ -67,7 +68,6 @@ export function LineTrendChart({
 }: LineTrendChartProps) {
   const { colors } = useAppTheme();
   const [width, setWidth] = useState(0);
-  const [scales, setScales] = useState<{ x: Scale; y: Scale } | null>(null);
   // Keyed by day so the selection survives re-renders and drops when the day leaves the range.
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const selectedIndex = selectedDay === null ? -1 : data.findIndex((point) => point.day === selectedDay);
@@ -95,17 +95,27 @@ export function LineTrendChart({
     return [min - pad, max + pad];
   }, [data, reference]);
 
+  const { scales, rawPoints, averagePoints } = useMemo(() => {
+    const lastX = chartData.length > 0 ? chartData[chartData.length - 1].x : 0;
+    const x = linearScale([0, lastX], [X_PADDING, width - X_PADDING]);
+    const y = linearScale(yDomain, [height, 0]);
+    return {
+      scales: { x, y },
+      rawPoints: chartData.map((point) => ({ x: x(point.x), y: y(point.value) })),
+      averagePoints: chartData.map((point) => ({ x: x(point.x), y: y(point.average) })),
+    };
+  }, [chartData, yDomain, width, height]);
+
   const onLayout = (event: LayoutChangeEvent) => setWidth(event.nativeEvent.layout.width);
 
   useChartDismiss(() => setSelectedDay(null));
 
   const onPress = (event: GestureResponderEvent) => {
-    if (!scales) return;
     const { locationX, locationY } = event.nativeEvent;
     let nearest = -1;
     let nearestDistance = HIT_RADIUS;
-    chartData.forEach((point, index) => {
-      const distance = Math.hypot(scales.x(point.x) - locationX, scales.y(point.value) - locationY);
+    rawPoints.forEach((point, index) => {
+      const distance = Math.hypot(point.x - locationX, point.y - locationY);
       if (distance <= nearestDistance) {
         nearest = index;
         nearestDistance = distance;
@@ -120,90 +130,72 @@ export function LineTrendChart({
   };
 
   const selectedPoint = selectedIndex >= 0 ? data[selectedIndex] : null;
+  const selected = selectedIndex >= 0 ? rawPoints[selectedIndex] : undefined;
 
   return (
     <View>
       <View style={{ height }} onLayout={onLayout}>
         {width > 0 && data.length > 0 && (
-          <CartesianChart
-            data={chartData}
-            xKey="x"
-            yKeys={['value', 'average']}
-            domain={{ y: yDomain }}
-            domainPadding={{ left: 10, right: 10 }}
-            onScaleChange={(x, y) => setScales({ x, y })}
-          >
-            {({ points, chartBounds, yScale }) => {
-              const gridYs = [0, 1 / 3, 2 / 3, 1].map(
-                (fraction) => chartBounds.top + (chartBounds.bottom - chartBounds.top) * fraction
-              );
-              const referenceY = reference !== null ? yScale(reference) : null;
-              const selected = selectedIndex >= 0 ? points.value[selectedIndex] : undefined;
-              const selectedY = selected?.y;
-              return (
-                <>
-                  {gridYs.map((y) => (
-                    <Line
-                      key={y}
-                      p1={vec(chartBounds.left, y)}
-                      p2={vec(chartBounds.right, y)}
-                      color={colors.border}
-                      strokeWidth={1}
-                    >
-                      <DashPathEffect intervals={[4, 6]} />
-                    </Line>
-                  ))}
-                  {referenceY !== null && (
-                    <Line
-                      p1={vec(chartBounds.left, referenceY)}
-                      p2={vec(chartBounds.right, referenceY)}
-                      color={colors.success}
-                      strokeWidth={1.5}
-                    >
-                      <DashPathEffect intervals={[8, 6]} />
-                    </Line>
-                  )}
-                  {selected && (
-                    <Line
-                      p1={vec(selected.x, chartBounds.top)}
-                      p2={vec(selected.x, chartBounds.bottom)}
-                      color={withAlpha(colors.primary, 0.5)}
-                      strokeWidth={1.5}
-                    >
-                      <DashPathEffect intervals={[3, 4]} />
-                    </Line>
-                  )}
-                  <Scatter
-                    points={points.value}
-                    radius={3}
-                    color={withAlpha(colors.textSecondary, 0.55)}
-                  />
-                  <VictoryLine
-                    points={points.average}
-                    color={colors.primary}
-                    strokeWidth={3}
-                    strokeCap="round"
-                    curveType="natural"
-                    animate={{ type: 'timing', duration: 450 }}
-                  />
-                  {selected && typeof selectedY === 'number' && (
-                    <>
-                      <Circle cx={selected.x} cy={selectedY} r={7} color={colors.surface} />
-                      <Circle cx={selected.x} cy={selectedY} r={5} color={colors.primary} />
-                    </>
-                  )}
-                </>
-              );
-            }}
-          </CartesianChart>
+          <Svg width={width} height={height}>
+            {[0, 1 / 3, 2 / 3, 1].map((fraction) => (
+              <Line
+                key={fraction}
+                x1={0}
+                x2={width}
+                y1={height * fraction}
+                y2={height * fraction}
+                stroke={colors.border}
+                strokeWidth={1}
+                strokeDasharray="4 6"
+              />
+            ))}
+            {reference !== null && (
+              <Line
+                x1={0}
+                x2={width}
+                y1={scales.y(reference)}
+                y2={scales.y(reference)}
+                stroke={colors.success}
+                strokeWidth={1.5}
+                strokeDasharray="8 6"
+              />
+            )}
+            {selected && (
+              <Line
+                x1={selected.x}
+                x2={selected.x}
+                y1={0}
+                y2={height}
+                stroke={withAlpha(colors.primary, 0.5)}
+                strokeWidth={1.5}
+                strokeDasharray="3 4"
+              />
+            )}
+            {rawPoints.map((point, index) => (
+              <Circle
+                key={data[index].day}
+                cx={point.x}
+                cy={point.y}
+                r={3}
+                fill={withAlpha(colors.textSecondary, 0.55)}
+              />
+            ))}
+            <AnimatedCurve points={averagePoints} stroke={colors.primary} strokeWidth={3} />
+            {selected && (
+              <>
+                <Circle cx={selected.x} cy={selected.y} r={7} fill={colors.surface} />
+                <Circle cx={selected.x} cy={selected.y} r={5} fill={colors.primary} />
+              </>
+            )}
+          </Svg>
         )}
         {width > 0 && data.length > 0 && (
           <View style={StyleSheet.absoluteFill}>
             <Pressable style={styles.hitArea} onPress={onPress} />
-            {selectedPoint && scales && (
+            {selectedPoint && selected && (
               <ChartTooltip
-                x={scales.x(chartData[selectedIndex].x)}
-                y={scales.y(selectedPoint.value)}
+                x={selected.x}
+                y={selected.y}
                 containerWidth={width}
                 value={formatValue(selectedPoint.value)}
                 label={formatDay(selectedPoint.day)}
