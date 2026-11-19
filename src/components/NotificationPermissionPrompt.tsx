@@ -1,9 +1,9 @@
-import * as Notifications from 'expo-notifications';
 import Storage from 'expo-sqlite/kv-store';
 import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Platform } from 'react-native';
 import { useDialog } from '@/components/AppDialog';
+import * as AnvilAlarm from '../../modules/anvil-alarm';
 
 /** kv-store key marking that the one-time permission prompt has been shown. */
 const NOTIFICATION_PROMPT_KEY = 'anvil.notifications.prompted';
@@ -49,7 +49,7 @@ export function NotificationPermissionPrompt() {
         {
           text: t('notifications.enable'),
           onPress: () => {
-            void Notifications.requestPermissionsAsync().catch(() => {});
+            void AnvilAlarm.requestPermissionAsync().catch(() => {});
           },
         },
         {

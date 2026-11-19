@@ -29,6 +29,19 @@ const VARIANTS = {
 };
 
 const appVariant = VARIANTS[variant] ?? VARIANTS.development;
+const isDevelopment = appVariant === VARIANTS.development;
+
+// Android permissions stripped from the merged manifest. Anvil is 100% offline
+// and never reads the photo library, so these only widen its footprint:
+// - READ_MEDIA_*: expo-media-library adds them, but sharing saves images
+//   write-only (no read permission needed on Android 13+).
+// - INTERNET / SYSTEM_ALERT_WINDOW: added by the React Native template; only the
+//   development build needs them (Metro bundler + dev menu overlay).
+const BLOCKED_ANDROID_PERMISSIONS = [
+  'android.permission.READ_MEDIA_IMAGES',
+  'android.permission.READ_MEDIA_VISUAL_USER_SELECTED',
+  ...(isDevelopment ? [] : ['android.permission.INTERNET', 'android.permission.SYSTEM_ALERT_WINDOW']),
+];
 
 export default {
   expo: {
@@ -51,12 +64,9 @@ export default {
       },
       predictiveBackGestureEnabled: false,
       package: appVariant.package,
-      // Android 12+ only lets expo-notifications use an exact alarm (so the
-      // rest-timer rings on time with the screen locked) when the app holds
-      // SCHEDULE_EXACT_ALARM. Prebuild merges this additively. Granted
-      // automatically on Android 12/13; on Android 14+ the user opts in once
-      // via the Alarms-and-reminders special-access screen.
-      permissions: ['SCHEDULE_EXACT_ALARM'],
+      // Notification + exact-alarm permissions for the rest timer are declared
+      // by the local `modules/anvil-alarm` native module's manifest.
+      blockedPermissions: BLOCKED_ANDROID_PERMISSIONS,
     },
     web: {
       output: 'static',
@@ -96,13 +106,15 @@ export default {
       'expo-sqlite',
       'expo-status-bar',
       'expo-web-browser',
-      'expo-audio',
       [
-        'expo-notifications',
+        'expo-audio',
         {
-          // Bundle the rest-timer chime so scheduled notifications can play it
-          // while the app is backgrounded / the screen is locked.
-          sounds: ['./assets/audio/rest_finished.wav'],
+          // Playback only: the app never records. In the background the rest
+          // timer rings via its notification, so no background-playback
+          // foreground service (or iOS audio background mode) is needed.
+          microphonePermission: false,
+          recordAudioAndroid: false,
+          enableBackgroundPlayback: false,
         },
       ],
     ],

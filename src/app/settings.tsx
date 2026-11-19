@@ -1,4 +1,3 @@
-import * as Application from 'expo-application';
 import Constants from 'expo-constants';
 import { Ionicons } from '@expo/vector-icons';
 import { Stack } from 'expo-router';
@@ -78,8 +77,9 @@ export default function SettingsScreen() {
   const dialog = useDialog();
   const [busyAction, setBusyAction] = useState<'export' | 'import' | 'erase' | null>(null);
 
-  // `nativeApplicationVersion` is null on web, so fall back to the app config version.
-  const appVersion = Application.nativeApplicationVersion ?? Constants.expoConfig?.version ?? null;
+  // Version from the embedded app config (`app.config.js`) — avoids expo-application,
+  // which pulls in Google's proprietary Install Referrer library on Android.
+  const appVersion = Constants.expoConfig?.version ?? null;
 
   const preference = useThemeStore((state) => state.preference);
   const setPreference = useThemeStore((state) => state.setPreference);
