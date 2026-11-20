@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import type { NativeStackNavigationProp } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';

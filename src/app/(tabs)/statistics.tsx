@@ -2,7 +2,7 @@ import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useMemo, useState, type ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { BodyWeightTrend } from '@/components/BodyWeightTrend';
 import { Screen } from '@/components/Screen';

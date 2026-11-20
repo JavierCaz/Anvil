@@ -1,4 +1,4 @@
-import type { MaterialCommunityIcons } from '@expo/vector-icons';
+import type MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { ComponentProps } from 'react';
 import type { AchievementCategory } from './achievements';
 

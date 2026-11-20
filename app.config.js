@@ -94,6 +94,9 @@ export default {
             // …and compressing native libraries roughly halves their share of
             // the download, at the cost of extracting them on install.
             useLegacyPackaging: true,
+            // Store the JS bundle compressed too: ~3 MB smaller download for
+            // ~12 ms slower cold start (measured on a Pixel 9 Pro).
+            enableBundleCompression: true,
           },
         },
       ],

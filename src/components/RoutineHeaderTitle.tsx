@@ -1,4 +1,4 @@
-import { MaterialCommunityIcons } from '@expo/vector-icons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { StyleSheet, Text, View } from 'react-native';
 import { getRoutineGlyph } from '@/constants/routine-icons';
 import { useAppTheme } from '@/theme/app-theme-provider';

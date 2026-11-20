@@ -1,4 +1,4 @@
-import type { MaterialCommunityIcons } from '@expo/vector-icons';
+import type MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import type { ComponentProps } from 'react';
 
 type GlyphName = ComponentProps<typeof MaterialCommunityIcons>['name'];

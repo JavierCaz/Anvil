@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 import { useRouter } from 'expo-router';
