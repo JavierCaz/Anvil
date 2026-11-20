@@ -1,0 +1,6 @@
+First release.
+
+• Routines built from 302 illustrated exercises
+• Workout logging with a rest timer that rings on the lock screen
+• Progress charts, personal records and 50 achievements
+• JSON backup export and import

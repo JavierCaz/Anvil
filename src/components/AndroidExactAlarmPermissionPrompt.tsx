@@ -1,18 +1,18 @@
 import * as IntentLauncher from 'expo-intent-launcher';
 import Constants from 'expo-constants';
-import * as Notifications from 'expo-notifications';
 import Storage from 'expo-sqlite/kv-store';
 import { useCallback, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, Platform } from 'react-native';
 import { useDialog } from '@/components/AppDialog';
+import * as AnvilAlarm from '../../modules/anvil-alarm';
 
 /** kv-store key marking that the one-time exact-alarm prompt has been shown. */
 const EXACT_ALARM_PROMPT_KEY = 'anvil.notifications.exactAlarmPrompted';
 
 /**
  * Android 14+ no longer auto-grants `SCHEDULE_EXACT_ALARM`. Without it,
- * expo-notifications falls back to inexact alarms, which Android batches while
+ * the rest-timer alarm falls back to inexact alarms, which Android batches while
  * the screen is locked — so the rest-timer notification rings late.
  *
  * This one-time prompt (shown only after notifications are already granted,
@@ -55,8 +55,8 @@ export function AndroidExactAlarmPermissionPrompt() {
       return;
     }
     // Pointless until notifications are on — re-checked on later foregrounds.
-    const { status } = await Notifications.getPermissionsAsync();
-    if (status !== 'granted') {
+    const granted = await AnvilAlarm.getPermissionStatusAsync().catch(() => false);
+    if (!granted) {
       return;
     }
     // Mark as prompted before showing so a re-mount / double-invoked effect

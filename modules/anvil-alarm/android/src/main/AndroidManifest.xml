@@ -1,0 +1,14 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+    <!-- Lets the rest-timer ring on time with the screen locked (Android 12+).
+         Auto-granted on 12/13; on 14+ the user opts in once via the
+         "Alarms & reminders" special-access screen. -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"/>
+    <uses-permission android:name="android.permission.VIBRATE"/>
+
+    <application>
+        <receiver
+            android:name="expo.modules.anvilalarm.AlarmReceiver"
+            android:exported="false"/>
+    </application>
+</manifest>

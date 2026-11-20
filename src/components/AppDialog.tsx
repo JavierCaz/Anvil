@@ -6,7 +6,7 @@
  * native API shape (title / message / buttons) but is styled with the app
  * theme (dark mode aware, brand colors, subtle scale-in animation).
  */
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import {
   createContext,
   useCallback,

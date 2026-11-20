@@ -1,30 +1,17 @@
 import { setAudioModeAsync, type AudioPlayer } from 'expo-audio';
-import * as Notifications from 'expo-notifications';
 import { Platform, Vibration } from 'react-native';
+import * as AnvilAlarm from '../../modules/anvil-alarm';
 
 /** Chime played (in-app and by the background notification) when a countdown ends. */
 export const ALARM_SOUND = require('../../assets/audio/rest_finished.wav');
-
-/** Bundled sound file name referenced by notifications / Android channels. */
-const ALARM_SOUND_FILE = 'rest_finished.wav';
 
 /** 3-beep chime (~2.1s) + a little slack before dismissing a timer. */
 export const ALARM_DURATION_MS = 2300;
 
 // While the app is in the foreground, alarms are handled by the in-app audio
-// player (chime + vibration) — suppress the notification so the sound does not
-// play twice. When the app is backgrounded or the screen is locked, the OS
-// delivers the notification with its sound normally.
-if (Platform.OS !== 'web') {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldPlaySound: false,
-      shouldSetBadge: false,
-      shouldShowBanner: false,
-      shouldShowList: false,
-    }),
-  });
-}
+// player (chime + vibration). The native `anvil-alarm` module skips the
+// notification in that case so the sound does not play twice; when the app is
+// backgrounded or the screen is locked, the OS delivers it with its sound.
 
 /** Three longer vibration pulses, synced to the beeps (pattern is Android-only). */
 export function fireAlarmVibration() {
@@ -88,28 +75,7 @@ export async function scheduleAlarmNotification({
     return;
   }
   try {
-    if (Platform.OS === 'android') {
-      await Notifications.setNotificationChannelAsync(channelId, {
-        name: channelName,
-        importance: Notifications.AndroidImportance.HIGH,
-        sound: ALARM_SOUND_FILE,
-        vibrationPattern: [0, 400, 200, 400],
-      });
-    }
-    await Notifications.scheduleNotificationAsync({
-      identifier,
-      content: {
-        title,
-        body,
-        sound: ALARM_SOUND_FILE,
-        data: { type: identifier },
-      },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.TIME_INTERVAL,
-        seconds: Math.max(1, Math.round(delaySeconds)),
-        channelId: Platform.OS === 'android' ? channelId : undefined,
-      },
-    });
+    await AnvilAlarm.scheduleAsync({ identifier, channelId, channelName, title, body, delaySeconds });
   } catch {
     // Notifications unavailable (e.g. permission denied).
   }
@@ -120,7 +86,7 @@ export function cancelAlarmNotification(identifier: string) {
   if (Platform.OS === 'web') {
     return;
   }
-  void Notifications.cancelScheduledNotificationAsync(identifier).catch(() => {});
+  AnvilAlarm.cancel(identifier);
 }
 
 /** Remove an already-delivered alarm notification from the tray. */
@@ -128,5 +94,5 @@ export function dismissAlarmNotification(identifier: string) {
   if (Platform.OS === 'web') {
     return;
   }
-  void Notifications.dismissNotificationAsync(identifier).catch(() => {});
+  AnvilAlarm.dismiss(identifier);
 }

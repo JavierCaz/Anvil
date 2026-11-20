@@ -1,0 +1,6 @@
+Primera versión.
+
+• Rutinas con 302 ejercicios ilustrados
+• Registro de entrenamientos con temporizador de descanso que suena con la pantalla bloqueada
+• Gráficas de progreso, récords personales y 50 logros
+• Exportación e importación de copias de seguridad en JSON

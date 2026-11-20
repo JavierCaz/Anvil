@@ -1,4 +1,4 @@
-import { Ionicons } from '@expo/vector-icons';
+import Ionicons from '@expo/vector-icons/Ionicons';
 import { Stack, useLocalSearchParams, useNavigation, useRouter } from 'expo-router';
 import type { NativeStackNavigationProp } from 'expo-router';
 import { useSQLiteContext } from 'expo-sqlite';
@@ -303,7 +303,11 @@ export default function WorkoutSessionScreen() {
   };
 
   const handleFinish = () => {
-    const incomplete = exercises.filter((e) => e.completed_sets < e.target_sets).length;
+    // Total sets still left across all exercises (not the number of exercises).
+    const incomplete = exercises.reduce(
+      (sum, e) => sum + Math.max(0, e.target_sets - e.completed_sets),
+      0,
+    );
     if (incomplete > 0) {
       dialog.alert({
         title: t('workout.finishEarlyConfirmTitle'),
