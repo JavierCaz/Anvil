@@ -16,7 +16,7 @@ import { SwipeToDelete } from '@/components/SwipeToDelete';
 import { useDialog } from '@/components/AppDialog';
 import { LoadingOverlay } from '@/components/LoadingOverlay';
 import { distanceScale, getExerciseMetrics } from '@/constants/exercise-metrics';
-import { muscleI18nKey } from '@/constants/exercises';
+import { equipmentI18nKey, muscleI18nKey } from '@/constants/exercises';
 import {
   getRoutine,
   getRoutineExercises,
@@ -97,6 +97,7 @@ export default function RoutineDetailScreen() {
   const renderItem = useCallback<SortableGridRenderItem<RoutineExerciseWithExercise>>(
     ({ item }) => {
       const muscleKey = muscleI18nKey(item.exercise_primary_muscle);
+      const equipmentKey = equipmentI18nKey(item.exercise_equipment);
       const firstReps = item.first_set_reps ?? item.reps;
       const firstRest = item.first_set_rest ?? item.rest_seconds;
       const metrics = getExerciseMetrics(item.exercise_type);
@@ -132,7 +133,9 @@ export default function RoutineDetailScreen() {
               </View>
               <Text style={[styles.rowSubtitle, { color: colors.textSecondary }]} numberOfLines={1}>
                 {muscleKey ? t(muscleKey) : ''}
-                {item.exercise_equipment ? ` · ${item.exercise_equipment}` : ''}
+                {item.exercise_equipment
+                  ? ` · ${equipmentKey ? t(equipmentKey) : item.exercise_equipment}`
+                  : ''}
               </Text>
               <View style={styles.chipRow}>
                 {[
